@@ -1,0 +1,59 @@
+
+
+php artisan make:migration create_table_estados_unidade --create=estados_unidade
+php artisan make:migration create_table_modelos_gestao --create=modelos_gestao
+php artisan make:migration create_table_tipos_unidade --create=tipos_unidade
+php artisan make:migration create_table_classes_unidade --create=classes_unidade
+php artisan make:migration create_table_subclasses_unidade --create=subclasses_unidade
+
+php artisan make:seeder EstadosUnidadeSeeder
+php artisan make:seeder ModelosGestaoSeeder
+php artisan make:seeder TiposUnidadeSeeder
+php artisan make:seeder ClassesUnidadeSeeder
+php artisan make:seeder SublclassesSeeder
+php artisan make:seeder TransformTableSeeder
+php artisan make:seeder TransformTableRangeSeeder
+
+php artisan make:model UnidadesDeTrabalho/Estado
+php artisan make:model UnidadesDeTrabalho/ModeloGestao
+php artisan make:model UnidadesDeTrabalho/Tipo
+php artisan make:model UnidadesDeTrabalho/Classe
+php artisan make:model UnidadesDeTrabalho/Subclasse
+
+
+
+php artisan crud:generate UnidadeDeTrabalho --fields="nome#string; sigla#string; tipo_id#integer; modelo_gestao_id#integer; unidade_saude_id#integer; classe_id#integer; subclasse_id#integer; possui_ambulatorio#boolean; status_id#integer"
+
+php artisan make:model Authorization/Resource
+php artisan make:model Authorization/Action
+
+
+php artisan make:migration create_table_resources --create=resources
+php artisan make:migration create_table_actions --create=actions
+php artisan make:migration create_table_actions_dependencies --create=actions_dependencies
+php artisan make:seeder ResourcesSeeder
+php artisan make:seeder ActionsSeeder
+php artisan make:seeder ActionsDependenciesSeeder
+
+role|resource|action
+
+php artisan make:migration create_table_role_resource_action --create=role_actions
+
+
+php artisan crud:generate Profiles --fields="nome#string; sigla#string; tipo_id#integer; modelo_gestao_id#integer; unidade_saude_id#integer; classe_id#integer; subclasse_id#integer; possui_ambulatorio#boolean; status_id#integer"
+
+remove tables
+//roles_resources_actions
+//action_dependencies
+//actions
+//resources
+delete from migrations where (batch = 16 or batch = 17)
+delete from migrations where batch = 20
+
+
+
+
+
+
+
+

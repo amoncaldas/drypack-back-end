@@ -1,0 +1,25 @@
+image: php:7.0-fpm
+
+services:
+  - postgres:latest
+
+variables:
+  POSTGRES_DB: base
+  POSTGRES_USER: runner
+  POSTGRES_PASSWORD: ""
+
+cache:
+  paths:
+  - vendor/
+
+before_script:
+- bash ci/docker_install.sh > /dev/null
+- chmod 777 -R storage
+- chmod 777 -R bootstrap/cache
+- rm .env.testing
+- cp .env.ci .env.testing
+- COMPOSER_PROCESS_TIMEOUT=2000 composer install
+
+test:app:
+  script:
+  - phpunit --coverage-text --colors=never

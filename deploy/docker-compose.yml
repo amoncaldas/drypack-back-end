@@ -1,0 +1,20 @@
+version: '3.1'
+
+services:
+    drypack:
+        container_name: drypack-container-prod
+        image: drypack-image-prod
+        build:
+          context: ./
+          args:
+            BUILD_SUPPORT: "false"
+            DRYPACK_DB_USER: drypackuser
+            DRYPACK_DB_PASS: drypack
+            WEB_ROOT_FOLDER: "/"
+        ports:
+          - 80:80
+        environment:
+          CI: "false"
+        volumes:
+          - ./:/var/www/
+
