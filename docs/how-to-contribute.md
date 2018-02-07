@@ -3,13 +3,13 @@
 Al the contributions to the DryPack Framework are very welcomed. To do so you have to clone the original source code running:
 
 ```sh
-git clone -b develop git@gitlab.com:drypack/back-end-php.git DryPack
+git clone -b develop git@gitlab.com:drypack/main.git DryPack
 ```
 
 Then run the contribute configure script. This will configure the project in the contribute mode.
 
 ```sh
-git clone -b develop git@gitlab.com:drypack/back-end-php.git DryPack
+git clone -b develop git@gitlab.com:drypack/main.git DryPack
 cd DryPack
 sh scripts/configure-contribute.sh
 ```
@@ -20,7 +20,7 @@ The contribute mode means that the project will be ready for contribution, so yo
 
 The source code of the DryPack is splitted in different repositories:
 
-- [DryPack back-end](https://gitlab.com/drypack/back-end-php) (main project)
+- [DryPack back-end](https://gitlab.com/drypack/main) (main project)
 - [DryPack front-end admin](https://gitlab.com/drypack/front-end-admin)
 - [DryPack front-end client](https://gitlab.com/drypack/front-end-client)
 - [NgC2 lib](https://gitlab.com/drypack/ngc2)

@@ -110,7 +110,7 @@ It also recommended the usage of a modern editor, like [Visual Studio Code](http
 Clone the repository locally:
 
 ```sh
-git clone -b master git@gitlab.com:drypack/back-end-php.git {project-name}
+git clone -b master git@gitlab.com:drypack/main.git {project-name}
 ```
 
 Only one line of command is necessary to check/install docker engine, check/create docker image, clone/download admin and client, install dependencies, seed the database, build and run. We have automated everything!

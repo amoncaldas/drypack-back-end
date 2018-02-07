@@ -1,7 +1,8 @@
 # Changelog #
 
 0.1.0 (development)
-- Added pack, deploy, install vis ftp/sftp artisan command
+
+- Added pack, deploy, install via ftp/sftp artisan command
 - Added single command line project/environment configure script
 - Added single command script for configure contribute mode
 - Added live multi language
@@ -19,7 +20,6 @@
 - GenericService
 - Administration in /admin
 - Public site in /client
-- Laravel to Laravel 5.4.12;
 - Gitlab continuous integration configuration
 - PHPUnit version 6;
 - CORS handling;

@@ -49,7 +49,7 @@ then
   echo "0.0.1" > VERSION;
 
   # Adding the reference to the DryPack original repository
-  git remote add drypack-repo git@gitlab.com:drypack/back-end-php.git;
+  git remote add drypack-repo git@gitlab.com:drypack/main.git;
 
   # go back to project root folder
   cd ../
