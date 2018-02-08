@@ -51,9 +51,23 @@ class Deploy extends Command
    */
   public function handle()
   {
-      // set/build options
-      $this->sendTo = $this->option('send');
+      // can be: development / staging / production
+      $this->env = $this->option('env');
+
+      if (!isset($this->env)) {
+        $this->error("\n".'To deploy the package it is necessary to inform the target environment, like --env=development, --env=staging or --env=production'."\n");
+        return;
+      }
+
+      $this->send = $this->option('send');
       $this->mustZip = $this->option('zip');
+
+      if($this->mustZip === "false" && $this->send === "true"){
+        $this->error("\n".'The --send=true and --zip=false can not be used together. Package not generated.'."\n");
+        return;
+      }
+
+
       $this->install = $this->option('install');
       $this->migrate = $this->option('migrate');
       $this->mustRemoveSamples = $this->option('rm-samples');

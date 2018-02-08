@@ -1,5 +1,4 @@
 FROM debian:stretch
-MAINTAINER Amon Caldas <amoncaldas@gmail.com>
 ENV DEBIAN_FRONTEND noninteractive
 
 # Install packages.

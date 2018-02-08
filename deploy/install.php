@@ -1,16 +1,16 @@
 <?php
 
 /**
- * pkName is gonna be the same of the PKG_NAME with the .zip extension
- * Url must be the full url with the http://
+ * Install a package, run migration (options) and remove unnecessary files
  */
 
 $pkgName = "appPack.zip";
-$installFile = 'install.php';
-$dockerFile = 'Dockerfile';
+$installerFile = 'install.php';
 $url = getBaseUrl();
 $dir = dirname(__FILE__);
 $migrate = htmlspecialchars($_GET['migrate']);
+
+
 
 try {
     $file=scandir($dir);
@@ -18,7 +18,7 @@ try {
     $content = '';
 
     for ($i=0; $i < $cont; $i++) {
-        if ($file[$i] != $pkgName && $file[$i] != $installFile && $file[$i] != $dockerFile
+        if ($file[$i] != $pkgName && $file[$i] != $installerFile
                 && $file[$i] != '.' && $file[$i] != '..') {
             $content .= $file[$i] . " ";
         }
@@ -30,29 +30,32 @@ try {
 
     $zip = new ZipArchive();
     $open = $zip->open($pkgName);
+
     if( $open === true){
 
         @set_time_limit(300); # 5 MINUTES
-        $zip->extractTo($dir);
+        $extractResult = $zip->extractTo($dir);
+        //var_dump($extractResult);
 
         $zip->close();
-
+        //var_dump($migrate);
         if($migrate === "true"){
-            echo shell_exec("cd $dir && artisan php migrate");
+            echo shell_exec("cd $dir && php artisan migrate");
         }
 
-        echo shell_exec("cd $dir && rm -rf $installFile $dockerFile $pkgName");
-
+        echo shell_exec("cd $dir && rm -rf $installerFile $pkgName");
+        //var_dump("deleted");
         http_response_code(200);
         //header("location:$url");
 
     } else {
-        http_response_code(400);
+        http_response_code(400, "Could not open $dir/$installerFile");
         //echo $open;
     }
 
 } catch (Exception $e) {
-    echo $e->getMessage();
+    //echo $e->getMessage();
+    http_response_code(400, $e->getMessage());
 }
 
 /**

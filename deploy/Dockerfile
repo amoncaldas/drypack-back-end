@@ -1,30 +1,24 @@
 FROM debian:stretch
-MAINTAINER Amon Caldas <amoncaldas@gmail.com>
-
 ENV DEBIAN_FRONTEND noninteractive
-ENV BUILD_SUPPORT=false
-ARG DRYPACK_DB_USER=drypackuser
-ARG DRYPACK_DB_PASS=drypack
-ARG RUN_ONCE_CMD="echo 'installed'"
-
-ARG WEB_ROOT_FOLDER="/var/www"
-# \/var\/www
 
 # Install packages.
 RUN apt-get update
 RUN apt-get install -y \
 	nano \
 	git \
-	apache2 \
+  apache2 \
+  libapache2-mod-php7.0 \
 	php7.0 \
 	php7.0-cli \
   php7.0-mbstring \
+	php7.0-sqlite3 \
   php7.0-xml \
 	php7.0-gd \
 	php7.0-curl \
 	php7.0-fpm \
+	php-xdebug \
+	php7.0-pgsql \
 	curl \
-  php7.0-pgsql \
 	wget \
 	zip \
   php-zip \
@@ -32,12 +26,13 @@ RUN apt-get install -y \
 	cron \
   gnupg \
 	supervisor \
-	lsof \
   gdal-bin \
-  php-imagick
+	lsof \
+  php-imagick \
+  pv
 RUN apt-get clean
 
-# Setup POSTGRES SECTION
+# setup POSTGRES SECTION
 # Add the PostgreSQL PGP key to verify their Debian packages.
 # It should be the same key as https://www.postgresql.org/media/keys/ACCC4CF8.asc
 #RUN apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8
@@ -65,21 +60,20 @@ USER postgres
 # Note: here we use ``&&\`` to run commands one after the other - the ``\``
 # allows the RUN command to span multiple lines.
 RUN  /etc/init.d/postgresql start &&\
-  psql --command "CREATE USER ${DRYPACK_DB_USER} WITH SUPERUSER PASSWORD '${DRYPACK_DB_PASS}';" &&\
-	psql --command "CREATE DATABASE drypack_db OWNER ${DRYPACK_DB_USER};" &&\
-	psql --command "CREATE DATABASE drypack_teste_db OWNER ${DRYPACK_DB_USER};" &&\
+  psql --command "CREATE USER drypackuser WITH SUPERUSER PASSWORD 'drypack';" &&\
+	psql --command "CREATE DATABASE drypack_db OWNER drypackuser;" &&\
+	psql --command "CREATE DATABASE drypack_teste_db OWNER drypackuser;" &&\
 	psql --command "CREATE EXTENSION adminpack;" && \
 	psql --command "CREATE DATABASE gisdb;" && \
 	psql --command "\connect gisdb;" && \
 	psql --command "CREATE EXTENSION postgis;" && \
-  createdb -O $DRYPACK_DB_USER $DRYPACK_DB_PASS
+  createdb -O drypackuser drypack
 
 # Adjust PostgreSQL configuration so that remote connections to the
-# database are possible.
-RUN echo "host all  all    0.0.0.0/0  md5" >> /etc/postgresql/9.5/main/pg_hba.conf
-
-# And add ``listen_addresses`` to ``/etc/postgresql/9.5/main/postgresql.conf``
-RUN echo "listen_addresses='*'" >> /etc/postgresql/9.5/main/postgresql.conf
+# database are possible
+## DISABLED in prodction environment!
+# RUN echo "host all  all    0.0.0.0/0  md5" >> /etc/postgresql/9.5/main/pg_hba.conf
+# RUN echo "listen_addresses='*'" >> /etc/postgresql/9.5/main/postgresql.conf
 
 # Add VOLUMEs to allow backup of config, logs and databases
 VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql"]
@@ -96,14 +90,10 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
-# Setup PHP.
-RUN sed -i 's/display_errors = Off/display_errors = Off/' /etc/php/7.0/cli/php.ini
-RUN sed -i 's/short_open_tag = Off/short_open_tag = Off/' /etc/php/7.0/cli/php.ini
-
 # Setup Apache.
 RUN sed -i 's/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
-RUN sed -i 's/DocumentRoot \/var\/www\/html/DocumentRoot ${WEB_ROOT_FOLDER}/' /etc/apache2/sites-available/000-default.conf
-RUN sed -i 's/DocumentRoot \/var\/www\/html/DocumentRoot ${WEB_ROOT_FOLDER}/' /etc/apache2/sites-available/default-ssl.conf
+RUN sed -i 's/DocumentRoot \/var\/www\/html/DocumentRoot \/var\/www/' /etc/apache2/sites-available/000-default.conf
+RUN sed -i 's/DocumentRoot \/var\/www\/html/DocumentRoot \/var\/www/' /etc/apache2/sites-available/default-ssl.conf
 RUN echo "Listen 8080" >> /etc/apache2/ports.conf
 RUN echo "Listen 8081" >> /etc/apache2/ports.conf
 RUN echo "Listen 8443" >> /etc/apache2/ports.conf
@@ -113,38 +103,34 @@ RUN a2enmod rewrite
 RUN a2enmod ssl
 RUN a2ensite default-ssl.conf
 
+
 # Setup Supervisor.
-RUN echo '[program:apache2]\ncommand=/bin/bash -c "source /etc/apache2/envvars && exec /usr/sbin/apache2 -DFOREGROUND"\nautorestart=true\n\n' >> /etc/supervisor/supervisord.conf
 RUN echo '[program:postgresql]\ncommand=/usr/lib/postgresql/9.5/bin/postgres -D /var/lib/postgresql/9.5/main -c config_file=/etc/postgresql/9.5/main/postgresql.conf\nuser=postgres\nautorestart=true\n\n' >> /etc/supervisor/supervisord.conf
 RUN echo '[program:cron]\ncommand=cron -f\nautorestart=false \n\n' >> /etc/supervisor/supervisord.conf
 
-# Command that will run once after the container runs
-RUN echo "[program:deploy]\ncommand=${RUN_ONCE_CMD} -c\n\n" >> /etc/supervisor/supervisord.conf
+# XDebug is DISABLED by default in production invironment
+# RUN echo "xdebug.max_nesting_level = 300" >> /etc/php/7.0/cli/conf.d/20-xdebug.ini
+# RUN echo "xdebug.remote_enable = 1" >> /etc/php/7.0/cli/conf.d/20-xdebug.ini
+# RUN echo "xdebug.remote_autostart = 1" >> /etc/php/7.0/cli/conf.d/20-xdebug.ini
+# RUN echo "xdebug.remote_host=172.17.0.1" >> /etc/php/7.0/cli/conf.d/20-xdebug.ini
 
 # Install Composer.
 RUN curl -sS https://getcomposer.org/installer | php
 RUN mv composer.phar /usr/local/bin/composer
 
-RUN if ($BUILD_SUPPORT == "true"); \
-  then \
-    curl -sL https://deb.nodesource.com/setup_6.x | bash - && \
-    apt-get update && \
-    apt-get install -y nodejs && \
-    mkdir ~/.npm-global && \
-    npm config set prefix '~/.npm-global' && \
-    npm config set prefix /usr/local; \
-  fi
+# Update composer
+#RUN composer global update
 
-RUN if ($BUILD_SUPPORT == "true"); \
-  then \
-    npm install -g serve gulp gulp-cli bower yo generator-karma karma \
-    angular-material angular @uirouter/angular @angular/core @angular/common angular-route @angular/router gulp-babel babel-preset-es2015 \
-    eslint eslint-plugin-angular protractor protractor-console generator-angular @angular/platform-browser; \
-  fi
+# Install NODEJS/NPM
+RUN curl -sL https://deb.nodesource.com/setup_6.x | bash - && \
+	apt-get update && \
+	apt-get install -y nodejs
 
-# Copy source code
-#COPY ["*", "/var/www/"]
+# Install Node packages.
+RUN npm install -g serve gulp gulp-cli yo generator-karma karma \
+angular-animate angular-aria angular-material angular angular-messages @uirouter/angular @angular/core @angular/common angular-route @angular/router gulp-babel babel-preset-es2015 \
+eslint eslint-plugin-angular protractor protractor-console generator-angular @angular/platform-browser webdriver-manager
 
-EXPOSE 80
+EXPOSE 80 5432 443
 CMD exec supervisord -n
 WORKDIR /var/www/

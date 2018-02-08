@@ -37,7 +37,10 @@ class DeployInstall extends Command
   */
   public function handle()
   {
-    if ($this->env === null) {
+    // can be: development / staging / production
+    $this->env = $this->option('env');
+
+    if (!isset($this->env)) {
       $this->error("\n".'To run a remote install it is necessary to inform the target environment, like --env=development, --env=staging or --env=production'."\n");
       return;
     }
@@ -51,29 +54,18 @@ class DeployInstall extends Command
    * @return void
    */
   protected function runRemoteInstall(){
-    $this->info("\n\n"."Running remote install script on $url...\n");
     $url = env("APP_URL");
+    $this->info("\n\n"."Running remote install script on $url ...\n");
     if($this->migrate === "true"){
       $url .= "?migrate=true";
     }
 
-    $client = new Client(['timeout'  => 10, 'connect_timeout' => 10]);
-    $promise = $client->requestAsync('GET', $url);
-    $failMessage = "\n\n"."Open the browser in the url $url to run the installer on the server and finish the process\n";
+    $body = file_get_contents("$url/install.php");
 
-    $promise->then(
-        function (ResponseInterface $res) {
-          if($res->getStatusCode()=== 200){
-            $this->info("\n\n"."Package installed/updated on the server $url\n");
-          } else {
-            $this->info($failMessage);
-          }
-        },
-        function (RequestException $e) {
-          $this->info($failMessage);
-        }
-    );
-    //$result = $client->get($url."/package/install.php");
-
+    if($http_response_header[0] === "HTTP/1.1 200 OK"){
+      $this->info("\n\n"."Package installed/updated on the server $url\n");
+    } else {
+      $this->error("The package could be installed");
+    }
   }
 }
