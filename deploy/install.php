@@ -10,8 +10,6 @@ $url = getBaseUrl();
 $dir = dirname(__FILE__);
 $migrate = htmlspecialchars($_GET['migrate']);
 
-
-
 try {
     $file=scandir($dir);
     $cont = count($file);

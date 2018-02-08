@@ -65,6 +65,10 @@ class DeployPack extends Command
       $this->error("\n".'To generate the package it is necessary to inform the target environment, like --env=development, --env=staging or --env=production'."\n");
       return;
     }
+    if(strpos(env("APP_URL"), 'domain.tld') !== false) {
+      $this->error("\n".'To generate the package to the '.$this->env.' environment you must set the APP_URL in the .env.'.$this->env.' file'."\n");
+      return;
+    }
     $this->envFile = $this->env === null? ".env": ".env.".$this->env;
     $this->mustZip = $this->option('zip');
     $this->mustRemoveSamples = $this->option('rm-samples');
@@ -188,6 +192,8 @@ class DeployPack extends Command
     $bar->advance();
 
     $this->command->copyDirFromApp(["bootstrap", "storage"], $this->packAppDir);
+    $this->command->copyFileFromApp("artisan", $this->packAppDir);
+
     File::makeDirectory($this->packAppDir."/public", 0777, true, true);
     $this->command->copyFileFromApp(
       [
@@ -200,7 +206,7 @@ class DeployPack extends Command
     );
     $bar->advance();
 
-    $backendAppDirs = ["app", "config", "resources", "vendor", "routes"];
+    $backendAppDirs = ["app", "config", "resources", "vendor", "routes", "database"];
     // If the package will, at the end, be zipped, we don't need to copy
     // but symlink them and when zipping, they are included
     if($this->mustZip === "true"){
