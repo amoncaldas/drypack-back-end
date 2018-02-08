@@ -58,12 +58,18 @@ class DeployPack extends Command
    */
   public function handle()
   {
+    // can be: development / staging / production
+    $this->env = $this->option('env');
+
+    if (!isset($this->env)) {
+      $this->error("\n".'To generate the package it is necessary to inform the target environment, like --env=development, --env=staging or --env=production'."\n");
+      return;
+    }
+    $this->envFile = $this->env === null? ".env": ".env.".$this->env;
     $this->mustZip = $this->option('zip');
     $this->mustRemoveSamples = $this->option('rm-samples');
 
-    // can be: development / staging / production
-    $this->env = $this->option('env');
-    $this->envFile = $this->env === null? ".env": ".env.".$this->env;
+
 
     $steps = 5;
     if($this->mustZip === "true"){

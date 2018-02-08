@@ -13,6 +13,8 @@ services:
             WEB_ROOT_FOLDER: "/"
         ports:
           - 80:80
+          - 5432:5432
+          - 443:443
         environment:
           CI: "false"
         volumes:
