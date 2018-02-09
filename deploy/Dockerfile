@@ -101,6 +101,7 @@ RUN sed -i 's/VirtualHost \*:80/VirtualHost \*:\*/' /etc/apache2/sites-available
 RUN sed -i 's/VirtualHost __default__:443/VirtualHost _default_:443 _default_:8443/' /etc/apache2/sites-available/default-ssl.conf
 RUN a2enmod rewrite
 RUN a2enmod ssl
+RUN a2enmod headers
 RUN a2ensite default-ssl.conf
 
 

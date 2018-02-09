@@ -11,7 +11,7 @@ class DeployInstall extends Command
   *
   * @var string
   */
-  protected $signature = 'deploy:install {--m|migrate=false}';
+  protected $signature = 'deploy:install {--migrate}';
 
   /**
   * The console command description.
@@ -56,7 +56,7 @@ class DeployInstall extends Command
   protected function runRemoteInstall(){
     $url = env("APP_URL");
     $this->info("\n\n"."Running remote install script on $url ...\n");
-    if($this->migrate === "true"){
+    if($this->migrate === true){
       $url .= "?migrate=true";
     }
 

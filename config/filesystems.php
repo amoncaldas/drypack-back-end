@@ -47,6 +47,10 @@ return [
             'driver' => 'local',
             'root' => storage_path('app'),
         ],
+        'root' => [
+            'driver' => 'local',
+            'root' => base_path(),
+        ],
         'deploy' => [
             'driver' => 'local',
             'root' => base_path('deploy'),

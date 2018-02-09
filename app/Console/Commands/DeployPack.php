@@ -22,14 +22,14 @@ class DeployPack extends Command
    *
    * @var string
    */
-  protected $signature = 'deploy:pack {--z|zip=true} {--rm|rm-samples=false}';
+  protected $signature = 'deploy:pack {--not-zip} {--rm-samples}';
 
   /**
    * The console command description.
    *
    * @var string
    */
-  protected $description = 'Script to generate an application package';
+  protected $description = 'Generate an application package';
 
   /**
    * Create a new command instance.
@@ -41,6 +41,7 @@ class DeployPack extends Command
       parent::__construct();
 
       $this->packageStorage = Storage::disk('package');
+      $this->deployStorage = Storage::disk('deploy');
       $this->packDir = base_path("package");
       $this->tempAppFolderName = "app";
       $this->packAppDir = base_path("package/app");
@@ -70,13 +71,13 @@ class DeployPack extends Command
       return;
     }
     $this->envFile = $this->env === null? ".env": ".env.".$this->env;
-    $this->mustZip = $this->option('zip');
+    $this->mustZip = !$this->option('not-zip');
     $this->mustRemoveSamples = $this->option('rm-samples');
 
 
 
     $steps = 5;
-    if($this->mustZip === "true"){
+    if($this->mustZip === true){
         $steps++;
     }
 
@@ -87,7 +88,7 @@ class DeployPack extends Command
     $this->copyBackendFiles();
     $this->copyAndBuildFrontend("client");
     $this->copyAndBuildFrontend("admin");
-    if($this->mustZip === "true"){
+    if($this->mustZip === true){
       $this->zip();
       $this->info("\n\n".'See zip package at '.$this->zipFullFileLocation."\n");
 
@@ -133,23 +134,18 @@ class DeployPack extends Command
 
 
   /**
-   * Build the htaccess
+   * get the web server config file
    *
    * @return void
    */
-  protected function getHtAccess() {
+  protected function getWebserverConfigFile() {
 
+    $webserverConfigFile = $this->deployStorage->get(".htaccess.template");
     $app_url_with_no_protocol = str_replace("http://", "", env("APP_URL"));
     $app_url_with_no_protocol = str_replace("https://", "", $app_url_with_no_protocol);
+    $webserverConfigFile = str_replace("{{host}}", $app_url_with_no_protocol, $webserverConfigFile);
 
-    return "<IfModule mod_rewrite.c>
-      Header set Access-Control-Allow-Origin \"*\"
-        Header set Access-Control-Allow-Headers \"Origin, Content-Type, Accept, Authorization, X-Requested-With\"
-        Header set Access-Control-Allow-Methods \"POST, GET, OPTIONS, PUT, DELETE\"
-      RewriteEngine On
-      RewriteCond %{HTTP_HOST} ^$app_url_with_no_protocol$
-      RewriteRule (.*) /public/\$1 [L]
-    </IfModule>";
+    return $webserverConfigFile;
   }
 
   /**
@@ -209,7 +205,7 @@ class DeployPack extends Command
     $backendAppDirs = ["app", "config", "resources", "vendor", "routes", "database"];
     // If the package will, at the end, be zipped, we don't need to copy
     // but symlink them and when zipping, they are included
-    if($this->mustZip === "true"){
+    if($this->mustZip === true){
       $this->command->createPackSymLink($backendAppDirs, $this->packAppDir);
     } else { // if is not gonna be zipped, we copy them
       $this->command->copyDirFromApp($backendAppDirs, $this->packAppDir);
@@ -217,7 +213,7 @@ class DeployPack extends Command
 
     $bar->advance();
 
-    $this->packageStorage->put("app/.htaccess", $this->getHtAccess());
+    $this->packageStorage->put("app/.htaccess", $this->getWebserverConfigFile());
     $this->command->removeFile($this->packAppDir."/.gitignore");
     $bar->advance();
     $bar->finish();
