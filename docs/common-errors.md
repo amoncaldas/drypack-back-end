@@ -31,6 +31,16 @@ php artisan route:clear
 php artisan view:clear
 ```
 
+## Broken packages while running docker-install script ##
+
+Error: "E: Unable to correct problems, you have held broken packages."
+
+```sh
+# on Debian like distributions
+sudo apt-get install aptitude
+sudo aptitude docker-ce
+```
+
 ## Docker installation error when running configure ##
 
 Purge any other previous/old docker installation:

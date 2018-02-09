@@ -121,6 +121,6 @@ RUN npm install -g serve gulp gulp-cli yo generator-karma karma \
 angular-animate angular-aria angular-material angular angular-messages @uirouter/angular @angular/core @angular/common angular-route @angular/router gulp-babel babel-preset-es2015 \
 eslint eslint-plugin-angular protractor protractor-console generator-angular @angular/platform-browser webdriver-manager
 
-EXPOSE 80 5432 22 443
+EXPOSE 5432 443
 CMD exec supervisord -n
 WORKDIR /var/www/
