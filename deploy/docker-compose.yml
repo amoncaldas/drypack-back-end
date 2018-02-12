@@ -1,22 +1,30 @@
 version: '3.1'
 
+networks:
+  drypack_net:
+    driver: bridge
 services:
-    drypack:
-        container_name: drypack-container-prod
-        image: drypack-image-prod
-        build:
-          context: ./
-          args:
-            BUILD_SUPPORT: "false"
-            DRYPACK_DB_USER: drypackuser
-            DRYPACK_DB_PASS: drypack
-            WEB_ROOT_FOLDER: "/"
-        ports:
-          - 80:80
-          - 5432:5432
-          - 443:443
-        environment:
-          CI: "false"
-        volumes:
-          - ./:/var/www/
+  drypack_web:
+    image: ttaranto/docker-nginx-php7
+    networks:
+      - drypack_net
+    ports:
+      - 80:80
+    volumes:
+      - ./:/var/www
+    links:
+      - drypack_db
+  drypack_db:
+    image: mdillon/postgis # can be also only 'postgres'
+    networks:
+      - drypack_net
+    environment:
+      POSTGRES_DB: drypack
+      POSTGRES_USER: drypackuser
+      POSTGRES_PASSWORD: drypack
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
 

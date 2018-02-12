@@ -1,8 +1,0 @@
-<IfModule mod_rewrite.c>
-      Header set Access-Control-Allow-Origin "*"
-        Header set Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization, X-Requested-With"
-        Header set Access-Control-Allow-Methods "POST, GET, OPTIONS, PUT, DELETE"
-      RewriteEngine On
-      RewriteCond %{HTTP_HOST} ^dev.domain.tld$
-      RewriteRule (.*) /public/$1 [L]
-    </IfModule>
