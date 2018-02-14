@@ -6,24 +6,27 @@ networks:
 services:
   drypack_web:
     image: ttaranto/docker-nginx-php7
+    container_name: app_server
     networks:
       - drypack_net
     ports:
       - 80:80
     volumes:
       - ./:/var/www
-    links:
-      - drypack_db
   drypack_db:
     image: mdillon/postgis # can be also only 'postgres'
+    container_name: db_server
     networks:
       - drypack_net
     environment:
-      POSTGRES_DB: drypack
+      POSTGRES_DB: drypack_db
       POSTGRES_USER: drypackuser
       POSTGRES_PASSWORD: drypack
   adminer:
     image: adminer
+    container_name: adminer_server
+    networks:
+      - drypack_net
     restart: always
     ports:
       - 8080:8080
