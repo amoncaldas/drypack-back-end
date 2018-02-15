@@ -10,8 +10,6 @@ use App\Console\Commands\LinuxCommands;
 use Illuminate\Support\Facades\App;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Filesystem\FilesystemManager;
-use GuzzleHttp\Exception\GuzzleException;
-use GuzzleHttp\Client;
 use Psr\Http\Message\ResponseInterface;
 use GuzzleHttp\Exception\RequestException;
 
@@ -22,7 +20,7 @@ class DeployPack extends Command
    *
    * @var string
    */
-  protected $signature = 'deploy:pack {--not-zip} {--rm-samples}';
+  protected $signature = 'deploy:pack {--no-zip} {--rm-samples}';
 
   /**
    * The console command description.
@@ -66,12 +64,9 @@ class DeployPack extends Command
       $this->error("\n".'To generate the package it is necessary to inform the target environment, like --env=development, --env=staging or --env=production'."\n");
       return;
     }
-    if(strpos(env("APP_URL"), 'domain.tld') !== false) {
-      $this->error("\n".'To generate the package to the '.$this->env.' environment you must set the APP_URL in the .env.'.$this->env.' file'."\n");
-      return;
-    }
+
     $this->envFile = $this->env === null? ".env": ".env.".$this->env;
-    $this->mustZip = !$this->option('not-zip');
+    $this->mustZip = !$this->option('no-zip');
     $this->mustRemoveSamples = $this->option('rm-samples');
 
 
@@ -132,22 +127,6 @@ class DeployPack extends Command
     $bar->finish();
   }
 
-
-  /**
-   * get the web server config file
-   *
-   * @return void
-   */
-  protected function getWebserverConfigFile() {
-
-    $webserverConfigFile = $this->deployStorage->get(".htaccess.template");
-    $app_url_with_no_protocol = str_replace("http://", "", env("APP_URL"));
-    $app_url_with_no_protocol = str_replace("https://", "", $app_url_with_no_protocol);
-    $webserverConfigFile = str_replace("{{host}}", $app_url_with_no_protocol, $webserverConfigFile);
-
-    return $webserverConfigFile;
-  }
-
   /**
    * Reset the package dir, removing previous package generated
    *
@@ -177,7 +156,7 @@ class DeployPack extends Command
   protected function copyBackendFiles(){
     $this->info("\n\n".'Copying back-end files to temp folder...'."\n");
 
-    $bar = $this->output->createProgressBar(5);
+    $bar = $this->output->createProgressBar(4);
     File::copy(base_path($this->envFile),  $this->packAppDir."/.env");
     $bar->advance();
 
@@ -193,7 +172,6 @@ class DeployPack extends Command
     File::makeDirectory($this->packAppDir."/public", 0777, true, true);
     $this->command->copyFileFromApp(
       [
-        "public/.htaccess",
         "public/favicon.ico",
         "public/index.php",
         "public/robots.txt"
@@ -210,10 +188,6 @@ class DeployPack extends Command
     } else { // if is not gonna be zipped, we copy them
       $this->command->copyDirFromApp($backendAppDirs, $this->packAppDir);
     }
-
-    $bar->advance();
-
-    $this->packageStorage->put("app/.htaccess", $this->getWebserverConfigFile());
     $this->command->removeFile($this->packAppDir."/.gitignore");
     $bar->advance();
     $bar->finish();
@@ -238,7 +212,7 @@ class DeployPack extends Command
       }
 
       File::makeDirectory($this->packAppDir."/public/$client/", 0777, true, true);
-      $this->command->copyDirFromApp(["public/$client/app", "public/$client/images"], $this->packAppDir."/public/$client");
+      $this->command->copyDirFromApp(["public/$client/app", "public/$client/images", "public/$client/styles"], $this->packAppDir."/public/$client");
       $this->command->copyFileFromApp(["public/$client/gulpfile.js", "public/$client/index.html", "public/$client/paths.json"], $this->packAppDir."/public/$client");
       $this->command->createPackSymLink("public/$client/node_modules", $this->packAppDir);
       File::makeDirectory($this->packAppDir."/public/$client/build", 0777, true, true);

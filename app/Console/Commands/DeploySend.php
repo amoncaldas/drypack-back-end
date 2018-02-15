@@ -38,7 +38,6 @@ class DeploySend extends Command
 
       $this->zipPackFileName = "appPack.zip";
       $this->installerFileName = "install.php";
-      $this->dockerFileName = "Dockerfile";
       $this->dockerInstallScript = "install-docker.sh";
       $this->dockerComposeFileName = "docker-compose.yml";
     }
@@ -98,10 +97,6 @@ class DeploySend extends Command
      * @return void
      */
     protected function sendSetupFiles(){
-      if($this->ftpStorage->put($this->dockerFileName, $this->deployStorage->get($this->dockerFileName)) === false){
-        $this->sendingError($this->dockerFileName);
-        return;
-      }
       if($this->ftpStorage->put($this->dockerInstallScript, $this->scriptStorage->get($this->dockerInstallScript)) === false){
         $this->sendingError($this->dockerInstallScript);
         return;

@@ -12,7 +12,7 @@ class Deploy extends Command
   *
   * @var string
   */
-  protected $signature = 'deploy {--z|zip=true} {--s|send=false} {--i|install=false} {--rm|rm-samples=false} {--m|migrate=false}';
+  protected $signature = 'deploy {--no-zip} {--send} {--install} {--rm-samples} {--migrate}';
 
   /**
    * The console command description.
@@ -53,26 +53,28 @@ class Deploy extends Command
   {
       // can be: development / staging / production
       $this->env = $this->option('env');
+      $this->install = $this->option('install');
+      $this->migrate = $this->option('migrate');
+      $this->mustRemoveSamples = $this->option('rm-samples');
+      $this->send = $this->option('send');
+      $this->mustZip = !$this->option('no-zip');
+      $this->env = $this->option('env'); // can be: development / staging / production
+      $this->envFile = $this->env === null? ".env": ".env.".$this->env;
 
       if (!isset($this->env)) {
         $this->error("\n".'To deploy the package it is necessary to inform the target environment, like --env=development, --env=staging or --env=production'."\n");
         return;
       }
 
-      $this->send = $this->option('send');
-      $this->mustZip = $this->option('zip');
-
-      if($this->mustZip === "false" && $this->send === "true"){
-        $this->error("\n".'The --send=true and --zip=false can not be used together. Package not generated.'."\n");
+      if($this->install === true && strpos(env("APP_URL"), 'domain.tld') !== false) {
+        $this->error("\n".'To install the package to the '.$this->env.' environment you must set the APP_URL in the .env.'.$this->env.' file'."\n");
         return;
       }
 
-
-      $this->install = $this->option('install');
-      $this->migrate = $this->option('migrate');
-      $this->mustRemoveSamples = $this->option('rm-samples');
-      $this->env = $this->option('env'); // can be: development / staging / production
-      $this->envFile = $this->env === null? ".env": ".env.".$this->env;
+      if($this->mustZip === false && $this->send === true){
+        $this->error("\n".'The --send and --no-zip can not be used together. Package not generated.'."\n");
+        return;
+      }
 
       // Run deploy tasks
       $this->deploy();

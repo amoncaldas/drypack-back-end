@@ -11,7 +11,7 @@ class DeployInstall extends Command
   *
   * @var string
   */
-  protected $signature = 'deploy:install {--migrate}';
+  protected $signature = 'deploy:install {--migrate} {--seed}';
 
   /**
   * The console command description.
@@ -45,6 +45,7 @@ class DeployInstall extends Command
       return;
     }
     $this->migrate = $this->option('migrate');
+    $this->seed = $this->option('seed');
     $this->runRemoteInstall();
   }
 
@@ -59,8 +60,15 @@ class DeployInstall extends Command
     if($this->migrate === true){
       $url .= "?migrate=true";
     }
+    if($this->seed === true){
+        $url .= "?seed=true";
+      }
 
-    $body = file_get_contents("$url/install.php");
+    try{
+        $body = file_get_contents($url);
+    } catch(\Exception $ex){
+        $this->error("The $url/install.php is not reachable");
+    }
 
     if($http_response_header[0] === "HTTP/1.1 200 OK"){
       $this->info("\n\n"."Package installed/updated on the server $url\n");

@@ -8,7 +8,16 @@ $pkgName = "appPack.zip";
 $installerFile = 'install.php';
 $url = getBaseUrl();
 $dir = dirname(__FILE__);
-$migrate = htmlspecialchars($_GET['migrate']);
+
+$migrate = false;
+$seed = false;
+
+if(isset($_GET['migrate'])) {
+    $migrate = htmlspecialchars($_GET['migrate']);
+}
+if(isset($_GET['seed'])) {
+    $seed = htmlspecialchars($_GET['seed']);
+}
 
 try {
     $file=scandir($dir);
@@ -36,24 +45,25 @@ try {
         //var_dump($extractResult);
 
         $zip->close();
-        //var_dump($migrate);
-        if($migrate === "true"){
+        if($migrate === true || $migrate === "true"){
             echo shell_exec("cd $dir && php artisan migrate");
         }
 
+        if($seed === true || $seed === "true"){
+            echo shell_exec("cd $dir && php artisan seed");
+        }
+
         echo shell_exec("cd $dir && rm -rf $installerFile $pkgName");
-        //var_dump("deleted");
         http_response_code(200);
-        //header("location:$url");
+        header(trim("HTTP/1.0 200"));
 
     } else {
-        http_response_code(400, "Could not open $dir/$installerFile");
-        //echo $open;
+        header(trim("HTTP/1.0 400 Could not open $dir/$installerFile"));
     }
 
 } catch (Exception $e) {
-    //echo $e->getMessage();
-    http_response_code(400, $e->getMessage());
+    $error =  $e->getMessage();
+    header(trim("HTTP/1.0 400 $error"));
 }
 
 /**
@@ -77,5 +87,7 @@ function getBaseUrl()
     // return: http://localhost/myproject/
     return $protocol.$hostName.$pathInfo['dirname']."/";
 }
+
+
 
 ?>
