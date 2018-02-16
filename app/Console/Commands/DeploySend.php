@@ -12,7 +12,7 @@ class DeploySend extends Command
      *
      * @var string
      */
-    protected $signature = 'deploy:send {--only-setup-files} {--single-file=}';
+    protected $signature = 'deploy:send {--single-file=}';
 
     /**
      * The console command description.
@@ -37,7 +37,7 @@ class DeploySend extends Command
       $this->rootStorage = Storage::disk('root');
 
       $this->zipPackFileName = "appPack.zip";
-      $this->installerFileName = "install.php";
+      $this->installerFileName = "install.sh";
       $this->dockerInstallScript = "install-docker.sh";
       $this->dockerComposeFileName = "docker-compose.yml";
     }
@@ -60,7 +60,6 @@ class DeploySend extends Command
         $this->error("\n".'To send the package to the '.$this->env.' environment you must set the FTP/SFTP credentials in the .env.'.$this->env.' file'."\n");
         return;
       }
-      $this->onlySetupFiles = $this->option('only-setup-files');
       $this->singleFile = $this->option('single-file');
       $this->send();
     }
@@ -74,12 +73,8 @@ class DeploySend extends Command
       $this->info("\n\n".'Sending to '.$this->env.' server at '.env("FTP_HOST")." ...\n");
 
       try{
-        // Send only environment setup files
-        if($this->onlySetupFiles === true){
-          $this->sendSetupFiles();
-        }
         // sent a single file
-        elseif(isset($this->singleFile)) {
+        if(isset($this->singleFile)) {
           $this->sendSingleFile();
         }
         // sent package and installer file
@@ -91,23 +86,6 @@ class DeploySend extends Command
       }
     }
 
-    /**
-     * Send the environment setup files
-     *
-     * @return void
-     */
-    protected function sendSetupFiles(){
-      if($this->ftpStorage->put($this->dockerInstallScript, $this->scriptStorage->get($this->dockerInstallScript)) === false){
-        $this->sendingError($this->dockerInstallScript);
-        return;
-      }
-      if($this->ftpStorage->put($this->dockerComposeFileName, $this->deployStorage->get($this->dockerComposeFileName)) === false){
-        $this->sendingError($this->dockerComposeFileName);
-        return;
-      }
-
-      $this->sendSetupSuccess();
-    }
 
     /**
      * Send a single file
@@ -136,7 +114,14 @@ class DeploySend extends Command
      * @return void
      */
     protected function sendPackage(){
-      $i = $this->deployStorage->get($this->installerFileName);
+      if($this->ftpStorage->put($this->dockerInstallScript, $this->scriptStorage->get($this->dockerInstallScript)) === false){
+        $this->sendingError($this->dockerInstallScript);
+        return;
+      }
+      if($this->ftpStorage->put($this->dockerComposeFileName, $this->deployStorage->get($this->dockerComposeFileName)) === false){
+        $this->sendingError($this->dockerComposeFileName);
+        return;
+      }
       if($this->ftpStorage->put($this->installerFileName, $this->deployStorage->get($this->installerFileName)) === false){
         $this->sendingError($this->installerFileName);
         return;
