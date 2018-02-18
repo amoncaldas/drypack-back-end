@@ -24,7 +24,7 @@ sudo chown newUserName:newUserName /var/sftp/uploads
 ## Restricting Access to One Directory ##
 
 ```sh
-# Open the sshd config flie
+# Open the sshd config file
 sudo nano /etc/ssh/sshd_config
 ```
 
@@ -38,7 +38,6 @@ Scroll to the very bottom of the file and append the following configuration sni
     AllowAgentForwarding no
     AllowTcpForwarding no
     X11Forwarding no
-
 
 Then save and close the file.
 

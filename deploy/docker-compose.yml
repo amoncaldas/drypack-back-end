@@ -1,6 +1,10 @@
 version: '3.1'
 
+networks:
+  drypack_net:
+    driver: bridge
 services:
+<<<<<<< HEAD
     drypack:
         container_name: drypack-container-prod
         image: drypack-image-prod
@@ -19,4 +23,38 @@ services:
           CI: "false"
         volumes:
           - ./:/var/www/
+=======
+  drypack_web:
+    image: ttaranto/docker-nginx-php7
+    container_name: dry_app_server
+    networks:
+      - drypack_net
+    ports:
+      - 8081:80
+    volumes:
+      - ./:/var/www
+  drypack_db:
+    image: mdillon/postgis # can be also only 'postgres'
+    container_name: dry_db_server
+    networks:
+      - drypack_net
+    environment:
+      POSTGRES_DB: drypack_db
+      POSTGRES_USER: drypackuser
+      POSTGRES_PASSWORD: drypack
+  drypack_adminer:
+    image: adminer
+    container_name: dry_adminer_server
+    networks:
+      - drypack_net
+    restart: always
+    ports:
+      - 8080:8080
+  drypack_smtp:
+    image: namshi/smtp
+    container_name: dry_smtp_server
+    networks:
+      - drypack_net
+
+>>>>>>> develop
 
