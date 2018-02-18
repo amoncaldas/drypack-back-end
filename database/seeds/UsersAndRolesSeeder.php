@@ -64,8 +64,8 @@ class UsersAndRolesSeeder extends Seeder
         $actions_filter = ["project:index", "project:show", "task:index", "task:show", "password", "authentication:authenticate"];
         AuthorizationSetup::setResourcesActionsForRole($actions_filter, $this->getRole(Role::anonymousRoleSlug()));
 
-        // Create 5 additional random users with no permissions
-        factory(User::class, 5)->create();
+        // Create 5 additional random users with no permissions  - disabled, you can enabled if needed
+        // factory(User::class, 5)->create();
     }
 
     /**
