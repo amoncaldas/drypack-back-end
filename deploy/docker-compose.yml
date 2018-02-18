@@ -10,7 +10,7 @@ services:
     networks:
       - drypack_net
     ports:
-      - 80:80
+      - 8081:80
     volumes:
       - ./:/var/www
   drypack_db:

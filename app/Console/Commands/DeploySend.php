@@ -131,6 +131,7 @@ class DeploySend extends Command
         return;
       }
       $this->info("\n\n".':::: PACKAGE SENT! ::::'."\n");
+      $this->info("\n\n".'You can now access the server via ssh and run "sh '.$this->installerFileName.' to finish the instalation.'."\n");
     }
 
 
@@ -142,16 +143,5 @@ class DeploySend extends Command
      */
     protected function sendingError($fileName){
         $this->error("\n".'The file '.$fileName.' could not be sent. Sending aborted.'."\n");
-    }
-
-    /**
-     * Print a send setup success message with instructions
-     *
-     * @return void
-     */
-    protected function sendSetupSuccess(){
-      $this->info("\n\n".':::: SETUP FILES SENT! ::::'."\n");
-
-      $this->info("\n\n".'Now you have to access the server via ssh and run "sh '.$this->dockerInstallScript.'" and then "docker-compose -f '.$this->dockerComposeFileName.' up" to finish the docker container setup on the remote server. Then run here, in this console, "php artisan deploy:install --env='.$this->env.'" to install the app package.'."\n");
     }
 }
