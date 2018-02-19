@@ -4,7 +4,7 @@
 
 1. Create/have a gmail account
 1. Authorize less secure applications on [https://myaccount.google.com/security](https://myaccount.google.com/security) ![Less secure app](images/less-secure-app.png)
-1. Make sure you are **not** running the application with the key APP_ENV equals to **local** or **development**  in .env file (in this cases the emails are redirected to log file)
+1. Make sure you are **not** running the application with MAIL_DRIVER equals to **log** in .env file (in this cases the emails are redirected to log file)
 1. Configure the smtp section in .env file as follows:
 
 ```config

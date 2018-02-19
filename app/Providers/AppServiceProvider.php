@@ -33,12 +33,5 @@ class AppServiceProvider extends ServiceProvider
         App::bind('drypack', function () {
             return new \App\Util\DryPack;
         });
-
-        // if the application is running in a non production environment
-        // redirect the emails to the log file
-        $env = getenv('APP_ENV');
-        if($env === "development" || $env === "local"){
-            App::make('config')->set('mail.driver', 'log');
-        }
     }
 }
