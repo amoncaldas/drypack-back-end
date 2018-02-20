@@ -218,7 +218,10 @@ class DeployPack extends Command
       File::makeDirectory($this->packAppDir."/public/$client/build", 0777, true, true);
       $bar->advance();
 
-      $this->command->runCmd("cd ". $this->packAppDir."/public/$client/ && npm rebuild node-sass && gulp --production");
+      //define if the front-end must be built in production mode or not
+      $envParam = $this->env === "production"? "--production": "";
+
+      $this->command->runCmd("cd ". $this->packAppDir."/public/$client/ && npm rebuild node-sass && gulp build $envParam");
       $this->command->removeDir($this->packAppDir."/public/$client/node_modules");
       $bar->advance();
 
