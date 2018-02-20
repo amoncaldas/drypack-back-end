@@ -15,13 +15,6 @@ Route::get('/', function () {
     return File::get(public_path().'/client/index.html');
 });
 
-Route::get('/install.php', function () {
-    ob_start();
-    $path = base_path("install.php");
-    require($path);
-    return ob_get_clean();
-});
-
 Route::get('/admin', function () {
     return File::get(public_path().'/admin/index.html');
 });

@@ -1,13 +1,22 @@
-@servers(['web' => ['uer@host']])
+@servers(['staging' => ['user@host'], 'development' => ['user@host'], 'production' => ['user@host']])
 
-@task('install', ['on' => 'web', 'confirm' => false])
-    cd /path/to/app/root/dir
+@task('install', ['on' => $env, 'confirm' => false])
+    cd /path/to/project/root/dir
     sh install.sh
 @endtask
 
-@task('migrate', ['on' => 'web', 'confirm' => false])
-    cd /path/to/app/root/dir
-    docker exec -it --user root dry_app_server /bin/sh -c "cd /var/www && php artisan migrate --seed"
+@task('migrate', ['on' => $env, 'confirm' => false])
+    docker exec -it --user root dry_app_server bash
+    cd /var/www
+    php artisan migrate
+    exit
+@endtask
+
+@task('seed', ['on' => $env, 'confirm' => false])
+    docker exec -it --user root dry_app_server bash
+    cd /var/www
+    php artisan seed
+    exit
 @endtask
 
 
