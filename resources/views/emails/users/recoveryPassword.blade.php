@@ -15,7 +15,7 @@
                 <p>{{ Lang::get('mail.if_not_requested_pass_reset')}}.</p>
                 <p>{{ Lang::get('mail.reset_link_validity')}}.</p>
                 <p>{{ Lang::get('mail.password_reset_link_instructions')}}.</p>
-                <p><a href="{{ url('/admin/#/app/password/reset/'.$token) }}">{{ url('/admin/#/password/reset/'.$token) }}</a></p>
+                <p><a href="{{ url('/admin/#/password/reset/'.$token) }}">{{ url('/admin/#/password/reset/'.$token) }}</a></p>
             </div>
         </div>
     </body>
