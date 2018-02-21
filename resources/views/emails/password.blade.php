@@ -15,7 +15,7 @@
             <hr>
             <div>
             {{ Lang::get('mail.password_reset_link_instructions')}}:<br>
-                <a href="{{ url('/#/password/reset/'.$token) }}">{{ url('/#/password/reset/'.$token) }}</a>
+                <a href="{{ url('/admin/#/password/reset/'.$token) }}">{{ url('/admin/#/password/reset/'.$token) }}</a>
             </div>
         </div>
     </body>
