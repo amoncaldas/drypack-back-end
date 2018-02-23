@@ -4,8 +4,8 @@ services:
 
 variables:
   POSTGRES_DB: drypack_db
-  POSTGRES_USER: drypackuser
-  POSTGRES_PASSWORD: drypack
+  POSTGRES_USER: runner
+  POSTGRES_PASSWORD: ""
 cache:
   paths:
   - vendor/
@@ -13,6 +13,7 @@ cache:
 before_script:
 - apt-get update -qq && apt-get install -y -qq git
 - git --version
+- bash ci/docker_install.sh > /dev/null
 - php --info
 - chmod 777 -R storage
 - chmod 777 -R bootstrap/cache
