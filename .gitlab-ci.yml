@@ -1,38 +1,31 @@
-networks:
-  drypack_net:
-    driver: bridge
+image: jguyomard/laravel-php:7.2
+volumes:
+  - ./:/var/www
 services:
-  drypack_web:
-    image: ttaranto/docker-nginx-php7
-    container_name: dry_app_server
-    networks:
-      - drypack_net
-    ports:
-      - 8081:80
-    volumes:
-      - ./:/var/www
-  drypack_db:
-    image: mdillon/postgis # can be also only 'postgres'
-    container_name: dry_db_server
-    networks:
-      - drypack_net
-    environment:
-      POSTGRES_DB: drypack_db
-      POSTGRES_USER: drypackuser
-      POSTGRES_PASSWORD: drypack
+  - postgres:latest
+
+variables:
+  POSTGRES_DB: drypack_db
+  POSTGRES_USER: drypackuser
+  POSTGRES_PASSWORD: drypack
 cache:
   paths:
   - vendor/
+
 before_script:
+- apt-get update -qq && apt-get install -y -qq git
+- git --version
+- bash ci/docker_install.sh > /dev/null
+- php --info
 - chmod 777 -R storage
 - chmod 777 -R bootstrap/cache
+- rm .env.testing
+- cp .env.ci .env.testing
 - COMPOSER_PROCESS_TIMEOUT=2000 composer install
 
 test:app:
   script:
   - ./vendor/bin/phpunit --coverage-text --colors=never
-
-
 
 
 
