@@ -26,8 +26,7 @@ class MailListener
         // this is useful, for exemple, in automate testing environments
         // where it is not possible  to write files
         // The mails will not be saved in the log file, but considered sent
-        $disableLogmail = env("DISABLE_LOG_MAIL");
-        if($disableLogmail === true) {
+        if( env("MAIL_DRIVER") === "log" && env("DISABLE_LOG_MAIL") === true )  {
             return false;
         }
     }
