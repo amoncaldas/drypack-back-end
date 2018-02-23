@@ -2,14 +2,14 @@ image: drypack-image-dev
 build:
   context: docker/
 volumes:
-  - -v ./:/var/www/
+  - ./:/var/www/
 cache:
   paths:
   - vendor/
 before_script:
-  - chmod 777 -R storage
-  - chmod 777 -R bootstrap/cache
-  - COMPOSER_PROCESS_TIMEOUT=2000 composer install
+- chmod 777 -R storage
+- chmod 777 -R bootstrap/cache
+- COMPOSER_PROCESS_TIMEOUT=2000 composer install
 
 test:app:
   script:
