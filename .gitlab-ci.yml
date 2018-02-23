@@ -1,28 +1,16 @@
-image: php:7.2-fpm
-
-services:
-  - postgres:latest
-
-variables:
-  POSTGRES_DB: base
-  POSTGRES_USER: runner
-  POSTGRES_PASSWORD: ""
-
+image: drypack-image-dev
+build:
+  context: docker/
+volumes:
+  - -v ./:/var/www/
 cache:
   paths:
   - vendor/
-
 before_script:
-- apt-get update -qq && apt-get install -y -qq git
-- git --version
-- bash ci/docker_install.sh > /dev/null
-- php --info
-- chmod 777 -R storage
-- chmod 777 -R bootstrap/cache
-- rm .env.testing
-- cp .env.ci .env.testing
-- COMPOSER_PROCESS_TIMEOUT=2000 composer install
+  - chmod 777 -R storage
+  - chmod 777 -R bootstrap/cache
+  - COMPOSER_PROCESS_TIMEOUT=2000 composer install
 
 test:app:
   script:
-  - phpunit --coverage-text --colors=never
+  - ./vendor/bin/phpunit --coverage-text --colors=never
