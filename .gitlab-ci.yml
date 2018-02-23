@@ -15,6 +15,8 @@ cache:
 before_script:
 - apt-get update -qq && apt-get install -y -qq git
 - git --version
+- apt-get install -y -qq php7.2-pgsql software-properties-common postgresql-9.5 postgresql-client-9.5
+- apt-get install -y -qq postgresql-contrib-9.5 postgresql-9.5-postgis-2.2 postgresql-9.5-postgis-scripts
 - php --info
 - bash ci/docker_install.sh > /dev/null
 - chmod 777 -R storage
