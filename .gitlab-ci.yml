@@ -21,6 +21,7 @@ before_script:
 
 test:app:
   script:
+  - php artisan key:generate
   - ./vendor/bin/phpunit --coverage-text --colors=never
 
 
