@@ -1,10 +1,25 @@
-version: '3.1'
-
-image: drypack-image-dev
-build:
-  context: docker/
-volumes:
-  - ./:/var/www/
+networks:
+  drypack_net:
+    driver: bridge
+services:
+  drypack_web:
+    image: ttaranto/docker-nginx-php7
+    container_name: dry_app_server
+    networks:
+      - drypack_net
+    ports:
+      - 8081:80
+    volumes:
+      - ./:/var/www
+  drypack_db:
+    image: mdillon/postgis # can be also only 'postgres'
+    container_name: dry_db_server
+    networks:
+      - drypack_net
+    environment:
+      POSTGRES_DB: drypack_db
+      POSTGRES_USER: drypackuser
+      POSTGRES_PASSWORD: drypack
 cache:
   paths:
   - vendor/
@@ -16,3 +31,8 @@ before_script:
 test:app:
   script:
   - ./vendor/bin/phpunit --coverage-text --colors=never
+
+
+
+
+
