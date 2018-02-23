@@ -6,6 +6,7 @@ variables:
   POSTGRES_DB: drypack_db
   POSTGRES_USER: runner
   POSTGRES_PASSWORD: ""
+  CI_DEBUG_SERVICES: trace
 cache:
   paths:
   - vendor/
