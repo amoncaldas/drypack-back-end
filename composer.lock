@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "0909a187e11c6e904fdaa769664bdc0d",
+    "content-hash": "6b5306db8ab710dcd0ff4894cd138675",
     "packages": [
         {
             "name": "appzcoder/crud-generator",
@@ -1581,6 +1581,52 @@
             ],
             "description": "Flysystem adapter for SFTP",
             "time": "2017-11-16T10:41:52+00:00"
+        },
+        {
+            "name": "mikey179/vfsStream",
+            "version": "v1.6.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mikey179/vfsStream.git",
+                "reference": "d5fec95f541d4d71c4823bb5e30cf9b9e5b96145"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mikey179/vfsStream/zipball/d5fec95f541d4d71c4823bb5e30cf9b9e5b96145",
+                "reference": "d5fec95f541d4d71c4823bb5e30cf9b9e5b96145",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~4.5"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.6.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "org\\bovigo\\vfs\\": "src/main/php"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Frank Kleine",
+                    "homepage": "http://frankkleine.de/",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Virtual file system to mock the real file system in unit tests.",
+            "homepage": "http://vfs.bovigo.org/",
+            "time": "2017-08-01T08:02:14+00:00"
         },
         {
             "name": "monolog/monolog",
@@ -3737,6 +3783,63 @@
             "description": "Library that helps with managing the version number of Git-hosted PHP projects",
             "homepage": "https://github.com/sebastianbergmann/version",
             "time": "2016-10-03T07:35:21+00:00"
+        },
+        {
+            "name": "stechstudio/laravel-vfs-adapter",
+            "version": "2.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/stechstudio/laravel-vfs-adapter.git",
+                "reference": "7f0c68db62d67612f6ee48fbd531b408e653edf4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/stechstudio/laravel-vfs-adapter/zipball/7f0c68db62d67612f6ee48fbd531b408e653edf4",
+                "reference": "7f0c68db62d67612f6ee48fbd531b408e653edf4",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/support": "5.5.x",
+                "league/flysystem": "^1.0",
+                "mikey179/vfsstream": "^1.6",
+                "php": ">=7.0.0"
+            },
+            "require-dev": {
+                "ext-fileinfo": "*",
+                "mockery/mockery": "~1.0",
+                "phpspec/phpspec": "^2.2",
+                "phpunit/phpunit": "~6.0",
+                "symfony/var-dumper": "^3"
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [],
+                "psr-4": {
+                    "STS\\Filesystem\\": "src"
+                },
+                "files": []
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Bubba Hines",
+                    "email": "rob@stechstudio.com"
+                }
+            ],
+            "description": "Virtual Filesystem Storage Adapter for Laravel",
+            "keywords": [
+                "Flysystem",
+                "adapter",
+                "laravel",
+                "lumen",
+                "php-vs",
+                "storage",
+                "vfs"
+            ],
+            "time": "2017-10-19T19:11:04+00:00"
         },
         {
             "name": "swiftmailer/swiftmailer",

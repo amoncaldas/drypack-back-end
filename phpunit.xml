@@ -16,7 +16,7 @@
         <testsuite name="Unit Tests">
             <directory suffix="Test.php">./tests/Unit</directory>
         </testsuite>
-        
+
         <testsuite name="App Tests">
             <directory suffix="Test.php">./tests/App</directory>
         </testsuite>
@@ -37,5 +37,7 @@
         <env name="CACHE_DRIVER" value="array"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="QUEUE_DRIVER" value="sync"/>
+        <env name="FTP_FILESYSTEM" value="local"/>
+        <env name="FTP_FILESYSTEM_ROOT" value="deploy/virtual_ftp"/>
     </php>
 </phpunit>

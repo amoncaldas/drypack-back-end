@@ -268,8 +268,6 @@ class DeployPack extends Command
    */
   protected function zip(){
 
-    $zipFullFileLocation = $this->packDir."/".$this->zipPackFileName;
-
     $this->info("\n\n".'Zipping the package...'."\n");
 
     $bar = $this->output->createProgressBar(3);

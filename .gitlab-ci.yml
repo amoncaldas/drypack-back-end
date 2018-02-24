@@ -36,10 +36,8 @@ test:app:
     - develop
   artifacts:
     when: on_failure
-    untracked: false
     paths:
       - storage/logs
-    expire_in: 1 day
 
 
 
