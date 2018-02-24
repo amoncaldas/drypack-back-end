@@ -13,7 +13,7 @@ before_script:
 - git --version
 - chmod 777 -R storage
 - chmod 777 -R storage/logs
-- chmod 777 -R package/app/
+- chmod 777 -R package/app
 - chmod 777 -R bootstrap/cache
 - rm .env.testing
 - cp .env.ci .env.testing
@@ -35,9 +35,10 @@ test:app:
   only:
     - develop
   artifacts:
+    when: on_failure
+    untracked: false
     paths:
-      - storage/logs/
-      - package/app/
+      - storage/logs
     expire_in: 1 day
 
 
