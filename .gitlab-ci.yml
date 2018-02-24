@@ -7,9 +7,6 @@ variables:
   POSTGRES_USER: runner
   POSTGRES_PASSWORD: ""
   CI_DEBUG_SERVICES: trace
-cache:
-  paths:
-  - vendor/
 
 before_script:
 - apt-get update -qq && apt-get install -y -qq git
@@ -20,9 +17,27 @@ before_script:
 - cp .env.ci .env.testing
 - COMPOSER_PROCESS_TIMEOUT=2000 composer install
 
-test:app:
+cache:
+  paths:
+  - vendor/
+
+stages:
+  #- build
+  - test
+  #- deploy
+
+job1:
+  stage: test
   script:
-  - ./vendor/bin/phpunit --coverage-text --colors=never
+    - ./vendor/bin/phpunit --coverage-text --colors=never
+  only:
+    - develop
+  artifacts:
+    paths:
+      - storage/logs/
+      - package/app/
+    expire_in: 1 day
+
 
 
 
