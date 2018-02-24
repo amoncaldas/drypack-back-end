@@ -12,6 +12,8 @@ before_script:
 - apt-get update -qq && apt-get install -y -qq git
 - git --version
 - chmod 777 -R storage
+- chmod 777 -R storage/logs
+- chmod 777 -R package/app/
 - chmod 777 -R bootstrap/cache
 - rm .env.testing
 - cp .env.ci .env.testing
@@ -26,7 +28,7 @@ stages:
   - test
   #- deploy
 
-job1:
+test:app:
   stage: test
   script:
     - ./vendor/bin/phpunit --coverage-text --colors=never
