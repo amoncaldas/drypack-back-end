@@ -14,7 +14,7 @@ class DeployTest extends TestCase
      */
     public function testGenerateAppPack()
     {
-        \Artisan::callSilent('deploy:pack', ['--env' => "testing", "--no-zip"=> true]);
+        \Artisan::call('deploy:pack', ['--env' => "testing", "--no-zip"=> true]);
         $appFiles = Storage::disk('package')->files('app');
         $this->assertGreaterThanOrEqual(10, $appFiles);
     }
@@ -24,7 +24,7 @@ class DeployTest extends TestCase
      */
     public function testGenerateAppPackWithoutSamples()
     {
-        \Artisan::callSilent('deploy:pack', ['--env' => "testing", "--no-zip"=> true, "--rm-samples"=>true]);
+        \Artisan::call('deploy:pack', ['--env' => "testing", "--no-zip"=> true, "--rm-samples"=>true]);
         $appFiles = Storage::disk('package')->files('app');
         $this->assertGreaterThanOrEqual(10, $appFiles);
     }
@@ -34,7 +34,7 @@ class DeployTest extends TestCase
      */
     public function testGenerateAppPackZippedAndSend()
     {
-        \Artisan::callSilent('deploy:pack', ['--env' => "testing"]);
+        \Artisan::call('deploy:pack', ['--env' => "testing"]);
         $this->assertEquals(Storage::disk('package')->exists('appPack.zip'), true);
         \Artisan::call('deploy:send', ['--env' => "testing"]);
 
