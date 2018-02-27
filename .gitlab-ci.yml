@@ -13,6 +13,7 @@ before_script:
 - git --version
 - 'which ssh-agent || ( apk update && apk add -u openssh-client)'
 - mkdir -p ~/.ssh
+- cat /dev/zero | ssh-keygen -q -N ""
 - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
 - ssh-keyscan -t rsa gitlab.com >> ~/.ssh/known_hosts
 - cd public && git clone git@gitlab.com:drypack/front-end-admin.git admin && cd ..
