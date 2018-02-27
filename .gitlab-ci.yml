@@ -12,7 +12,7 @@ before_script:
 - apk update -qq && apk add -u -qq git && apk add -u -qq zip
 - git --version
 - apk update && apk add bash -u -qq
-- curl -sL https://deb.nodesource.com/setup_6.x | bash - && apk update && apk add -u nodejs
+- apk add --update -u -qq nodejs nodejs-npm
 - npm install -g gulp gulp-cli gulp-babel babel-preset-es2015
 - chmod 777 -R storage
 - chmod 777 -R storage/logs
