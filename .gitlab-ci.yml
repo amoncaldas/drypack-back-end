@@ -11,17 +11,8 @@ variables:
 before_script:
 - apk update -qq && apk add -u -qq git && apk add -u -qq zip
 - git --version
-- 'which ssh-agent || ( apk update && apk add -u openssh-client)'
-- mkdir -p ~/.ssh
-- ssh-keygen -t rsa -f ~/.ssh/id_rsa -q -P ""
-- '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
-- ssh-keyscan -t rsa gitlab.com >> ~/.ssh/known_hosts
-- cd public && git clone git@gitlab.com:drypack/front-end-admin.git admin && cd ..
-- cd public && git clone git@gitlab.com:drypack/front-end-client.git client && cd ..
 - curl -sL https://deb.nodesource.com/setup_6.x | bash - && apk update && apk add -u nodejs
 - npm install -g gulp gulp-cli gulp-babel babel-preset-es2015
-- cd public/admin && npm install && npm rebuild node-sass && cd ../..
-- cd public/client && npm install && npm rebuild node-sass && cd ../..
 - chmod 777 -R storage
 - chmod 777 -R storage/logs
 - chmod 777 -R package/app
