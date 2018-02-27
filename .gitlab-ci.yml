@@ -9,9 +9,9 @@ variables:
   CI_DEBUG_SERVICES: trace
 
 before_script:
-- apk update -qq && apk apk add -u -qq git && apk add -u -qq zip
+- apk update -qq && apk add -u -qq git && apk add -u -qq zip
 - git --version
-- 'which ssh-agent || ( apk update && apk add -u install openssh-client)'
+- 'which ssh-agent || ( apk update && apk add -u openssh-client)'
 - cd public && git clone git@gitlab.com:drypack/front-end-admin.git admin && cd ..
 - cd public && git clone git@gitlab.com:drypack/front-end-client.git client && cd ..
 - curl -sL https://deb.nodesource.com/setup_6.x | bash - && apk update && apk add -u nodejs
