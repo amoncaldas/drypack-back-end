@@ -12,6 +12,7 @@ before_script:
 - apk update -qq && apk add -u -qq git && apk add -u -qq zip
 - git --version
 - 'which ssh-agent || ( apk update && apk add -u openssh-client)'
+- mkdir -p ~/.ssh
 - ssh-keyscan -t rsa gitlab.com >> ~/.ssh/known_hosts
 - cd public && git clone git@gitlab.com:drypack/front-end-admin.git admin && cd ..
 - cd public && git clone git@gitlab.com:drypack/front-end-client.git client && cd ..
