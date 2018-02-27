@@ -229,7 +229,7 @@ class DeployPack extends Command
     //define if the front-end must be built in production mode or not
     $envParam = $this->env === "production" || $this->env === "staging"? "--production": "";
 
-    $this->command->runCmd("cd ". $this->packAppDir."/public/$client/ && npm rebuild node-sass && gulp build $envParam");
+    $this->command->runCmd("cd ". $this->packAppDir."/public/$client/ && npm rebuild node-sass >> /dev/null 2>&1 && gulp build $envParam >> /dev/null 2>&1");
     $this->command->removeDir($this->packAppDir."/public/$client/node_modules");
     $bar->advance();
 

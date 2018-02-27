@@ -15,9 +15,6 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         'OwenIt\Auditing\Events\Auditing'=> [
             'App\Listeners\AuditingListener'
-        ],
-        'Illuminate\Mail\Events\MessageSending' => [
-            'App\Listeners\MailListener',
-        ],
+        ]
     ];
 }

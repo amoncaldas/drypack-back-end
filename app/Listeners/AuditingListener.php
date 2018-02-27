@@ -56,7 +56,11 @@ class AuditingListener
 
         if (isset($original) && is_array($original)){
             // compare the current attributes value with the original (before changed) and get what has changed
-            $diff_attr = array_diff($model->getAttributes(), $original);
+            $attributes = $model->getAttributes();
+            $attributes = json_decode(json_encode($attributes), true);
+            $original = json_decode(json_encode($original), true);
+
+            $diff_attr = array_diff(array_map('serialize',$attributes), array_map('serialize',$original));
 
             // get a list of not watched model attributes
             $exclude = ["updated_at", "created_at", "deleted_at"];

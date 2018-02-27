@@ -52,4 +52,17 @@ class ProjectsController extends CrudController
 
         return $rules;
     }
+
+    /**
+     * After store a project, store the c entry
+     *
+     * @param Request $request
+     * @param Model $project
+     * @return void
+     */
+    protected function afterStore(Request $request, Model $project)
+    {
+        // store the task change in the audit
+        $project->storeAudit('created', 'projects', [], $project->toArray());
+    }
 }
