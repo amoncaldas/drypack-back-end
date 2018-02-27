@@ -81,8 +81,18 @@ class DeployPack extends Command
     $this->resetPackDirs();
     $this->clearApp();
     $this->copyBackendFiles();
-    $this->copyAndBuildFrontend("client");
-    $this->copyAndBuildFrontend("admin");
+
+    if ($this->command->checkDir("public/client") === true) {
+        $this->copyAndBuildFrontend("client");
+    }else {
+        $this->info("\n\n".'Client front-end not present, skeeping include it in the pack '."\n");
+    }
+    if ($this->command->checkDir("public/admin") === true) {
+        $this->copyAndBuildFrontend("admin");
+    } else {
+      $this->info("\n\n".'Admin front-end not present, skeeping include it in the pack '."\n");
+    }
+
     if($this->mustZip === true){
       $this->zip();
       $this->info("\n\n".'See zip package at '.$this->zipFullFileLocation."\n");
@@ -200,65 +210,63 @@ class DeployPack extends Command
    * @return void
    */
   protected function copyAndBuildFrontend($client){
-    if ($this->command->checkDir("public/$client") === true) {
+    $this->info("\n\n".'Building and copying '.$client.' front-end files...'."\n");
 
-      $this->info("\n\n".'Building and copying '.$client.' front-end files...'."\n");
+    $bar = $this->output->createProgressBar(3);
 
-      $bar = $this->output->createProgressBar(3);
-
-      $result = $this->command->checkFile("public/$client/gulpfile.js");
-      if($result !== true){
-        $this->exitError("The directory ($result) was not found. It is not possible to continue.");
-      }
-
-      File::makeDirectory($this->packAppDir."/public/$client/", 0777, true, true);
-      $this->command->copyDirFromApp(["public/$client/app", "public/$client/images", "public/$client/styles"], $this->packAppDir."/public/$client");
-      $this->command->copyFileFromApp(["public/$client/gulpfile.js", "public/$client/index.html", "public/$client/paths.json"], $this->packAppDir."/public/$client");
-      $this->command->createPackSymLink("public/$client/node_modules", $this->packAppDir);
-      File::makeDirectory($this->packAppDir."/public/$client/build", 0777, true, true);
-      $bar->advance();
-
-      //define if the front-end must be built in production mode or not
-      $envParam = $this->env === "production" || $this->env === "staging"? "--production": "";
-
-      $this->command->runCmd("cd ". $this->packAppDir."/public/$client/ && npm rebuild node-sass && gulp build $envParam");
-      $this->command->removeDir($this->packAppDir."/public/$client/node_modules");
-      $bar->advance();
-
-      // angular i18n use several files to be able to switch to several languages/cultures
-      // These files are only loaded when a user selects a language, so they all are not
-      // included in the minimized js and then it is needed to include the entire folder with its contents
-      if($this->command->checkDir("public/$client/node_modules/angular-i18n") === true){
-        File::makeDirectory($this->packAppDir."/public/$client/node_modules");
-        $this->command->copyDirFromApp("public/$client/node_modules/angular-i18n", $this->packAppDir."/public/$client/node_modules/");
-      }
-
-      $this->command->removeRecursivelyByPattern($this->packAppDir."/public/$client/", ".*");
-      $this->command->removeRecursivelyByPattern($this->packAppDir."/public/$client/", "*.example*");
-
-      // After compiling/minimizing every javascript in a single application.js,
-      // we can remove the sources js, they are not needed anymore to run the application
-      $this->command->removeFile(
-        [
-          $this->packAppDir."/public/$client/app/*.js",
-          $this->packAppDir."/public/$client/app/**/*.js",
-          $this->packAppDir."/public/$client/app/**/**/*.js",
-          $this->packAppDir."/public/$client/styles/*.scss",
-          $this->packAppDir."/public/$client/gulpfile.js",
-        ]
-      );
-
-      if($this->mustRemoveSamples === "true"){
-        $this->command->removeDir($this->packAppDir."/public/$client/app/samples");
-      }
-
-      // After removing javascript files as result maybe we have some empty folders, so we remove them
-      $this->RemoveEmptySubFolders($this->packAppDir."/public/$client");
-
-      $this->command->setWritePermission($this->packAppDir);
-      $bar->advance();
-      $bar->finish();
+    $result = $this->command->checkFile("public/$client/gulpfile.js");
+    if($result !== true){
+      $this->exitError("The directory ($result) was not found. It is not possible to continue.");
     }
+
+    File::makeDirectory($this->packAppDir."/public/$client/", 0777, true, true);
+    $this->command->copyDirFromApp(["public/$client/app", "public/$client/images", "public/$client/styles"], $this->packAppDir."/public/$client");
+    $this->command->copyFileFromApp(["public/$client/gulpfile.js", "public/$client/index.html", "public/$client/paths.json"], $this->packAppDir."/public/$client");
+    $this->command->createPackSymLink("public/$client/node_modules", $this->packAppDir);
+    File::makeDirectory($this->packAppDir."/public/$client/build", 0777, true, true);
+    $bar->advance();
+
+    //define if the front-end must be built in production mode or not
+    $envParam = $this->env === "production" || $this->env === "staging"? "--production": "";
+
+    $this->command->runCmd("cd ". $this->packAppDir."/public/$client/ && npm rebuild node-sass && gulp build $envParam");
+    $this->command->removeDir($this->packAppDir."/public/$client/node_modules");
+    $bar->advance();
+
+    // angular i18n use several files to be able to switch to several languages/cultures
+    // These files are only loaded when a user selects a language, so they all are not
+    // included in the minimized js and then it is needed to include the entire folder with its contents
+    if($this->command->checkDir("public/$client/node_modules/angular-i18n") === true){
+      File::makeDirectory($this->packAppDir."/public/$client/node_modules");
+      $this->command->copyDirFromApp("public/$client/node_modules/angular-i18n", $this->packAppDir."/public/$client/node_modules/");
+    }
+
+    $this->command->removeRecursivelyByPattern($this->packAppDir."/public/$client/", ".*");
+    $this->command->removeRecursivelyByPattern($this->packAppDir."/public/$client/", "*.example*");
+
+    // After compiling/minimizing every javascript in a single application.js,
+    // we can remove the sources js, they are not needed anymore to run the application
+    $this->command->removeFile(
+      [
+        $this->packAppDir."/public/$client/app/*.js",
+        $this->packAppDir."/public/$client/app/**/*.js",
+        $this->packAppDir."/public/$client/app/**/**/*.js",
+        $this->packAppDir."/public/$client/styles/*.scss",
+        $this->packAppDir."/public/$client/gulpfile.js",
+      ]
+    );
+
+    if($this->mustRemoveSamples === "true"){
+      $this->command->removeDir($this->packAppDir."/public/$client/app/samples");
+    }
+
+    // After removing javascript files as result maybe we have some empty folders, so we remove them
+    $this->RemoveEmptySubFolders($this->packAppDir."/public/$client");
+
+    $this->command->setWritePermission($this->packAppDir);
+    $bar->advance();
+    $bar->finish();
+
   }
 
   /**

@@ -9,8 +9,14 @@ variables:
   CI_DEBUG_SERVICES: trace
 
 before_script:
-- apt-get update -qq && apt-get install -y -qq git
+- apt-get update -qq && apt-get install -y -qq git && apt-get install -y -qq zip
 - git --version
+- cd public && git clone git@gitlab.com:drypack/front-end-admin.git admin && cd ..
+- cd public && git clone git@gitlab.com:drypack/front-end-client.git client && cd ..
+- curl -sL https://deb.nodesource.com/setup_6.x | bash - && apt-get update && apt-get install -y nodejs
+- npm install -g gulp gulp-cli gulp-babel babel-preset-es2015
+- cd public/admin && npm install && npm rebuild node-sass && cd ../..
+- cd public/client && npm install && npm rebuild node-sass && cd ../..
 - chmod 777 -R storage
 - chmod 777 -R storage/logs
 - chmod 777 -R package/app

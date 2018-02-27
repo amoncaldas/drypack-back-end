@@ -69,7 +69,7 @@ class LinuxCommands
         }
       } else {
         $source = base_path($source_s);
-        return exec("cp -r $source $dest | pv -e -t -a > /dev/null");
+        return exec("cp -r $source $dest > /dev/null");
       }
     }
 
