@@ -11,6 +11,7 @@ variables:
 before_script:
 - apt-get update -qq && apt-get install -y -qq git && apt-get install -y -qq zip
 - git --version
+- 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
 - cd public && git clone git@gitlab.com:drypack/front-end-admin.git admin && cd ..
 - cd public && git clone git@gitlab.com:drypack/front-end-client.git client && cd ..
 - curl -sL https://deb.nodesource.com/setup_6.x | bash - && apt-get update && apt-get install -y nodejs
