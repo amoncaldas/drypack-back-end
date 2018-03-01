@@ -69,8 +69,6 @@ class DeployPack extends Command
     $this->mustZip = !$this->option('no-zip');
     $this->mustRemoveSamples = $this->option('rm-samples');
 
-
-
     $steps = 5;
     if($this->mustZip === true){
         $steps++;
