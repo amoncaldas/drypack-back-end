@@ -6,7 +6,7 @@
     </head>
     <body>
         <div style="width: 100%; text-align:center; background-color:#fff; padding: 10px;">
-            <img src="{{$message->embed(public_path().'/admin/images/logo.png')}}" alt="logo"
+            <img src="{{$message->embed(resource_path().'/images/logo.png')}}" alt="logo"
                 style="max-width: 30%;">
             <hr>
             <div style="font-size: 20px;font-weight: bold;">

@@ -1,25 +1,45 @@
-image: php:7.0-fpm
-
+image: jguyomard/laravel-php:7.2
 services:
   - postgres:latest
 
 variables:
-  POSTGRES_DB: base
+  POSTGRES_DB: drypack_db
   POSTGRES_USER: runner
   POSTGRES_PASSWORD: ""
-
-cache:
-  paths:
-  - vendor/
+  CI_DEBUG_SERVICES: trace
 
 before_script:
-- bash ci/docker_install.sh > /dev/null
+- apk update -qq && apk add -u -qq git zip bash
+- apk add --update -u -qq nodejs nodejs-npm
+- npm install -g gulp gulp-cli gulp-babel babel-preset-es2015
 - chmod 777 -R storage
+- chmod 777 -R storage/logs
+- chmod 777 -R package/app
 - chmod 777 -R bootstrap/cache
 - rm .env.testing
 - cp .env.ci .env.testing
 - COMPOSER_PROCESS_TIMEOUT=2000 composer install
 
+cache:
+  paths:
+  - vendor/
+
+stages:
+  #- build
+  - test
+  #- deploy
+
 test:app:
+  stage: test
   script:
-  - phpunit --coverage-text --colors=never
+    - ./vendor/bin/phpunit --coverage-text --colors=never
+  only:
+    - develop
+  artifacts:
+    when: on_failure
+    paths:
+      - storage/logs
+
+
+
+

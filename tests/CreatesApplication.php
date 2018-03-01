@@ -3,7 +3,7 @@
 namespace Tests;
 
 use Illuminate\Contracts\Console\Kernel;
-
+use Illuminate\Support\Facades\Config;
 trait CreatesApplication
 {
     /**
@@ -19,6 +19,7 @@ trait CreatesApplication
 
         // All te mail sending is redirected to the log during tests
         $app->make('config')->set('mail.driver', 'log');
+
 
         $this->adminUserData = factory(\App\User::class)->states('admin-plain-password')->make()->getAttributes();
         $this->basicUserData = factory(\App\User::class)->states('basic-plain-password')->make()->getAttributes();
@@ -37,6 +38,10 @@ trait CreatesApplication
 
         \Artisan::call('migrate:reset', []);
         \Artisan::call('migrate', ['--seed' => true]);
+
+        // We just enable the audit in console mode after the seed,
+        //  so during the tests also run the audit code
+        $this->app->make('config')->set('audit.console', true);
     }
 }
 

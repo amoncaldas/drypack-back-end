@@ -118,8 +118,14 @@ class BaseModel extends Model implements AuditableContract
                 throw new BusinessException("The event $event is not listed as an auditable event in App\BaseModel property auditableEvents");
             }
 
-            sort($new_values);
-            sort($old_values);
+            try{
+              sort(json_decode(json_encode($new_values), true));
+            } catch(\Exception $ex) {/*silence is gold*/}
+
+            try{
+              sort(json_decode(json_encode($old_values), true));
+            } catch(\Exception $ex) {/*silence is gold*/}
+
 
             $foreignKey = Config::get('audit.user.foreign_key', 'user_id');
             $user = Auth::user();

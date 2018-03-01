@@ -94,6 +94,19 @@ class TasksController extends CrudController
     }
 
     /**
+     * After store a task, store an audit entry
+     *
+     * @param Request $request
+     * @param Model $task
+     * @return void
+     */
+    protected function afterStore(Request $request, Model $task)
+    {
+        // store the task change in the audit
+        $task->storeAudit('created', 'tasks', [], $task->toArray());
+    }
+
+    /**
      * Update the task status
      */
     public function toggleDone(Request $request)
@@ -101,6 +114,9 @@ class TasksController extends CrudController
         $task = Task::find($request->id);
 
         $this->validate($request, ['done' => 'required']);
+
+        // store the task change in the audit
+        $task->storeAudit('updated', 'tasks', ["done"=>$task->done], ["done"=>$request->done]);
 
         $task->done = $request->done;
 

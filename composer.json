@@ -11,8 +11,9 @@
     "php": "~7.0",
     "appzcoder/crud-generator": "^1.2",
     "arcanedev/log-viewer": "~4.3",
-    "guzzlehttp/guzzle": "^6.3",
     "doctrine/dbal": "^2.5",
+    "guzzlehttp/guzzle": "^6.3",
+    "laravel/envoy": "1.4.0",
     "laravel/framework": "~5.5.13",
     "laravel/tinker": "~1.0",
     "laravelcollective/html": "^5.5",
@@ -20,8 +21,7 @@
     "owen-it/laravel-auditing": "~5.0.0",
     "phpunit/phpunit": "~6.0.5",
     "ragingdave/flysystem-sftp-laravel": "^1.0",
-    "tymon/jwt-auth": "1.0.0-rc.1",
-    "laravel/envoy": "1.4.0"
+    "tymon/jwt-auth": "1.0.0-rc.1"
   },
   "require-dev": {
     "barryvdh/laravel-debugbar": "^2.3",

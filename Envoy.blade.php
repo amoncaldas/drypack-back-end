@@ -1,22 +1,15 @@
-@servers(['staging' => ['user@host'], 'development' => ['user@host'], 'production' => ['user@host']])
+@setup
+    $migrate = isset($migrate) ? "-migrate" : "";
+    $seed = isset($seed) ? "-s" : "";
+    $target = isset($target) ? $target : "user@host";
+@endsetup
 
-@task('install', ['on' => $env, 'confirm' => false])
-    cd /path/to/project/root/dir
-    sh install.sh
+@servers(['server' => [$target]])
+
+@task('install', ['on' => 'server', 'confirm' => false])
+    cd /path/to/app/root/folder/on/the/server
+    sh install.sh {{$migrate}} {{$seed}}
 @endtask
 
-@task('migrate', ['on' => $env, 'confirm' => false])
-    docker exec -it --user root dry_app_server bash
-    cd /var/www
-    php artisan migrate
-    exit
-@endtask
-
-@task('seed', ['on' => $env, 'confirm' => false])
-    docker exec -it --user root dry_app_server bash
-    cd /var/www
-    php artisan seed
-    exit
-@endtask
 
 

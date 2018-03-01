@@ -4,15 +4,22 @@ networks:
   drypack_net:
     driver: bridge
 services:
+  php:
+    image: jguyomard/laravel-php:7.2
+    container_name: dry_php_server
+    networks:
+      - drypack_net
+    volumes:
+      - ./:/var/www
   drypack_web:
-    image: ttaranto/docker-nginx-php7
-    container_name: dry_app_server
+    image: jguyomard/laravel-nginx:1.13
+    container_name: dry_web_server
+    volumes:
+      - ./:/var/www
     networks:
       - drypack_net
     ports:
       - 8081:80
-    volumes:
-      - ./:/var/www
   drypack_db:
     image: mdillon/postgis # can be also only 'postgres'
     container_name: dry_db_server

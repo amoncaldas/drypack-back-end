@@ -79,12 +79,12 @@ return [
             'bucket' => env('AWS_BUCKET'),
         ],
         'ftp' => [
-            'driver'    => env('DRIVER','ftp'), // can be ftp or sftp
+            'driver'    => env('FTP_FILESYSTEM', env('DRIVER','ftp')), // can be ftp or sftp
             'host'      => env('FTP_HOST','ftp.tld'),
             'port'      => env('FTP_PORT', 22),
             'username'  => env('FTP_USER','ftp-user'),
             'password'  => env('FTP_PASSWD','ftp-password'),
-            'root'      => env('FTP_ROOT','./'),
+            'root'      => env('FTP_FILESYSTEM_ROOT', env('FTP_ROOT','./')),
             'passive'   => env('FTP_PASSIVE',false),
             'ssl'       => env('FTP_SSL',false),
             'timeout'   => env('FTP_TIMEOUT',30),
