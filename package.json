@@ -9,7 +9,7 @@
         "build": "gulp --gulpfile public/admin/gulpfile.js && gulp --gulpfile public/client/gulpfile.js",
         "reset-actions": "php artisan db:seed --class=ActionsSeeder",
         "seed-users-roles": "php artisan db:seed --class=UsersAndRolesSeeder",
-        "check": "gulp --gulpfile public/admin/gulpfile.js check",
+        "check": "gulp --gulpfile public/admin/gulpfile.js check && gulp --gulpfile public/client/gulpfile.js check",
         "webdriver": "webdriver-manager start",
         "e2e-test": "sh scripts/e2e-test.sh",
         "php-test": "sh scripts/php-test.sh"

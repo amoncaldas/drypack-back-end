@@ -21,7 +21,6 @@ This project is based in Laravel, a collection of community and custom component
 - [Automated tests](#automated-tests)
 - [Get new features and updates from DryPack](#get-new-features-and-updates-from-drypack)
 - [Log viewer](#log)
-- [Generate production package](#generate-production-package)
 - [Scripts and commands](#scripts-and-commands)
 - [Development](#development)
   - [Internationalization](#internationalization)
@@ -267,34 +266,6 @@ To see the logs in the developer viewer
 - Go to [http://localhost:5000/developer/log-viewer](http://localhost:5000/developer/log-viewer)
 - Type the username and password according what is in the .env DEVELOPER_ID and DEVELOPER
 
-## Generate production package ##
-
-- Set the data in **.env.environment-name** with the right configuration/credentials (pkg_name, database, smtp, log level, ftp and etc) and disable the debug.
-- Run the following command:
-
-```sh
-# remember, it is needed to be in the docker bash
-# to run this command if you are using Docker
-# to go inside the container run: "docker exec -it --user root drypack-container bash"
-
-# remember of adjusting the .env with the right credentials*
-cd {project_root_folder}
-npm run package
-```
-
-- This command do the following:
-  - prepares the application to run in the informed environment, minifying the js and css and updating the index.html to point to the generated files.
-  - generates the zipped package placing it in package/**appPack.zip**.
-  - Ask if you want send it to a FTP server
-    - If yes:
-      - Send the package according the environment passed via command option (the environment credentials must be setted in config/filesystems.php)
-      - Unzip it on the server
-      - The package will be removed from the FTP and from the project root folder
-      - Remove the package from the FTP and local file system
-      - open the default browser in the url set in APP_URL in the .env
-    - If not:
-      - Keep the **appPack.zip**. in the package root folder
-
 ## Scripts and commands ##
 
 - All the scripts and commands must be ran in the project root folder
@@ -350,6 +321,13 @@ en-US, but you can also change it.
   - add the desired locale in the *locales* array in *public/admin/app/app.global.js*
   - create a folder in *public/admin/app/i18n* with the identification of your locale (eg.:de-DE)
   - copy the all the files from *public/admin/app/i18n/en-US* to your new locale folder
+  - open each file copied in your new folder and replace en-US in 'en-US.i18n.' by your locale id, like 'de-DE.i18n.'
+  - open each file copied in your new folder and translate the contents
+
+- *In the front-end client*:
+  - add the desired locale in the *locales* array in *public/client/app/app.global.js*
+  - create a folder in *public/client/app/i18n* with the identification of your locale (eg.:de-DE)
+  - copy the all the files from *public/client/app/i18n/en-US* to your new locale folder
   - open each file copied in your new folder and replace en-US in 'en-US.i18n.' by your locale id, like 'de-DE.i18n.'
   - open each file copied in your new folder and translate the contents
 
@@ -489,12 +467,14 @@ The definitions about the actions available for each resource is stored in confi
 To do it, run:
 
 ```php
+# in the docker container prompt:
 npm run reset-actions
 ```
 
 If you want to redefine the default user actions/roles, run:
 
 ```php
+# in the docker container prompt:
 npm run seed-users-roles
 ```
 
@@ -629,6 +609,7 @@ The DryPack comes with a deploy command line utility that allows to build/pack/s
 with a single command!
 
 ```sh
+# in the docker container prompt:
 artisan deploy --env=development --install --migrate --seed
 # this will build, pack, deploy, install, run migrations and seed on the development environment
 ```
@@ -640,12 +621,14 @@ Full list of commands and options:
 * Build and pack the application
 
   ```sh
+  # in the docker container prompt:
   deploy:pack {--no-zip} {--rm-samples}
   # both options are boolean, so, you don't need to pass a value
   ```
 * Send
 
   ```sh
+  # in the docker container prompt:
   deploy:send {--single-file=}
   # without options send the default set of files to install on a remote server, 
   # with --single-file option allow to send a specific file to the server
@@ -654,6 +637,7 @@ Full list of commands and options:
 * Build, pack, send and install
 
   ```sh
+  # in the docker container prompt:
   deploy {--no-zip} {--send} {--install} {--rm-samples} {--migrate} {--seed}
   # Internally the deploy command calls the deploy:pack and deploy:send and also
   # run the installer remotely, using Laravel envoy 
@@ -676,3 +660,7 @@ Full list of commands and options:
 - [Code snippets](docs/code-snippets.md)
 - [Commands](docs/commands.md)
 - [Common errors](docs/common-errors.md)
+- [How to add a key to a remote server](docs/add-key-remote-ssh.md)
+- [Configure reverse proxy on apache](docs/configure-apache-reverse-proxy.md)
+- [Configure e-mail sending](docs/configure-email-sending.md)
+- [Configure sftp](docs/configure-sftp.md)
