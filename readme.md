@@ -652,6 +652,7 @@ Full list of commands and options:
   ```
 
 * Build, pack, send and install
+
   ```sh
   deploy {--no-zip} {--send} {--install} {--rm-samples} {--migrate} {--seed}
   # Internally the deploy command calls the deploy:pack and deploy:send and also

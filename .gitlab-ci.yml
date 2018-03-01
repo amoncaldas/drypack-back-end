@@ -33,8 +33,6 @@ test:app:
   stage: test
   script:
     - ./vendor/bin/phpunit --coverage-text --colors=never
-  only:
-    - develop
   artifacts:
     when: on_failure
     paths:
