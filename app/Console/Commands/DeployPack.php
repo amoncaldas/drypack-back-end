@@ -64,17 +64,10 @@ class DeployPack extends Command
       $this->error("\n".'To generate the package it is necessary to inform the target environment, like --env=development, --env=staging or --env=production'."\n");
       return;
     }
-<<<<<<< HEAD
-    $this->envFile = $this->env === null? ".env": ".env.".$this->env;
-    $this->mustZip = $this->option('zip');
-=======
 
     $this->envFile = $this->env === null? ".env": ".env.".$this->env;
     $this->mustZip = !$this->option('no-zip');
->>>>>>> develop
     $this->mustRemoveSamples = $this->option('rm-samples');
-
-
 
     $steps = 5;
     if($this->mustZip === true){
