@@ -12,11 +12,7 @@ class DeploySend extends Command
      *
      * @var string
      */
-<<<<<<< HEAD
-    protected $signature = 'deploy:send {--only-setup-files=false}';
-=======
     protected $signature = 'deploy:send {--single-file=}';
->>>>>>> develop
 
     /**
      * The console command description.
@@ -38,17 +34,10 @@ class DeploySend extends Command
       $this->deployStorage = Storage::disk('deploy');
       $this->scriptStorage = Storage::disk('scripts');
       $this->ftpStorage = Storage::disk('ftp');
-<<<<<<< HEAD
-
-      $this->zipPackFileName = "appPack.zip";
-      $this->installerFileName = "install.php";
-      $this->dockerFileName = "Dockerfile";
-=======
       $this->rootStorage = Storage::disk('root');
 
       $this->zipPackFileName = "appPack.zip";
       $this->installerFileName = "install.sh";
->>>>>>> develop
       $this->dockerInstallScript = "install-docker.sh";
       $this->dockerComposeFileName = "docker-compose.yml";
     }
