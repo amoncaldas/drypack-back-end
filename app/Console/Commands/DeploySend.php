@@ -70,49 +70,6 @@ class DeploySend extends Command
     * @return void
     */
     protected function send(){
-<<<<<<< HEAD
-      if(env("FTP_HOST") == "ftp.tld" || env("FTP_USER") == "ftp-user" || env("FTP_PASSWD") == "ftp-password") {
-        $this->error("\n".'To send the package to the '.$this->env.' environment you must set the FTP/SFTP credentials in the .env.'.$this->env.' file'."\n");
-        return;
-      }
-      else {
-        $this->info("\n\n".'Sending to '.$this->env.' server at '.env("FTP_HOST")." ...\n");
-
-        try{
-          // Send only environment setup files
-          if($this->onlySetupFiles === "true"){
-            if($this->ftpStorage->put($this->dockerFileName, $this->deployStorage->get($this->dockerFileName)) === false){
-              $this->sendingError($this->dockerFileName);
-              return;
-            }
-            if($this->ftpStorage->put($this->dockerInstallScript, $this->scriptStorage->get($this->dockerInstallScript)) === false){
-              $this->sendingError($this->dockerInstallScript);
-              return;
-            }
-            if($this->ftpStorage->put($this->dockerComposeFileName, $this->deployStorage->get($this->dockerComposeFileName)) === false){
-              $this->sendingError($this->dockerComposeFileName);
-              return;
-            }
-
-            $this->sendSetupSuccess();
-
-          } else { // sent package and installer file
-            $i = $this->deployStorage->get($this->installerFileName);
-            if($this->ftpStorage->put($this->installerFileName, $this->deployStorage->get($this->installerFileName)) === false){
-              $this->sendingError($this->installerFileName);
-              return;
-            }
-            if($this->ftpStorage->put($this->zipPackFileName, $this->packageStorage->get($this->zipPackFileName)) === false){
-              $this->sendingError($this->zipPackFileName);
-              return;
-            }
-            $this->info("\n\n".':::: PACKAGE SENT! ::::'."\n");
-          }
-        } catch(\Exception $ex){
-          $this->error($ex->getMessage());
-        }
-      }
-=======
       $this->info("\n\n".'Sending to '.$this->env.' server at '.env("FTP_HOST")." ...\n");
 
       try{
