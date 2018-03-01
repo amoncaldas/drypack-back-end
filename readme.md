@@ -33,6 +33,7 @@ This project is based in Laravel, a collection of community and custom component
   - [Easy CRUD](#easy-crud)
   - [Attributes format](attributes-format)
   - [Making a specific validation](making-a-specific-validation)
+- [Deploy](#deploy)
 - [Contributing to the DryPack](#contributing-to-the-drypack)
 - [Additional READMEs](#additional-readmes)
 
@@ -42,6 +43,7 @@ It is included in the DryPack the following features:
 
 - Based on [Laravel 5.5.*](https://laravel.com/docs/5.5)
 - One single command to setup the whole solution!
+- One single command to deploy the whole solution!
 - AngularJS 1.6.4 framework in the front-ends (admin and public client)
 - For authentication it is used [JWT](http://jwt.io) with the component [tymon/jwt-auth](https://github.com/tymondesigns/jwt-auth)
 - Docker Container with all the requirements and ready to use - see [PHP Docker](docker/readme.md);
@@ -620,9 +622,45 @@ At any action in the CrudController it is possible to add specific validations r
   }
 ```
 
+## Deploy ##
+
+The DryPack comes with a deploy command line utility that allows to build/pack/send/install the application
+with a single command!
+
+```sh
+artisan deploy --env=development --install --migrate --seed
+# this will build, pack, deploy, install, run migrations and seed on the development environment
+```
+
+**Important:** to be able to to deploy, it is necessary to define the the FTP credentials, DEPLOY_TARGET server in the corresponding .env file (like env.development or env.production) and correct app root folder on the remote server in the fle [Envoy.blade.php](Envoy.blade.php)
+
+Full list of commands and options:
+
+* Build and pack the application
+
+  ```sh
+  deploy:pack {--no-zip} {--rm-samples}
+  # both options are boolean, so, you don't need to pass a value
+  ```
+* Send
+
+  ```sh
+  deploy:send {--single-file=}
+  # without options send the default set of files to install on a remote server, 
+  # with --single-file option allow to send a specific file to the server
+  ```
+
+* Build, pack, send and install
+  ```sh
+  deploy {--no-zip} {--send} {--install} {--rm-samples} {--migrate} {--seed}
+  # Internally the deploy command calls the deploy:pack and deploy:send and also
+  # run the installer remotely, using Laravel envoy 
+  ```
+
+
 ## Contributing to the DryPack ##
 
-- Access the [How to contribute with the DryPack](/docs/how-to-contribute.md)
+- Access the doc [How to contribute with the DryPack](/docs/how-to-contribute.md)
 
 ## Additional READMEs ##
 

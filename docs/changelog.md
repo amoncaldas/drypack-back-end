@@ -7,7 +7,7 @@
 - Added single command script for configure contribute mode
 - Added live multi language
 - Upgraded to Audit 5.0
-- Comments and docs in english
+- Comments and docs in English
 - Changed external lib to ng-c2
 - Updated Laravel to 5.5
 - Updated Laravel Audit to 4.1
@@ -25,5 +25,6 @@
 - CORS handling;
 - Gulp minification tasks;
 - Structure for automated unit tests and e2e(end to end);
-- Complete environment automation with Dockerfile
+- Complete environment automation with Dockerfile and docker-compose
 - Automated testes written, covering 90% of the back-end;
+- Added single command deploy solution
