@@ -134,18 +134,6 @@ class DeploySend extends Command
       $this->info("\n\n".'You can now access the server via ssh and run "sh '.$this->installerFileName.' to finish the instalation.'."\n");
     }
 
-
-    /**
-     * Print an error message in case that a file can not be sent
-     *
-     * @param string $fileName
-     * @return void
-     */
-    protected function sendingError($fileName){
-        $this->error("\n".'The file '.$fileName.' could not be sent. Sending aborted.'."\n");
->>>>>>> develop
-    }
-
     /**
      * Print an error message in case that a file can not be sent
      *
