@@ -71,6 +71,7 @@ It is included in the DryPack the following features:
 - Integration with [Angular Client](https://gitlab.com/drypack/front-end-client);
 - Integration with [C2YoGenerator](git@gitlab.com:drypack/c2yogenerator.git);
 - Code well documented and READMEs
+- Gitlab CI integration to auto test the application
 
 ## Requirements ##
 

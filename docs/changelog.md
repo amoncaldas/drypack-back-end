@@ -28,3 +28,4 @@
 - Complete environment automation with Dockerfile and docker-compose
 - Automated testes written, covering 90% of the back-end;
 - Added single command deploy solution
+- Gitlab CI integration to auto test the application
