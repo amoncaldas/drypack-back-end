@@ -1,21 +1,25 @@
 FROM debian:stretch
 ENV DEBIAN_FRONTEND noninteractive
 
-# Install packages.
+RUN apt-get update && apt-get install apt-transport-https lsb-release ca-certificates wget -y
+RUN wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
+RUN sh -c 'echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list'
 RUN apt-get update
-RUN apt-get install -y \
+
+# Install packages.
+RUN apt-get update && apt-get install -y \
 	nano \
 	git \
-	php7.0 \
-	php7.0-cli \
-  php7.0-mbstring \
-	php7.0-sqlite3 \
-  php7.0-xml \
-	php7.0-gd \
-	php7.0-curl \
-	php7.0-fpm \
+	php7.2 \
+	php-cli \
+  php-mbstring \
+	php-sqlite3 \
+  php-xml \
+	php-gd \
+	php-curl \
+	php-fpm \
 	php-xdebug \
-	php7.0-pgsql \
+	php-pgsql \
 	curl \
 	wget \
 	zip \
@@ -90,8 +94,8 @@ ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
 # Setup PHP.
-RUN sed -i 's/display_errors = Off/display_errors = On/' /etc/php/7.0/cli/php.ini
-RUN sed -i 's/short_open_tag = Off/short_open_tag = On/' /etc/php/7.0/cli/php.ini
+RUN sed -i 's/display_errors = Off/display_errors = On/' /etc/php/7.2/cli/php.ini
+RUN sed -i 's/short_open_tag = Off/short_open_tag = On/' /etc/php/7.2/cli/php.ini
 
 # Setup Supervisor.
 RUN echo '[program:postgresql]\ncommand=/usr/lib/postgresql/9.5/bin/postgres -D /var/lib/postgresql/9.5/main -c config_file=/etc/postgresql/9.5/main/postgresql.conf\nuser=postgres\nautorestart=true\n\n' >> /etc/supervisor/supervisord.conf
@@ -99,10 +103,10 @@ RUN echo '[program:sshd]\ncommand=/usr/sbin/sshd -D\n\n' >> /etc/supervisor/supe
 RUN echo '[program:cron]\ncommand=cron -f\nautorestart=false \n\n' >> /etc/supervisor/supervisord.conf
 
 # Setup XDebug.
-RUN echo "xdebug.max_nesting_level = 300" >> /etc/php/7.0/cli/conf.d/20-xdebug.ini
-RUN echo "xdebug.remote_enable = 1" >> /etc/php/7.0/cli/conf.d/20-xdebug.ini
-RUN echo "xdebug.remote_autostart = 1" >> /etc/php/7.0/cli/conf.d/20-xdebug.ini
-RUN echo "xdebug.remote_host=172.17.0.1" >> /etc/php/7.0/cli/conf.d/20-xdebug.ini
+RUN echo "xdebug.max_nesting_level = 300" >> /etc/php/7.2/cli/conf.d/20-xdebug.ini
+RUN echo "xdebug.remote_enable = 1" >> /etc/php/7.2/cli/conf.d/20-xdebug.ini
+RUN echo "xdebug.remote_autostart = 1" >> /etc/php/7.2/cli/conf.d/20-xdebug.ini
+RUN echo "xdebug.remote_host=172.17.0.1" >> /etc/php/7.2/cli/conf.d/20-xdebug.ini
 
 # Install Composer.
 RUN curl -sS https://getcomposer.org/installer | php
@@ -117,8 +121,7 @@ RUN curl -sL https://deb.nodesource.com/setup_6.x | bash - && \
 	apt-get install -y nodejs
 
 # Install Node packages.
-RUN npm install -g serve gulp gulp-cli yo generator-karma karma \
-angular-animate angular-aria angular-material angular angular-messages @uirouter/angular @angular/core @angular/common angular-route @angular/router gulp-babel babel-preset-es2015 \
+RUN npm install -g serve gulp gulp-cli gulp-babel babel-preset-es2015 \
 eslint eslint-plugin-angular protractor protractor-console generator-angular @angular/platform-browser webdriver-manager
 
 EXPOSE 5432 443
