@@ -18,5 +18,6 @@ class TestCase extends BaseTestCase
     public function __construct()
     {
         $this->faker = \Faker\Factory::create();
+        parent::__construct();
     }
 }
