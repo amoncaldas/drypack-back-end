@@ -8,7 +8,7 @@ public/admin
 package/appPack.zip
 package/app/*
 !package/app/.gitkeep
-deploy/virtual_temp
+deploy/virtual_temp/
 
 # Laravel
 storage/framework/cache/data/*

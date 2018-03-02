@@ -4,14 +4,11 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use App\Console\Commands\LinuxCommands;
-use Illuminate\Support\Facades\App;
+//use Illuminate\Support\Facades\App;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Filesystem\FilesystemManager;
-use Psr\Http\Message\ResponseInterface;
-use GuzzleHttp\Exception\RequestException;
 
 class DeployPack extends Command
 {
@@ -69,8 +66,6 @@ class DeployPack extends Command
     $this->mustZip = !$this->option('no-zip');
     $this->mustRemoveSamples = $this->option('rm-samples');
 
-
-
     $steps = 5;
     if($this->mustZip === true){
         $steps++;
@@ -81,17 +76,7 @@ class DeployPack extends Command
     $this->resetPackDirs();
     $this->clearApp();
     $this->copyBackendFiles();
-
-    if ($this->command->checkDir("public/client") === true) {
-        $this->copyAndBuildFrontend("client");
-    }else {
-        $this->info("\n\n".'Client front-end not present, skeeping include it in the pack '."\n");
-    }
-    if ($this->command->checkDir("public/admin") === true) {
-        $this->copyAndBuildFrontend("admin");
-    } else {
-      $this->info("\n\n".'Admin front-end not present, skeeping include it in the pack '."\n");
-    }
+    $this->extractFrontEnds();
 
     if($this->mustZip === true){
       $this->zip();
@@ -101,6 +86,42 @@ class DeployPack extends Command
       $this->info("\n\n".'See package folder at '.$this->packAppDir."\n");
     }
     $this->info("\n\n".':::: PACKAGE GENERATED! ::::'."\n");
+  }
+
+  /**
+   * Extract front ends and store it on the pack folder
+   *
+   * @return void
+   */
+  protected function extractFrontEnds(){
+    if ($this->command->checkDir("public/client") === true) {
+      $this->call(
+          "deploy:front-end",
+          [
+            "--client"=>"client",
+            "--strategy"=>"angular1",
+            "--out-folder"=>$this->packAppDir,
+            "--env"=>$this->env
+          ]
+      );
+    }else {
+      $this->info("\n\n".'Client front-end not present, skeeping include it in the pack '."\n");
+    }
+
+    if ($this->command->checkDir("public/admin") === true) {
+      $this->call(
+        "deploy:front-end",
+        [
+          "--client"=>"admin",
+          "--strategy"=>"angular1",
+          "--out-folder"=>$this->packAppDir,
+          "--env"=>$this->env
+        ]
+      );
+
+    } else {
+      $this->info("\n\n".'Admin front-end not present, skeeping include it in the pack '."\n");
+    }
   }
 
   /**
@@ -203,71 +224,6 @@ class DeployPack extends Command
     $bar->finish();
   }
 
-  /**
-   * Copy front-end files to temp package dir
-   *
-   * @param string $client (client|admin)
-   * @return void
-   */
-  protected function copyAndBuildFrontend($client){
-    $this->info("\n\n".'Building and copying '.$client.' front-end files...'."\n");
-
-    $bar = $this->output->createProgressBar(3);
-
-    $result = $this->command->checkFile("public/$client/gulpfile.js");
-    if($result !== true){
-      $this->exitError("The directory ($result) was not found. It is not possible to continue.");
-    }
-
-    File::makeDirectory($this->packAppDir."/public/$client/", 0777, true, true);
-    $this->command->copyDirFromApp(["public/$client/app", "public/$client/images", "public/$client/styles"], $this->packAppDir."/public/$client");
-    $this->command->copyFileFromApp(["public/$client/gulpfile.js", "public/$client/index.html", "public/$client/paths.json"], $this->packAppDir."/public/$client");
-    $this->command->createPackSymLink("public/$client/node_modules", $this->packAppDir);
-    File::makeDirectory($this->packAppDir."/public/$client/build", 0777, true, true);
-    $bar->advance();
-
-    //define if the front-end must be built in production mode or not
-    $envParam = $this->env === "production" || $this->env === "staging"? "--production": "";
-
-    $this->command->runCmd("cd ". $this->packAppDir."/public/$client/ && npm rebuild node-sass >> /dev/null 2>&1 && gulp build $envParam >> /dev/null 2>&1");
-    $this->command->removeDir($this->packAppDir."/public/$client/node_modules");
-    $bar->advance();
-
-    // angular i18n use several files to be able to switch to several languages/cultures
-    // These files are only loaded when a user selects a language, so they all are not
-    // included in the minimized js and then it is needed to include the entire folder with its contents
-    if($this->command->checkDir("public/$client/node_modules/angular-i18n") === true){
-      File::makeDirectory($this->packAppDir."/public/$client/node_modules");
-      $this->command->copyDirFromApp("public/$client/node_modules/angular-i18n", $this->packAppDir."/public/$client/node_modules/");
-    }
-
-    $this->command->removeRecursivelyByPattern($this->packAppDir."/public/$client/", ".*");
-    $this->command->removeRecursivelyByPattern($this->packAppDir."/public/$client/", "*.example*");
-
-    // After compiling/minimizing every javascript in a single application.js,
-    // we can remove the sources js, they are not needed anymore to run the application
-    $this->command->removeFile(
-      [
-        $this->packAppDir."/public/$client/app/*.js",
-        $this->packAppDir."/public/$client/app/**/*.js",
-        $this->packAppDir."/public/$client/app/**/**/*.js",
-        $this->packAppDir."/public/$client/styles/*.scss",
-        $this->packAppDir."/public/$client/gulpfile.js",
-      ]
-    );
-
-    if($this->mustRemoveSamples === "true"){
-      $this->command->removeDir($this->packAppDir."/public/$client/app/samples");
-    }
-
-    // After removing javascript files as result maybe we have some empty folders, so we remove them
-    $this->RemoveEmptySubFolders($this->packAppDir."/public/$client");
-
-    $this->command->setWritePermission($this->packAppDir);
-    $bar->advance();
-    $bar->finish();
-
-  }
 
   /**
    * Zip the package dir
@@ -297,19 +253,5 @@ class DeployPack extends Command
     $bar->finish();
   }
 
-  /**
-   * Remove empty sub folders from a folder
-   *
-   * @param string $path
-   * @return void
-   */
-  protected function RemoveEmptySubFolders($path)
-  {
-    $empty=true;
-    foreach (glob($path.DIRECTORY_SEPARATOR."*") as $file)
-    {
-      $empty &= is_dir($file) && !is_link($file) && $this->RemoveEmptySubFolders($file);
-    }
-    return $empty &&  rmdir($path);
-  }
+
 }

@@ -41,9 +41,8 @@ rm install.sh
 docker-compose up -d
 
 # the migration is not ran automatically
-# docker exec -it --user root dry_app_server /bin/sh -c "cd /var/www && php artisan migrate --seed"
 
-docker exec -it --user root dry_app_server /bin/sh -c 'echo "* * * * * php /var/www schedule:run >> /dev/null 2>&1" | crontab -'
+docker exec --user root dry_php_server /bin/sh -c 'echo "* * * * * php /var/www schedule:run >> /dev/null 2>&1" | crontab -'
 
 printf 'Waiting the server to be alive...\n'
 until $(curl --output /dev/null --silent --head --fail http://localhost:8080); do
@@ -55,13 +54,18 @@ printf 'Server is now alive!\n'
 
 if [ $MIGRATE = true ]
 then
-  docker exec --user root dry_app_server /bin/sh -c "cd /var/www && php artisan migrate"
+  docker exec --user root dry_php_server /bin/sh -c "cd /var/www && php artisan migrate"
 fi
 
 if [ $SEED = true ]
 then
-  docker exec --user root dry_app_server /bin/sh -c "cd /var/www && php artisan db:seed"
+  docker exec --user root dry_php_server /bin/sh -c "cd /var/www && php artisan db:seed"
 fi
+
+# Be aware that the deploy task when ran using artisan deploy checks this printed string below
+# to determine if the installation succeeded. If you change this message, make sure to update the
+# app/Console/Commands/Deploy.php on the deploy method.
+printf 'Installation succeeded!\n'
 
 
 
