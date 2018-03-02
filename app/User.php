@@ -237,7 +237,7 @@ class User extends BaseModel implements AuthenticatableContract, CanResetPasswor
      *
      * @return int $id
      */
-    public static function resolveId() {
+    public static function resolve() {
         $user = \Auth::user();
         if(isset($user)) {
             return $user->id;
