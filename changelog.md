@@ -1,7 +1,10 @@
 # Changelog #
 
-0.1.0 (development)
+1.0.0.beta (development)
 
+- Upgraded to Audit 6.0
+- Updated Laravel to 5.6
+- Updated JWT to 1.0.0-rc.2
 - Added pack, deploy, install via ftp/sftp artisan command
 - Added single command line project/environment configure script
 - Added single command script for configure contribute mode
@@ -21,7 +24,7 @@
 - Administration in /admin
 - Public site in /client
 - Gitlab continuous integration configuration
-- PHPUnit version 6;
+- PHPUnit version 7;
 - CORS handling;
 - Gulp minification tasks;
 - Structure for automated unit tests and e2e(end to end);

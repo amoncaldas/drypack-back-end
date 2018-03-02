@@ -36,11 +36,10 @@ trait CreatesApplication
     {
         parent::setUp();
 
-        \Artisan::call('migrate:reset', []);
-        \Artisan::call('migrate', ['--seed' => true]);
+        \Artisan::call('migrate:fresh', ['--seed' => true]);
 
         // We just enable the audit in console mode after the seed,
-        //  so during the tests also run the audit code
+        // so during the tests also run the audit code
         $this->app->make('config')->set('audit.console', true);
     }
 }

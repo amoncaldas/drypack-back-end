@@ -15,7 +15,8 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         \App\Console\Commands\DeployPack::class,
         \App\Console\Commands\DeploySend::class,
-        \App\Console\Commands\Deploy::class,
+        \App\Console\Commands\DeployRun::class,
+        \App\Console\Commands\DeployFrontEnd::class,
         \Laravelista\LumenVendorPublish\VendorPublishCommand::class,
     ];
 

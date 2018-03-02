@@ -1,12 +1,14 @@
 ### Composer ###
 composer.phar
 vendor/
+
+# Custom
 public/client
 public/admin
 package/appPack.zip
 package/app/*
 !package/app/.gitkeep
-deploy/virtual_temp
+deploy/virtual_temp/
 
 ### Resources ###
 node_modules/

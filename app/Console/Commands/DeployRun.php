@@ -4,21 +4,21 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 
-class Deploy extends Command
+class DeployRun extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'deploy {--no-zip} {--send} {--install} {--rm-samples} {--migrate} {--seed}';
+    protected $signature = 'deploy:run {--no-zip} {--send} {--install} {--rm-samples} {--migrate} {--seed}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Runs the deploy on a target environment';
+    protected $description = 'Runs the full deploy (build, pack, send and install) on a target environment';
 
     /**
      * Create a new command instance.

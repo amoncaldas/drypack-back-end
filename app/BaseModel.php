@@ -133,7 +133,7 @@ class BaseModel extends Model implements AuditableContract
             $data = $this->transformAudit([
                 'auditable_id'   => $this->getKey(),
                 'auditable_type' => $this->getMorphClass(),
-                $foreignKey      => $user->resolveId(),
+                $foreignKey      => $user->resolve(),
                 'url'            => Request()->fullUrl(),
                 'ip_address'     => Request()->ip(),
                 'user_agent'     => Request()->header('User-Agent'),
