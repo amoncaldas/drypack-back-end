@@ -6,7 +6,7 @@ public/admin
 package/appPack.zip
 package/app/*
 !package/app/.gitkeep
-deploy/virtual_temp
+deploy/virtual_temp/
 
 ### Resources ###
 node_modules/

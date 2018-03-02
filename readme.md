@@ -610,21 +610,32 @@ with a single command!
 
 ```sh
 # in the docker container prompt:
-artisan deploy --env=development --install --migrate --seed
+artisan deploy:run --env=development --install --migrate --seed
 # this will build, pack, deploy, install, run migrations and seed on the development environment
 ```
 
-**Important:** to be able to to deploy, it is necessary to define the the FTP credentials, DEPLOY_TARGET server in the corresponding .env file (like env.development or env.production) and correct app root folder on the remote server in the fle [Envoy.blade.php](Envoy.blade.php)
+**Important:** to be able to to deploy, it is necessary to define the the FTP credentials, DEPLOY_TARGET server in the corresponding .env file (like env.development or env.production), set the app root folder on the remote server in the fle [Envoy.blade.php](Envoy.blade.php) and [add your ssh key on the remote server](#add-key-remote-ssh.md)
 
 Full list of commands and options:
 
-* Build and pack the application
+* Build and pack the application (back and front-end)
 
   ```sh
   # in the docker container prompt:
   deploy:pack {--no-zip} {--rm-samples}
-  # both options are boolean, so, you don't need to pass a value
+  # both options are boolean, so, you don't need to pass a value  
+  # The default --strategy used by deploy:run to build the font-ends is "angular1"
   ```
+
+* Extract/build only a front-end
+
+  ```sh
+  # in the docker container prompt:
+  deploy:front-end {--client=} {--strategy=} {--env=} {--out-folder=} {--rm-samples}
+  # example:
+  # deploy:front-end --client=admin --strategy=angular1 --env=development --out-folder=package/app
+  ```
+
 * Send
 
   ```sh
@@ -634,13 +645,14 @@ Full list of commands and options:
   # with --single-file option allow to send a specific file to the server
   ```
 
-* Build, pack, send and install
+* Build, pack, send and install (back and front-end)
 
   ```sh
   # in the docker container prompt:
-  deploy {--no-zip} {--send} {--install} {--rm-samples} {--migrate} {--seed}
+  deploy:run {--no-zip} {--send} {--install} {--rm-samples} {--migrate} {--seed}
   # Internally the deploy command calls the deploy:pack and deploy:send and also
-  # run the installer remotely, using Laravel envoy 
+  # run the installer remotely, using Laravel envoy
+  # The default --strategy used by deploy:run to build the font-ends is "angular1"
   ```
 
 

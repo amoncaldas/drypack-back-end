@@ -5,6 +5,7 @@ namespace Tests\Unit;
 use Tests\TestCase;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Artisan;
 
 class DeployTest extends TestCase
 {
@@ -14,7 +15,7 @@ class DeployTest extends TestCase
      */
     public function testGenerateAppPack()
     {
-        \Artisan::call('deploy:pack', ['--env' => "testing", "--no-zip"=> true]);
+        Artisan::call('deploy:pack', ['--env' => "testing", "--no-zip"=> true]);
         $appFiles = Storage::disk('package')->files('app');
         $this->assertGreaterThanOrEqual(10, $appFiles);
     }
@@ -24,7 +25,7 @@ class DeployTest extends TestCase
      */
     public function testGenerateAppPackWithoutSamples()
     {
-        \Artisan::call('deploy:pack', ['--env' => "testing", "--no-zip"=> true, "--rm-samples"=>true]);
+        Artisan::call('deploy:pack', ['--env' => "testing", "--no-zip"=> true, "--rm-samples"=>true]);
         $appFiles = Storage::disk('package')->files('app');
         $this->assertGreaterThanOrEqual(10, $appFiles);
     }
@@ -37,7 +38,7 @@ class DeployTest extends TestCase
         // The deploy command internally calls:
         // \Artisan::call('deploy:pack', ['--env' => "testing"]);
         // \Artisan::call('deploy:send', ['--env' => "testing"]);
-        \Artisan::call('deploy', ['--env' => "testing", "--send"=>true]);
+        Artisan::call('deploy:run', ['--env' => "testing", "--send"=>true]);
 
         // The package is generated and stored locally before being sent to the server
         // and is stored at the package folder
@@ -62,7 +63,7 @@ class DeployTest extends TestCase
      * Test the single file sending command
      */
     public function testSendingASingleFile(){
-        \Artisan::call('deploy:send', ['--env' => "testing", "--single-file"=>"docs/add-key-remote-ssh.md"]);
+        Artisan::call('deploy:send', ['--env' => "testing", "--single-file"=>"docs/add-key-remote-ssh.md"]);
 
         // When running in testing env, the ouput to the ftp disk is redirected
         // to a local virtual ftp folder. So, after "sending" the file to
@@ -70,7 +71,7 @@ class DeployTest extends TestCase
         $this->assertEquals(true, Storage::disk('ftp')->exists('docs/add-key-remote-ssh.md'));
 
         // After check that the expected file is there, we remove it
-        Storage::disk('ftp')->delete('add-key-remote-ssh.md');
+        Storage::disk('ftp')->delete('docs/add-key-remote-ssh.md');
     }
 
     /**
@@ -80,7 +81,7 @@ class DeployTest extends TestCase
      * file and want to test a real deployment, then uncomment the method below
      */
     // public function testGenerateAppPackZipSendAndInstall(){
-    //     \Artisan::call('deploy', ['--env' => "testing", "--install"=>true, "--migrate"=>true, "--seed"=>true]);
+    //     Artisan::call('deploy:run', ['--env' => "testing", "--install"=>true, "--migrate"=>true, "--seed"=>true]);
     //     $this->assertEquals(strpos(true, \Artisan::output(), "Installation succeeded!"));
     // }
 }
