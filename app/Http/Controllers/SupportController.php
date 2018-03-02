@@ -17,7 +17,7 @@ class SupportController extends Controller
      */
     public function langs(Request $request)
     {
-        $messages = array_merge(trans('auth.messages'), trans('business'));
+        $messages = array_merge(trans('auth.messages'), trans('business'), trans('mail'));
         $attributes = trans('validation.attributes');
         return [
             'attributes' => $attributes,
