@@ -40,7 +40,7 @@ This project is based in Laravel, a collection of community and custom component
 
 It is included in the DryPack the following features: 
 
-- Based on [Laravel 5.5.*](https://laravel.com/docs/5.5)
+- Based on [Laravel 5.6.*](https://laravel.com/docs/5.5)
 - One single command to setup the whole solution!
 - One single command to deploy the whole solution!
 - AngularJS 1.6.4 framework in the front-ends (admin and public client)
