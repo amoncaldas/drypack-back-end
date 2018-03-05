@@ -81,9 +81,6 @@ RUN echo "listen_addresses='*'" >> /etc/postgresql/9.5/main/postgresql.conf
 # Add VOLUMEs to allow backup of config, logs and databases
 VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql"]
 
-# Set the default command to run when starting the container
-CMD ["/usr/lib/postgresql/9.5/bin/postgres", "-D", "/var/lib/postgresql/9.5/main", "-c", "config_file=/etc/postgresql/9.5/main/postgresql.conf"]
-
 USER root
 # END setup POSTGRES SECTION
 
@@ -123,6 +120,14 @@ RUN curl -sL https://deb.nodesource.com/setup_6.x | bash - && \
 # Install Node packages.
 RUN npm install -g serve gulp gulp-cli gulp-babel babel-preset-es2015 \
 eslint eslint-plugin-angular protractor protractor-console generator-angular @angular/platform-browser webdriver-manager
+
+# Install openjdk, Chrome and update webdriver-manager (necessary for running protractor e2e test)
+RUN apt-get update && \
+  apt-get install openjdk-8-jdk-headless -y && \
+  wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
+  dpkg -i google-chrome-stable_current_amd64.deb; apt-get -fy install
+
+RUN webdriver-manager update
 
 EXPOSE 5432 443
 CMD exec supervisord -n
