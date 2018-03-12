@@ -11,6 +11,7 @@
     "check": "gulp --gulpfile public/admin/gulpfile.js check && gulp --gulpfile public/client/gulpfile.js check",
     "webdriver": "webdriver-manager start",
     "e2e-test": "sh scripts/e2e-test.sh",
-    "php-test": "sh scripts/php-test.sh"
+    "php-test": "sh scripts/php-test.sh",
+    "to-container": "docker start drypack-container-dev && docker exec -it drypack-container-dev bash"
   }
 }
