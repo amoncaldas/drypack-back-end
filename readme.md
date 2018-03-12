@@ -55,7 +55,7 @@ It is included in the DryPack the following features:
 - Code generator for back-end and front-end
 - Tasks automation (run, build, check, deploy, test)
 - Tests automation infrastructure for your business tests
-- Test coverage of more than 90%
+- Api test coverage of more than 90%
 - Deploy package generator
 - Auto sending/installation via FTP
 - Easy and flexible CRUD structure with triggers and callbacks
