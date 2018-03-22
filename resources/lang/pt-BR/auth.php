@@ -37,7 +37,9 @@ return [
         'role'=>'Perfis',
         'authentication'=>'Autenticação',
         'project'=>'Projeto',
-        'task'=>'Tarefa'
+        'task'=>'Tarefa',
+        'section'=> 'Seção',
+        'page'=> 'Página'
     ],
     'actions'=> [
         'all'=>'Todas',
@@ -55,7 +57,8 @@ return [
         'models'=>'Listar recursos',
         'updateProfile'=>'Atualizar o próprio perfil',
         'postEmail'=>'Solicitar redefinição de senha',
-        'postReset'=>'Salvar redefinição de senha'
+        'postReset'=>'Salvar redefinição de senha',
+        'toggleDone'=> 'Alternar estado'
     ],
     /*
     |--------------------------------------------------------------------------

@@ -11,10 +11,6 @@
 |
 */
 
-Route::get('/', function () {
-    return File::get(public_path().'/client/index.html');
-});
-
 Route::get('/admin', function () {
     return File::get(public_path().'/admin/index.html');
 });
@@ -28,3 +24,7 @@ Route::get('/phpinfo', function () {
         abort(404, 'Resource not found.');
     }
 });
+
+Route::get('{all}', function () {
+    return File::get(public_path().'/client/index.html');
+})->where('all', '^(?!api).*$');

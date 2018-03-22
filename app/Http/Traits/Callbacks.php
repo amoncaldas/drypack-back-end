@@ -29,6 +29,7 @@ trait Callbacks
         'beforeAll' => [ 'beforeAll' ],
         'beforeStore' => [ 'beforeStore' ],
         'beforeSearch' => [ 'beforeSearch' ],
+        'afterSearch' => [ 'afterSearch' ],
         'beforeUpdate' => [ 'beforeUpdate' ],
         'beforeSave' => [ 'beforeSave' ],
         'beforeDestroy' => [ 'beforeDestroy' ],
@@ -51,6 +52,7 @@ trait Callbacks
 
     protected function beforeAll(Request $request) { } // NOSONAR
     protected function beforeSearch(Request $request, $dataQuery, $countQuery) { } // NOSONAR
+    protected function afterSearch(Request $request, $data, $klass) { } // NOSONAR
     protected function beforeStore(Request $request, Model $model) { } // NOSONAR
     protected function beforeUpdate(Request $request, Model $model) { } // NOSONAR
     protected function beforeSave(Request $request, Model $model) { } // NOSONAR

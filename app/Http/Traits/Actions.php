@@ -56,6 +56,10 @@ trait Actions
             }
         }
 
+        $customData = $this->callback('afterSearch', $request, $data, $klass);
+        if($customData !== null){
+            return $customData;
+        }
         return $data;
     }
 

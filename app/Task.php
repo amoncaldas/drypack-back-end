@@ -40,7 +40,7 @@ class Task extends BaseModel
     ];
 
     /**
-    * Return the relationship to the project to which the the task belongs to
+    * Return the relationship to the project to which the task belongs to
     * @return object
     */
     public function project()

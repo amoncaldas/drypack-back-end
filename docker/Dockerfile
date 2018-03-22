@@ -118,7 +118,7 @@ RUN curl -sL https://deb.nodesource.com/setup_6.x | bash - && \
 	apt-get install -y nodejs
 
 # Install Node packages.
-RUN npm install -g serve gulp gulp-cli gulp-babel babel-preset-es2015 \
+RUN npm install -g serve gulp gulp-cli gulp-babel babel-preset-es2015 yo https://gitlab.com/drypack/c2yogenerator \
 eslint eslint-plugin-angular protractor protractor-console generator-angular @angular/platform-browser webdriver-manager
 
 # Install openjdk, Chrome and update webdriver-manager (necessary for running protractor e2e test)

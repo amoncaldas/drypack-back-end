@@ -37,7 +37,9 @@ return [
         'role'=>'Roles',
         'authentication'=>'Authentication',
         'project'=>'Project',
-        'task'=>'Task'
+        'task'=>'Task',
+        'section'=> 'Section',
+        'page'=> 'Page'
     ],
     'actions'=> [
         'all'=>'All',
@@ -55,7 +57,8 @@ return [
         'models'=>'List resources',
         'updateProfile'=>'Update profile',
         'postEmail'=>'Request password reset',
-        'postReset'=>'Save reseted password'
+        'postReset'=>'Save reseted password',
+        'toggleDone'=> 'Alternate state'
     ],
     /*
     |--------------------------------------------------------------------------

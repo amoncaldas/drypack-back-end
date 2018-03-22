@@ -58,15 +58,29 @@ Get SQL query log:
 $logs = \DB::getQueryLog();
 
 ```
-## simulate the install request on a server ##
+## Process directly a php file ##
 
 ```php
-// on routes/web.php, route to simulate the install request on a server
-Route::get('/package/install.php', function () {
+// on routes/web.php, define it
+Route::get('/folder/file.php', function () {
     ob_start();
-    $path = base_path("package/install.php");
+    $path = base_path("folder/file.php");
     require($path);
     return ob_get_clean();
 });
 ```
+
+## Add custom validation message ##
+
+```php
+'custom' => [
+    'field_name' => [
+        'required' => 'This message will be shown if this input key is empty',
+    ]
+],
+```
+
+
+
+
 

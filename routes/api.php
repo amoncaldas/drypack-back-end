@@ -32,6 +32,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'i18n']], function () {
 
     Route::group(['prefix' => 'support'], function () {
         Route::get('langs', 'SupportController@langs');
+        Route::get('locales', 'SupportController@locales');
     });
 
     // First we log the user an then, in the AuthenticateController the 'dyn.permission' is executed
@@ -46,9 +47,14 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'i18n']], function () {
 
         Route::post('password/email', 'PasswordController@postEmail');
         Route::post('password/reset', 'PasswordController@postReset');
+        Route::resource('sections', 'Content\SectionController');
+        Route::resource('pages', 'Content\PageController');
+
+        // Samples
         Route::resource('projects', 'Samples\ProjectsController');
         Route::put('tasks/toggleDone', 'Samples\TasksController@toggleDone');
         Route::resource('tasks', 'Samples\TasksController');
+
         Route::resource('mails', 'MailsController', ['only' => ['store']]);
         Route::put('profile', 'UsersController@updateProfile');
 

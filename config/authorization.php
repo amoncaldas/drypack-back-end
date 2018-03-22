@@ -7,6 +7,7 @@
 
 return [
 
+    /** Do not remove the default roles unless you know exactly what you are doing! */
     'default_roles'=>[
         'ADMIN_ROLE_SLUG'=>'admin',
         'BASIC_ROLE_SLUG'=>'basic',
@@ -74,7 +75,7 @@ return [
         'updateProfile',
         'postEmail',
         'postReset',
-
+        'toggleDone',
         /* Custom actions */
 
         /* Your custom actions come here */
@@ -174,7 +175,7 @@ return [
         ],
 
         // Authentication - as we need the user identification to check the permmission
-        // first we log the user in an then we check it it has the permission
+        // first we log the user in an then we check if he/she has the permission
         'authentication'=>['controller_class'=>'AuthenticateController','restricted_to_logged_users'=>true,
             'actions'=>
             [
@@ -199,6 +200,33 @@ return [
         */
         'dummyActionTest'=>['dummy'=>true,'namespace'=>'App\Http\Controllers\Samples','controller_class'=>'DummyActionController', 'actions'=>[]],
 
+        // Section
+        'section'=>['controller_class'=>'SectionController', 'namespace'=>'App\Http\Controllers\Content',
+            'actions'=>['all','store','update','destroy','index', 'show']
+        ],
+
+        // Page
+        'page'=>['controller_class'=>'PageController', 'namespace'=>'App\Http\Controllers\Content',
+            'actions'=>[
+                'all',
+                [
+                    'slug'=>'store',
+                    'dependencies'=>[
+                        ['resource_slug'=>'section','action_type_slug'=>'index']
+                    ]
+                ],
+                [
+                    'slug'=>'update',
+                    'dependencies'=>[
+                        ['resource_slug'=>'section','action_type_slug'=>'index']
+                    ]
+                ],
+                'destroy',
+                'index',
+                'show'
+            ]
+        ],
+
         /*
         |--------------------------------------------------------------------------
         | Here comes the resources of the samples Project and Tasks.
@@ -213,7 +241,15 @@ return [
 
         // Sample/Task
         'task'=>['namespace'=>'App\Http\Controllers\Samples','controller_class'=>'TasksController',
-            'actions'=>['all','store','update','destroy','index', 'show', 'toggleDone']
+            'actions'=>[
+                'all',
+                ['slug'=>'store','dependencies'=>[['resource_slug'=>'project','action_type_slug'=>'index']]],
+                ['slug'=>'update','dependencies'=>[['resource_slug'=>'project','action_type_slug'=>'index']]],
+                ['slug'=>'destroy','dependencies'=>[['resource_slug'=>'project','action_type_slug'=>'index']]],
+                ['slug'=>'index','dependencies'=>[['resource_slug'=>'project','action_type_slug'=>'index']]],
+                ['slug'=>'show','dependencies'=>[['resource_slug'=>'project','action_type_slug'=>'index']]],
+                ['slug'=>'toggleDone','dependencies'=>[['resource_slug'=>'project','action_type_slug'=>'index']]]
+            ]
         ]
     ]
 ];

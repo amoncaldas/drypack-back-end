@@ -80,7 +80,7 @@ class AuditController extends Controller
     public function models(Request $request)
     {
         // Get all models, except BaseModel
-        $models = \DryPack::modelNames(array("BaseModel.php"));
+        $models = \DryPack::modelNames(array("BaseModel.php", "Content.php"));
 
         return [
             'models' => $models

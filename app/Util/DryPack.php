@@ -42,6 +42,8 @@ class DryPack
         $models = array();
         $path = app_path();
         $files = scandir($path);
+        $contentFiles = scandir(app_path("Content"));
+        $files = array_merge($files, $contentFiles);
 
         foreach ($files as $file) {
             // skip all dirs and ignored_model_files

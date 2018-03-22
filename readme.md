@@ -410,7 +410,7 @@ yo c2generator
 - Choose a structure in the list
 - type the resource name
 
-**For more information about how to use the generator go to [Generator C2yoGenerator](git@gitlab.com:drypack/c2yogenerator.git);**
+**For more information about how to use the generator go to** [Generator C2yoGenerator](git@gitlab.com:drypack/c2yogenerator.git)
 
 > To generate the structure in the back-end, use the following commands:
 
@@ -524,6 +524,7 @@ destroy(Request $request, $id)
 applyFilters(page, $request, $baseQuery)
 beforeAll($request)
 beforeSearch($request, $dataQuery, $countQuery)
+afterSearch($request, $data, $klass) // if implemented and returns data, the api will return the custom returned data
 beforeSave($request, $obj)
 beforeStore($request, $obj)
 beforeUpdate($request, $obj)
@@ -676,3 +677,4 @@ Full list of commands and options:
 - [Configure reverse proxy on apache](docs/configure-apache-reverse-proxy.md)
 - [Configure e-mail sending](docs/configure-email-sending.md)
 - [Configure sftp](docs/configure-sftp.md)
+- [HTML 5 mode API](docs/html5ModeAPI.md)
