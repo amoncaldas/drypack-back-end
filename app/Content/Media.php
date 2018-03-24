@@ -4,7 +4,7 @@ namespace App\Content;
 
 use App\Content\Content;
 
-class Page extends Content
+class Media extends Content
 {
     /**
      * The database table used by the model.
@@ -19,6 +19,15 @@ class Page extends Content
      * @var array
      */
     protected $fillable = ['file_name','type','status','author_name','author_id', 'mimetype','length'];
+
+    /**
+     * Get the content type of the concreet class
+     *
+     * @return string
+     */
+    protected function getContentType() {
+        return "media";
+    }
 
     /**
     * Return the relationship with the parent project

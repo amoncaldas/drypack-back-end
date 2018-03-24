@@ -20,6 +20,15 @@ class MediaText extends Content
      */
     protected $fillable = ['title','desc','locale','media_id'];
 
+    /**
+     * Get the content type of the concreet class
+     *
+     * @return string
+     */
+    protected function getContentType() {
+        return "media_text";
+    }
+
 
     /**
      * Get the Media that owns the media text.

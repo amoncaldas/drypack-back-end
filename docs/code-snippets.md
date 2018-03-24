@@ -47,7 +47,8 @@ function nestedStringIntoObject($nested_string) {
   return $object;
 }
 ```
-Get SQL query log:
+
+## Get SQL query log ##
 
 ```php
 
@@ -79,6 +80,18 @@ Route::get('/folder/file.php', function () {
     ]
 ],
 ```
+
+## Check/remove HTML in js ##
+
+```js
+var isHTML = RegExp.prototype.test.bind(/(<([^>]+)>)/i);
+if(isHTML('<p>a</p>')) {/*...*/}
+var withHtml = '<p>a</p>';
+var withoutHtml = withHtml ? String(withHtml).replace(/<[^>]+>/gm, '') : '';
+```
+
+
+          
 
 
 

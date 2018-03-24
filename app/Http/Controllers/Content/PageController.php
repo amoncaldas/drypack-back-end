@@ -101,7 +101,8 @@ class PageController extends BaseMultiLangContentController
     }
 
     /**
-     * Callback used to save additional translation specifique data
+     * Callback used to save additional translation specifique data.
+     * After save is only fired if the beforeSaveTranslation returns nothing|null or true
      *
      * @return void
      */
@@ -110,9 +111,9 @@ class PageController extends BaseMultiLangContentController
     }
 
     /**
-     * Callback used to modify the translation model before save
+     * Callback used to modify the translation model before save     *
      *
-     * @return void
+     * @return void|boolean if return false the auto save in parent is canceled
      */
     protected function beforeSaveTranslation(Request $request, Model $translation, $trans_arr) {
         if(!$request->has('status')) {
@@ -121,6 +122,21 @@ class PageController extends BaseMultiLangContentController
 
         $translation->slug = $trans_arr["url"]["slug"];
         $translation->section_id = $trans_arr["url"]["section_id"];
+
+        // this code snippet allow the user specify an id for a new content
+        // this is necessary when the user is migrating content from other system
+        // and wants to keep the same friendly url, including the same id
+        if( isset($trans_arr["url"]["content_id"])) {
+            $id = $trans_arr["url"]["content_id"];
+            $existingContentWithSameId = Page::find($id);
+            // this is allowed only if a content with the specified id does not already exist
+            if ($existingContentWithSameId === null) {
+                $translation->id =  $id;
+            }
+        }
+
+        // return false to cancel auto save and then save by yourself in your code here
+        return true;
     }
 
 

@@ -2,6 +2,8 @@
 
 namespace App\Util;
 
+use Illuminate\Support\Facades\Config;
+
 class DryPack
 {
 
@@ -37,28 +39,33 @@ class DryPack
      * @param array $ignoredModels list of files representing models to be ignored
      * @return array list of string wit the model's name
      */
-    public static function modelNames($ignored_model_files = array())
+    public static function loadableModels()
     {
         $models = array();
-        $path = app_path();
-        $files = scandir($path);
-        $contentFiles = scandir(app_path("Content"));
-        $files = array_merge($files, $contentFiles);
 
-        foreach ($files as $file) {
-            // skip all dirs and ignored_model_files
-            if ($file === '.' || $file === '..' || is_dir($path . '/' . $file) || in_array($file, $ignored_model_files)) {
-                continue;
+        $locations = Config::get('dynamic-query.model-locations');
+
+        foreach ($locations as $location) {
+            $files = scandir($location['path']);
+
+            foreach ($files as $file) {
+                if(!in_array($file,$location['exclusions']) && $file !== '.' && $file !== '..' && !is_dir($location['path'] . '/' . $file)) {
+                    $model = preg_replace('/\.php$/', '', $file);
+                    if(isset($location['namespace'])) {
+                        $model = $location['namespace']."\\".$model;
+                    } else {
+                        'App\\'.$model;
+                    }
+                    $models[] = $model;
+                }
             }
-
-            $models[] = preg_replace('/\.php$/', '', $file);
         }
 
         return $models;
     }
 
     public static function getSlug($string){
-         // Remove special accented characters - ie. sí.
+         // Remove special characters - ie. sí.
         if(!isset($string)){
             return $string;
         }

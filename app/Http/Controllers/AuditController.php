@@ -44,7 +44,7 @@ class AuditController extends Controller
         }
 
         if($request->has('model') && $request->model !== null) {
-            $baseQuery = $baseQuery->where('auditable_type', 'App\\' . $request->model);
+            $baseQuery = $baseQuery->where('auditable_type', $request->model);
         }
 
         if($request->has('dateStart')) {
@@ -80,7 +80,7 @@ class AuditController extends Controller
     public function models(Request $request)
     {
         // Get all models, except BaseModel
-        $models = \DryPack::modelNames(array("BaseModel.php", "Content.php"));
+        $models = \DryPack::loadableModels();
 
         return [
             'models' => $models

@@ -73,12 +73,18 @@ abstract class BaseMultiLangContentController extends CrudController
                 $trans_arr['multi_lang_content_id'] = $content->id;
                 $klass = $this->getTranslationModel();
                 $translation = new $klass($trans_arr);
+                $proceedSave = true;
+
+                // the derived controller class can cancel the auto save if it returns false
                 if (method_exists($this, "beforeSaveTranslation" )) {
-                    $this->beforeSaveTranslation($request, $translation, $trans_arr);
+                    $proceedSave = $this->beforeSaveTranslation($request, $translation, $trans_arr);
                 }
-                $translation->save();
-                if (method_exists($this, "afterSaveTranslation" )) {
-                    $this->afterSaveTranslation($request, $translation);
+                // if proceedSave is true or was not returned (is null), the auto save is proceeded
+                if($proceedSave === true || $proceedSave === null) {
+                    $translation->save();
+                    if (method_exists($this, "afterSaveTranslation" )) {
+                        $this->afterSaveTranslation($request, $translation);
+                    }
                 }
             }
         }

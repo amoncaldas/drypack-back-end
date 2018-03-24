@@ -30,6 +30,7 @@ This project is based in Laravel, a collection of community and custom component
   - [Dynamic Permissions](#dynamic-permissions)
   - [How to use GenericService](#how-to-use-genericservice)
   - [Easy CRUD](#easy-crud)
+  - [Dynamic Query](#dynamic-query)
   - [Attributes format](attributes-format)
   - [Making a specific validation](making-a-specific-validation)
 - [Deploy](#deploy)
@@ -300,39 +301,36 @@ en-US, but you can also change it.
 
 **Changing the default locale:**
 
-- *In the back-end*: change the value of *DEFAULT_LOCALE* in the .env* file(s).
-- *In the front-end admin*: change the value of *defaultLocale* in *public/admin/app/app.global.js* and include the defined default locale angular file in gulpfile.js paths.angularScripts.
+- *In the back-end*: change the value of *DEFAULT_LOCALE* in the .env* file(s). Make sure the default locale exists in *config/i18n.php*!
 
 *Important:*
 
-- you must change in both: front and-back end to see it working
+- the locals you define in *config/i18n.php* must exist in the front-end and back-end
 - make sure that the locale being defined as default is already added. See the step below!
-- Reload and recompile the front-end (stop/start gulp task) the application so it can take effect
+- Reload and recompile the front-end (stop/start gulp task) and the application so it can take effect
 
 **Adding a new locale:**
 
 - *In the back-end*:
   - add the desired locale in the *config/i18n.php*
   - create a folder in *resources/lang/* with the identification of your locale (eg.:de-DE)
-  - copy the all the files from 8resources/lang/en-US8* to your new locale folder
-  - open each file copied in your new folder and translate the contents
+  - copy the all the files from resources/lang/en-US8* to your new locale folder
+  - open each file copied in your new folder and translate the content for each key
 
 - *In the front-end admin*:
-  - add the desired locale in the *locales* array in *public/admin/app/app.global.js*
   - create a folder in *public/admin/app/i18n* with the identification of your locale (eg.:de-DE)
   - copy the all the files from *public/admin/app/i18n/en-US* to your new locale folder
   - open each file copied in your new folder and replace en-US in 'en-US.i18n.' by your locale id, like 'de-DE.i18n.'
-  - open each file copied in your new folder and translate the contents
+  - open each file copied in your new folder and translate the content for each key
 
 - *In the front-end client*:
-  - add the desired locale in the *locales* array in *public/client/app/app.global.js*
   - create a folder in *public/client/app/i18n* with the identification of your locale (eg.:de-DE)
   - copy the all the files from *public/client/app/i18n/en-US* to your new locale folder
   - open each file copied in your new folder and replace en-US in 'en-US.i18n.' by your locale id, like 'de-DE.i18n.'
-  - open each file copied in your new folder and translate the contents
+  - open each file copied in your new folder and translate the content for each key
 
   *Important:*
-  - You need to add in both: front and back end to see it working
+  - You need to add in both: front and back end to see it working (unless you are using only back or front for another project)
   - After doing this, stop the gulp task and start again
   - Reload the application so it can take effect
 
@@ -574,6 +572,12 @@ class ProjectsController extends CrudController
     }
 }
 ```
+
+### Dynamic Query ###
+
+The Dynamic Query utility allows to query the raw data of loadable models in the in database, applying custom queries.
+To add/change the loadable models edit the file **configure/dynamic-query.php**
+
 
 ### Attributes format ###
 
