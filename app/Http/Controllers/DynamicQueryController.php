@@ -33,13 +33,17 @@ class DynamicQueryController extends Controller
 
     public function index(Request $request)
     {
-        // As we are using GenericService, the filters passed are in a json format
-        $modelFilters = json_decode($request->filters, true);
+        if($request->has("model")) {
+            $modelWithNameSpace = $request->model;
+        } else {
+            // As we are using GenericService, the filters passed are in a json format
+            $modelFilters = json_decode($request->filters, true);
 
-        // from the filters, at this moment, we just want to retrive, the model id
-        // that represent the namespace and class name
-        $modelFilters = is_array($modelFilters)? $modelFilters[0]: $modelFilters;
-        $modelWithNameSpace = $modelFilters["model"]["id"];
+            // from the filters, at this moment, we just want to retrive, the model id
+            // that represent the namespace and class name
+            $modelFilters = is_array($modelFilters)? $modelFilters[0]: $modelFilters;
+            $modelWithNameSpace = $modelFilters["model"]["id"];
+        }
 
         // Instantiate the model using the model name and the default namespace
         $instance = new $modelWithNameSpace;
@@ -107,6 +111,5 @@ class DynamicQueryController extends Controller
         return [
             'models' => $data
         ];
-        //return $data;
     }
 }

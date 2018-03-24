@@ -29,7 +29,7 @@ class DynamicQueryTest extends TestCase
         array_push($filters, createCondition('endswith', 'email', $this->adminUserData['email']));
 
         $query = [
-            'model' => 'User',
+            'model' => 'App\User',
             'filters' => json_encode($filters)
         ];
 
@@ -52,13 +52,17 @@ class DynamicQueryTest extends TestCase
 
         $responseData = $response->json();
 
-        $response->assertJsonStructure(['*' => [
-            'name', 'props' => [
-                '*' => ['name', 'type']
+        $response->assertJsonStructure([
+            'models' => [
+                '*' => [
+                    'name', 'props' => [
+                        '*' => ['name', 'type']
+                    ]
+                ]
             ]
-        ]]);
+        ]);
 
         // Need to be at least user model
-        $this->assertContains('User', collect($responseData)->pluck('name')->all());
+        $this->assertContains('App\User', collect($responseData["models"])->pluck('name')->all());
     }
 }

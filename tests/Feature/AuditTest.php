@@ -16,7 +16,7 @@ class AuditTest extends TestCase
 
         $response->assertJsonStructure(['models']);
         // Need to be at least user model
-        $this->assertContains('User', $response->json()['models']);
+        $this->assertContains('App\User', $response->json()['models']);
     }
 
     /**
@@ -44,7 +44,7 @@ class AuditTest extends TestCase
 
         $query = [
             'user' => $this->adminUserData['name'],
-            'model' => 'User',
+            'model' => 'App\User',
             'auditable_id' => $createdUser['id'],
             'type' => 'updated',
             'dateStart' => $date,

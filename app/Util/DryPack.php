@@ -34,10 +34,9 @@ class DryPack
     }
 
     /**
-     * Get the list of app models from the app dir
+     * Get the list of app models according defined in condig/dynamic-query.php
      *
-     * @param array $ignoredModels list of files representing models to be ignored
-     * @return array list of string wit the model's name
+     * @return array list of string wit the model's namespace and name
      */
     public static function loadableModels()
     {
@@ -64,8 +63,13 @@ class DryPack
         return $models;
     }
 
+    /**
+     * Replace special characters for the non special corresponding ones
+     *
+     * @param string $string
+     * @return string
+     */
     public static function getSlug($string){
-         // Remove special characters - ie. sí.
         if(!isset($string)){
             return $string;
         }
