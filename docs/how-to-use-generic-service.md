@@ -90,7 +90,7 @@ The route above will map all the requests to **/domain-data/{method-name}** to *
  Having this code, it is possible to make GET requests with query filters, like using three patterns:
 
 ```javascript
- ?filters=[{"prop":"slug","op":"=","value":"new"}, {"prop":"description","op":"like","value":"brand new"}];
+ ?filters=[{ prop: 'slug', op: '=', value: 'new' }, { prop: 'description', op: 'like', value: 'brand new' } ]
  ?prop=name&op==&value=New
  ?slug=new
  ```

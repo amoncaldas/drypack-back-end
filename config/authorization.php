@@ -11,7 +11,8 @@ return [
     'default_roles'=>[
         'ADMIN_ROLE_SLUG'=>'admin',
         'BASIC_ROLE_SLUG'=>'basic',
-        'ANONYMOUS_ROLE_SLUG'=>'anonymous'
+        'ANONYMOUS_ROLE_SLUG'=>'anonymous',
+        'NEWS_SUBSCRIBER_ROLE_SLUG'=>'news_subscriber'
     ],
 
     /*
@@ -76,6 +77,7 @@ return [
         'postEmail',
         'postReset',
         'toggleDone',
+        'registerNewsLetterSubscriberUser'
         /* Custom actions */
 
         /* Your custom actions come here */
@@ -103,8 +105,8 @@ return [
         'all'=>['actions'=>['all','store','update','destroy', 'show']],
 
         // User
-        'users'=>['controller_class'=>'UsersController', 'restricted_to_logged_users'=>true,
-            'actions'=>['all','store','update','destroy','index', 'show', 'updateProfile']
+        'user'=>['controller_class'=>'UsersController', 'restricted_to_logged_users'=>true,
+            'actions'=>['all','store','update','destroy','index', 'show', 'updateProfile', 'registerNewsLetterSubscriberUser']
         ],
 
         // AuditController
@@ -175,7 +177,7 @@ return [
         ],
 
         // Authentication - as we need the user identification to check the permmission
-        // first we log the user in an then we check if he/she has the permission
+        // first we log the user in an then we check if s/he has the permission
         'authentication'=>['controller_class'=>'AuthenticateController','restricted_to_logged_users'=>true,
             'actions'=>
             [
@@ -205,6 +207,11 @@ return [
             'actions'=>['all','store','update','destroy','index', 'show']
         ],
 
+         // Section
+        'category'=>['controller_class'=>'CategoryController', 'namespace'=>'App\Http\Controllers\Content',
+         'actions'=>['all','store','update','destroy','index', 'show']
+        ],
+
         // Page
         'page'=>['controller_class'=>'PageController', 'namespace'=>'App\Http\Controllers\Content',
             'actions'=>[
@@ -225,6 +232,11 @@ return [
                 'index',
                 'show'
             ]
+        ],
+
+        // Domain data
+        'domain-data'=>['controller_class'=>'DomainDataController', 'namespace'=>'App\Http\Controllers\Content',
+             'actions'=>['mapAndGet']
         ],
 
         /*

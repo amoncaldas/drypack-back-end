@@ -75,6 +75,9 @@ return [
     'timezone'             => 'The :attribute must be a valid zone.',
     'unique'               => 'The :attribute has already been taken.',
     'url'                  => 'The :attribute format is invalid.',
+    'same_parent'          => 'The :resources in all locale verson must have the same parent',
+    'required_in_all_locales'       => 'All the fields of the :resources , in all locales versions are mandatory',
+    'unique_in_all_locale'          => 'The :resources in all locale versions must have unique name and slug',
 
     /*
     |--------------------------------------------------------------------------
@@ -123,7 +126,9 @@ return [
         'subject' => 'Subject',
         'message' => 'Message',
         'date' => 'Date',
-        'image' => 'Image'        
+        'image' => 'Image',
+        'categories'=> 'categories',
+        'category'=> 'category'
     ],
 
 ];

@@ -41,6 +41,15 @@ class Role extends BaseModel
     protected $fillable = ['title','slug'];
 
     /**
+     * Get the default news subscriber Role slug
+     *
+     * @return string
+     */
+    public static function newsSubscriberRoleSlug(){
+        return Config::get('authorization.default_roles.NEWS_SUBSCRIBER_ROLE_SLUG');
+    }
+
+    /**
      * Get the default anonymous Role slug
      *
      * @return string

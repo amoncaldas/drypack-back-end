@@ -14,7 +14,8 @@ return [
     'roles'=> [
         'admin'=>'Admin',
         'basic'=>'Basic',
-        'anonymous'=>'Anonymous'
+        'anonymous'=>'Anonymous',
+        'news_subscriber'=>'News subscriber'
     ],
     /*
     |--------------------------------------------------------------------------
@@ -28,7 +29,7 @@ return [
     */
     'resources'=> [
         'all'=>'All',
-        'users'=>'User',
+        'user'=>'User',
         'audit'=>'Audit',
         'dataInspection'=>'Dynamic Query',
         'emails'=>'Emails',
@@ -58,7 +59,8 @@ return [
         'updateProfile'=>'Update profile',
         'postEmail'=>'Request password reset',
         'postReset'=>'Save reseted password',
-        'toggleDone'=> 'Alternate state'
+        'toggleDone'=> 'Alternate state',
+        'registerNewsLetterSubscriberUser'=> 'Register newsletter subscriber'
     ],
     /*
     |--------------------------------------------------------------------------

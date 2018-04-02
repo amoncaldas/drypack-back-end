@@ -55,8 +55,12 @@ class DynamicQueryController extends Controller
         $baseQuery = \DB::table($instance->getTable());
 
         if(isset($instance) && isset($baseQuery)) {
+
+            // id is not an attribute, but we want to add it
+            $all_attr = ["id"];
+
             // Get all model attributes
-            $all_attr = $instance->getAllAttributes();
+            $all_attr = array_merge($all_attr, $instance->getAllAttributes());
 
             // Filter the attributes defined as non visible in dynamic query
             $filtered_attr = array_diff($all_attr, $instance->getHideAttributesInDynamicQuery());

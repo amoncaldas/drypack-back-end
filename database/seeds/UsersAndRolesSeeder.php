@@ -50,8 +50,8 @@ class UsersAndRolesSeeder extends Seeder
         $basicRole = $this->getRole(Role::defaultBasicRoleSlug());
 
         // We can use resource:action to set an specific action in a resource
-        // and set CRUD permissions to the resources "authentication", "project", "task" and "users:updateProfile" to it
-        $actions_filter = ["authentication", "password", "project", "task", "users:updateProfile", "section", "page"];
+        // and set CRUD permissions to the resources "authentication", "project", "task" and "user:updateProfile" to it
+        $actions_filter = ["authentication", "password", "project", "task", "user:updateProfile", "section", "page", "category", "domain-data"];
         AuthorizationSetup::setResourcesActionsForRole($actions_filter,$basicRole);
 
         // Create the NORMAL user (if it not exists) and attach the role NORMAL to it
@@ -61,11 +61,22 @@ class UsersAndRolesSeeder extends Seeder
         }
 
         // Create the ANONYMOUS role (if it does not exist)
-        $actions_filter = ["project:index", "project:show", "task:index", "task:show", "password", "authentication:authenticate"];
+        $actions_filter = [
+            "project:index",
+            "project:show",
+            "task:index",
+            "task:show",
+            "password",
+            "authentication:authenticate",
+            "user:registerNewsLetterSubscriberUser"
+        ];
         AuthorizationSetup::setResourcesActionsForRole($actions_filter, $this->getRole(Role::anonymousRoleSlug()));
 
         // Create 5 additional random users with no permissions  - disabled, you can enabled if needed
         // factory(User::class, 5)->create();
+
+        // Create the subscriber Role, if it does not exist
+        $this->getRole(Role::newsSubscriberRoleSlug());
     }
 
     /**

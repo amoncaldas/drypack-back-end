@@ -225,15 +225,22 @@ trait GenericService
         // $addFilter = function(&$filter) use (&$query){
         $addFilter = function($filter) use ($query){
             $this->prepareBinding($filter, $query);
-            $bindings[] = $filter->value;
-            return $bindings;
+
+            if(!isset($filter->invalid) || $filter->invalid = false) {
+                $bindings[] = $filter->value;
+                return $bindings;
+            }
         };
 
         // here we get the filters from the request
         $filters = $this->getAttributeFilters($request);
         $bindings = [];
         foreach ($filters as $filter) {
-            $bindings[] = $addFilter($filter);
+            $filterBinding = $addFilter($filter);
+            if(isset($filterBinding)) {
+                $bindings[] = $filterBinding;
+            }
+
         }
         // here we set the parameters array as bindings
         $query->setBindings($bindings);
@@ -371,20 +378,31 @@ trait GenericService
                 // will be binded via parameter binding, replacing the ?
                 $query = $query->whereRaw("lower($filter->prop) like ?");
 
-            } else {
-                if ($filter->op === 'like') {
-                    $filter->value = ['%'.$filter->value.'%'];
-
-                } elseif ($filter->op === 'startswith') {
-                    $filter->value = ['%'.strtolower($filter->value)];
-
-                } else {
-                    $filter->value = [strtolower($filter->value).'%'];
-                }
-
+            } elseif($filter->op === 'like') {
+                $filter->value = ['%'.$filter->value.'%'];
                 // we set the where condition, but the left value (filter->value)
                 // will be binded via parameter binding, replacing the ?
                 $query = $query->whereRaw("$filter->prop like ?");
+            } else {
+                if ($filter->op === 'startswith') {
+                    $filter->value = ['%'.strtolower($filter->value)];
+                } else { // endswith
+                    $filter->value = [strtolower($filter->value).'%'];
+                }
+                $query = $query->whereRaw("lower($filter->prop) like ?");
+            }
+        }
+        elseif ($filter->op === 'notin') {
+            if ($filter->value !== null ) {
+                if (is_array($filter->value) ) {
+                    $query = $query->whereNotIn($filter->prop, $filter->value);
+                } elseif(strpos($filter->value, ',') !== false) {
+                    $query = $query->whereNotIn($filter->prop, explode(',', $filter->value));
+                } else {
+                    $filter->invalid = true;
+                }
+            } else {
+                $filter->invalid = true;
             }
         }
         else{
@@ -411,6 +429,7 @@ trait GenericService
             $filters = $request->input('filters');
             if(!is_object($filters)){
                 $filters = json_decode(($filters));
+                $filters = is_array($filters)? $filters : [$filters];
                 foreach ($filters as $filter) {
                     if(!isset($filter->op)){
                         $filter->op = $defaultOperator; // set default operator, if not set

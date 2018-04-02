@@ -14,7 +14,8 @@ return [
     'roles'=> [
         'admin'=>'Admin',
         'basic'=>'Básico',
-        'anonymous'=>'Anônimo'
+        'anonymous'=>'Anônimo',
+        'news_subscriber'=>'Assinante de Newsletter'
     ],
     /*
     |--------------------------------------------------------------------------
@@ -58,7 +59,8 @@ return [
         'updateProfile'=>'Atualizar o próprio perfil',
         'postEmail'=>'Solicitar redefinição de senha',
         'postReset'=>'Salvar redefinição de senha',
-        'toggleDone'=> 'Alternar estado'
+        'toggleDone'=> 'Alternar estado',
+        'registerNewsLetterSubscriberUser'=> 'Registrar assinante de newsletter'
     ],
     /*
     |--------------------------------------------------------------------------

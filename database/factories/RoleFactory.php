@@ -35,6 +35,13 @@ $factory->state(App\Role::class, 'anonymous', function () {
     ];
 });
 
+$factory->state(App\Role::class, 'news_subscriber', function () {
+    return [
+        'title' => \Lang::get("auth.roles.news_subscriber"),
+        'slug' => 'news_subscriber'
+    ];
+});
+
 $factory->state(App\Role::class, 'invalid', function () {
     return [
         'title' => null,

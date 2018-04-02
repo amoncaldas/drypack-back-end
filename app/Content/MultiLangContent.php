@@ -4,7 +4,6 @@ namespace App\Content;
 
 use App\BaseModel;
 use App\User;
-
 use Illuminate\Database\Eloquent\Model;
 
 class MultiLangContent extends BaseModel

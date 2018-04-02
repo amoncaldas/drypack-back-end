@@ -73,6 +73,9 @@ return [
     'timezone'             => ':attribute deve ser uma timezone válida.',
     'unique'               => ':attribute já está em uso.',
     'url'                  => 'O formato de :attribute é inválido.',
+    'same_parent'          => ':resources em todas as versões de cultura devem ter o mesmo ascendente',
+    'required_in_all_locales'       => 'Todos os campos das :resources ,  em todas as versões de cultura são obrigatórios',
+    'unique_in_all_locale'          => ':resources em todas as versões de culturas devem ter um nome e slug únicos',
 
     /*
     |--------------------------------------------------------------------------
@@ -121,7 +124,9 @@ return [
         'subject' => 'Assunto',
         'message' => 'Mensagem',
         'date' => 'Data',
-        'image' => 'Imagem'        
+        'image' => 'Imagem',
+        'categories'=> 'categorias',
+        'category'=> 'categoria'
     ],
 
 ];

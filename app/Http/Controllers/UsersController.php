@@ -182,6 +182,7 @@ class UsersController extends CrudController
         try{
             Mail::to($user)->send(new ConfirmNewUser($user));
         } catch(\Exception $ex) {
+            // if it is not possible to send the email, a warning header will be added to the request
             $request->merge(["warning"=>'new_registration_email_could_not_be_sent']);
         }
     }
@@ -204,7 +205,7 @@ class UsersController extends CrudController
             'password' => 'confirmed|min:6',
         ]);
 
-        $user->fill(Input::only('name', 'email'));
+        $user->fill(Input::only('name', 'email', 'bio'));
 
         // The locale is saved for the case when scheduled services
         // are ran to send e-mails to users. In this case, it is needed
@@ -229,5 +230,24 @@ class UsersController extends CrudController
         $user->roles = $user->roles()->get()->toArray();
 
         return $user;
+    }
+
+    public function registerNewsLetterSubscriberUser(Request $request) {
+        $this->validate($request, [
+            'name'=>'min:3',
+            'email'=>'required|unique:users,email'
+        ]);
+
+        $email = $request->input('email');
+        $existingUser = User::where('email',$email)->first();
+        $subscriberRole = Role::where('slug','=',Role::newsSubscriberRoleSlug())->first();
+        if(!$existingUser){
+            $user = new User();
+            $user->fill(Input::only('name','email'));
+            $user->save();
+            $user->roles()->save($subscriberRole);
+        } else {
+            $existingUser->roles()->save($subscriberRole);
+        }
     }
 }

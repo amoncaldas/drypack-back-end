@@ -4,6 +4,7 @@ namespace App\Content;
 
 use App\BaseModel;
 use App\User;
+use App\Content\Category;
 use App\Content\MultiLangContent;
 use App\Content\Media;
 use App\Content\Section;
@@ -100,8 +101,7 @@ abstract class Content extends BaseModel
     */
     public function categories()
     {
-        // to be implemented
-        //return $this->belongsToMany(Category::class, 'section_id', 'id');
+        return $this->belongsToMany(Category::class, 'category_content', 'content_id', 'category_id');
     }
 
     /**

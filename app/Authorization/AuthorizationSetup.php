@@ -12,6 +12,7 @@ use Illuminate\Support\Collection;
 use App\Role;
 use App\User;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Config;
 
 
 class AuthorizationSetup
@@ -96,14 +97,54 @@ class AuthorizationSetup
             // We get all the actions of each resource that has no action filter
             $allowed_actions = Action::whereIn('resource_slug', $resource_slugs)->get();
 
+            $all_resources = Config::get('authorization.resources');
+
             // We add below the specified action for a resource
             foreach($resource_slugs_and_actions as $ra) {
+                self::validateFilter($ra, $all_resources);
                 $action = Action::where('resource_slug', $ra['resource_slug'])->where('action_type_slug', $ra['action_type_slug'])->get();
                 $allowed_actions->push($action->first());
             }
         }
         // all the actions, from resource only filter or "resource:action" filter are returned
         return $allowed_actions;
+    }
+
+    /**
+     * Checks if a resource and action is present in the authorisation config file
+     *
+     * @param array $resource_slug_and_actions
+     * @param array $all_resources
+     * @return void
+     */
+    protected static function validateFilter(array $resource_slug_and_actions, array $all_resources) {
+        $ra = $resource_slug_and_actions;
+
+        // if the resource does not exist in the resource array, stop and raise an exception
+        if(!isset($all_resources[$ra['resource_slug']])) {
+            throw new \Exception("Resource '".$ra['resource_slug']."' is not defined at config/authorization.php. Check the config file!");
+        }
+        $resource = $all_resources[$ra['resource_slug']];
+        $action = $ra["action_type_slug"];
+        $found = false;
+
+        // if the resource actions attribute is not an array, stop and raise an exception
+        if(!is_array($resource["actions"])) {
+            $found = false;
+        } else {
+            // check all the resource action to try to find the action
+            foreach ($resource["actions"] as $key => $value) {
+                // if the value is an array (may using dependence), check the key slug, if not, check the value
+                $found = is_array($value)? $value["slug"] == $action: $value === $action;
+                if($found === true) {
+                    break;
+                }
+            }
+        }
+        if(!$found) {
+            throw new \Exception("Action '".$ra['action_type_slug']."' is not defined in config/authorization.php at the key '".$ra['resource_slug']."actions.'. Check the config file!");
+        }
+
     }
 
     /**

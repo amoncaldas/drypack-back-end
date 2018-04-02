@@ -49,6 +49,10 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'i18n']], function () {
         Route::post('password/reset', 'PasswordController@postReset');
         Route::resource('sections', 'Content\SectionController');
         Route::resource('pages', 'Content\PageController');
+        Route::resource('categories', 'Content\CategoryController');
+
+        // This route maps the request to /domain-data/{domainName} using generic service
+        Route::get('/domain-data/{domainName}', 'Content\DomainDataController@mapAndGet');
 
         // Samples
         Route::resource('projects', 'Samples\ProjectsController');
@@ -57,6 +61,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'i18n']], function () {
 
         Route::resource('mails', 'MailsController', ['only' => ['store']]);
         Route::put('profile', 'UsersController@updateProfile');
+        Route::post('nesw/subscribe', 'UsersController@registerNewsLetterSubscriberUser');
 
         // This route maps the request to /authorization/actions using generic service
         Route::get('/authorization/{domainName}', 'AuthorizationController@mapAndGet');
@@ -67,7 +72,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'i18n']], function () {
 
         Route::get('audit', 'AuditController@index');
         Route::get('audit/models', 'AuditController@models');
-        Route::resource('users', 'UsersController', ['except' => ['updateProfile']]);
+        Route::resource('users', 'UsersController', ['except' => ['updateProfile', 'registerNewsLetterSubscriberUser']]);
         Route::group(['prefix' => 'dynamic-query'], function () {
             Route::get('/', 'DynamicQueryController@index');
             Route::get('models', 'DynamicQueryController@models');
