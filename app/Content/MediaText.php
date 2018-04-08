@@ -3,8 +3,9 @@
 namespace App\Content;
 
 use App\Content\Content;
+use App\BaseModel;
 
-class MediaText extends Content
+class MediaText extends BaseModel
 {
     /**
      * The database table used by the model.
@@ -19,15 +20,6 @@ class MediaText extends Content
      * @var array
      */
     protected $fillable = ['title','desc','locale','media_id'];
-
-    /**
-     * Get the content type of the concreet class
-     *
-     * @return string
-     */
-    protected function getContentType() {
-        return "media_text";
-    }
 
 
     /**

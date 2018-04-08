@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\Http\Controllers\CrudController;
 use Illuminate\Database\Eloquent\Model;
+use \Auth;
 
 
 abstract class BaseMultiLangContentController extends CrudController
@@ -55,7 +56,9 @@ abstract class BaseMultiLangContentController extends CrudController
         $model = $query->getModel();
         $model->setTranslationRelationTarget($this->getTranslationRelationTarget());
         $query->setModel($model);
-        $query = $query->with("translations")->with("author")->where("type",$this->getContentType());
+        $query = $query->with("author")->with("translations")->whereHas('translations', function ($query) use($request) {
+            $query->where('type', $this->getContentType());
+        });
     }
 
 
@@ -71,21 +74,38 @@ abstract class BaseMultiLangContentController extends CrudController
         if($translations && count($translations) > 0){
             foreach ($translations as $trans_arr) {
                 $trans_arr['multi_lang_content_id'] = $content->id;
-                $klass = $this->getTranslationModel();
-                $translation = new $klass($trans_arr);
-                $proceedSave = true;
+                $this->saveTranslation($request, $trans_arr);
+            }
+        }
+    }
 
-                // the derived controller class can cancel the auto save if it returns false
-                if (method_exists($this, "beforeSaveTranslation" )) {
-                    $proceedSave = $this->beforeSaveTranslation($request, $translation, $trans_arr);
-                }
-                // if proceedSave is true or was not returned (is null), the auto save is proceeded
-                if($proceedSave === true || $proceedSave === null) {
-                    $translation->save();
-                    if (method_exists($this, "afterSaveTranslation" )) {
-                        $this->afterSaveTranslation($request, $translation);
-                    }
-                }
+    /**
+     * Save a translation
+     *
+     * @param Request $request
+     * @param array $trans_arr
+     * @return void
+     */
+    function saveTranslation(Request $request, array $trans_arr) {
+        $klass = $this->getTranslationModel();
+
+        if(isset($trans_arr["id"])) { // it is an update
+            $translation = $klass::find($trans_arr["id"]);
+            $translation->fill($trans_arr);
+        } else { // it is a create new
+            $translation = new $klass($trans_arr);
+        }
+        $proceedSave = true; // the default behavior is to proceed
+
+        // the derived controller class can cancel the auto save if it returns false
+        if (method_exists($this, "beforeSaveTranslation" )) {
+            $proceedSave = $this->beforeSaveTranslation($request, $translation, $trans_arr);
+        }
+        // if proceedSave is true or was not returned (is null), the auto save is proceeded
+        if($proceedSave === true || $proceedSave === null) {
+            $translation->save();
+            if (method_exists($this, "afterSaveTranslation" )) {
+                $this->afterSaveTranslation($request, $translation, $trans_arr);
             }
         }
     }
@@ -100,8 +120,20 @@ abstract class BaseMultiLangContentController extends CrudController
      */
     protected function beforeUpdate(Request $request, Model $content) {
         $content->setTranslationRelationTarget($this->getTranslationRelationTarget());
-        $content->translations()->delete();
     }
+
+    /**
+     * When a multi lang content is freshed it is needed to set the target translation relation
+     * define din the parent controller
+     *
+     * @param Request $request
+     * @param Model $content
+     * @return void
+     */
+    protected function afterFresh(Request $request, Model $content) {
+        $content->setTranslationRelationTarget($this->getTranslationRelationTarget());
+    }
+
 
     /**
      * Before save, set the content type and the author id
@@ -112,6 +144,6 @@ abstract class BaseMultiLangContentController extends CrudController
      */
     protected function beforeSave(Request $request, Model $content) {
         $content->type = $this->getContentType();
-        $content->owner_id = \Auth::user()->id;
+        $content->owner_id = Auth::user()->id;
     }
 }

@@ -6,15 +6,26 @@ use App\Content\Content;
 
 class Page extends Content
 {
-    /**
-     * The database table used by the model.
-     *
-     * @var string
-     */
-    protected $table = "pages";
-
     protected function getContentType() {
         return "page";
+    }
+
+    public function newQuery()
+    {
+        $query = parent::newQuery();
+        $type = $this->getContentType();
+        $query = $query->where('content_type','=', $type);
+        return $query;
+    }
+
+    /**
+     * Get the target relation class with namespace
+     *
+     * @return string
+     */
+    public function getTranslationRelationTarget()
+    {
+        return "App\Content\Page";
     }
 
      /**
@@ -24,11 +35,6 @@ class Page extends Content
      */
     public function toArray() {
         $data = parent::toArray();
-        $data["url"] = [
-            "slug" => $data["slug"],
-            "section_id" => $data["section_id"],
-            "content_id" => $data["id"]
-        ];
         return $data;
     }
 }

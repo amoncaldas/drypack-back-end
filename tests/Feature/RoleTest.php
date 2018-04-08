@@ -37,7 +37,7 @@ class RoleTest extends TestCase
         $role->title = $this->faker->name;
 
         // add permissions to the role
-        $actions_allowed = ["authentication", "password", "project", "users:updateProfile"];
+        $actions_allowed = ["authentication", "password", "project", "user:updateProfile"];
 
         // The line below will store the actions to the role in DB
         AuthorizationSetup::setResourcesActionsForRole($actions_allowed, $role);

@@ -21,6 +21,9 @@ class CreateAuthorContentTable extends Migration {
             $table->foreign('author_id')->references('id')->on('users')
                 ->onUpdate('cascade')->onDelete('cascade');
 
+            $table->foreign('content_id')->references('id')->on('contents')
+                ->onUpdate('cascade')->onDelete('cascade');
+
             $table->primary(['author_id', 'content_id', 'content_type']);
         });
     }

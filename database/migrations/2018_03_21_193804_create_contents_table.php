@@ -3,7 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 
-class CreatePagesTable extends Migration
+class CreateContentsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -12,26 +12,24 @@ class CreatePagesTable extends Migration
      */
     public function up()
     {
-        Schema::create('pages', function(Blueprint $table) {
-            $table->increments('id');
+        Schema::create('contents', function(Blueprint $table) {
             $table->string('title');
-            $table->string('slug');
             $table->string('locale');
+            $table->integer('section_id')->unsigned()->nullable();
+            $table->string('slug');
+            $table->increments('id');
+            $table->integer('order')->nullable();
+            $table->string('content_type');
             $table->string('status');
             $table->text('content')->nullable();
             $table->string('abstract')->nullable();
             $table->string('short_desc')->nullable();
             $table->string('password')->nullable();
-
             $table->integer('featured_image_id')->nullable();
             $table->foreign('featured_image_id')->references('id')->on('medias');
-
             $table->integer('multi_lang_content_id')->nullable();
             $table->foreign('multi_lang_content_id')->references('id')->on('multi_lang_contents')->onUpdate('cascade')->onDelete('cascade');
-
-            $table->integer('section_id')->nullable();
-            $table->foreign('section_id')->references('id')->on('sections')->onUpdate('cascade')->onDelete('cascade');
-
+            $table->foreign('section_id')->references('id')->on('sections')->onDelete('set null');
             $table->timestampTz('created_at');
             $table->timestampTz('updated_at');
         });
@@ -44,6 +42,6 @@ class CreatePagesTable extends Migration
      */
     public function down()
     {
-        Schema::drop('pages');
+        Schema::drop('contents');
     }
 }

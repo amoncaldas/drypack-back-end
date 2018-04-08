@@ -136,7 +136,7 @@ trait Actions
 
         $messages = [];
         if(method_exists($this,'messages')) {
-            $messages = $this->messages();
+            $messages = $this->messages($request);
         }
 
         $this->validate($input, $this->getValidationRules($request, $obj),$messages);
@@ -156,7 +156,10 @@ trait Actions
             return Response::json(['error' => 'messages.duplicatedResourceError'], HttpResponse::HTTP_CONFLICT);
         }
 
-        $response = response($obj->fresh());
+        $freshed = $obj->fresh();
+        $this->callback('afterFresh', $request, $freshed);
+
+        $response = response($freshed);
 
         if($request->warning != null) {
             $response->header("Warning", $request->warning);

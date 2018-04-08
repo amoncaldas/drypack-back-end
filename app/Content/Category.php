@@ -46,9 +46,11 @@ class Category extends BaseModel
     public function toArray() {
         // get the original array to be displayed
         $data = parent::toArray();
+
         // add relation data
         $data['relations_count'] = \DB::table('category_content')->where('category_id', '=', $this->id)->count();
         if (isset($data["parent_category_id"])) {
+            // TODO: add explanation!
             $data['parent_multi_lang_content_id'] = Category::where("id", $data["parent_category_id"])->first()->multi_lang_content_id;
         }
         return $data;

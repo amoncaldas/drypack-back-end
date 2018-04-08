@@ -4,6 +4,7 @@ namespace App\Content;
 
 use App\BaseModel;
 use App\Content\MultiLangContent;
+use App\User;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -21,7 +22,7 @@ class Section extends BaseModel
      *
      * @var array
      */
-    protected $fillable = ['title', 'url', 'locale', 'multi_lang_content_id'];
+    protected $fillable = ['title', 'url', 'locale', 'multi_lang_content_id', 'has_single', 'content'];
 
     /**
     * Return the relationship to the project to which the the task belongs to
@@ -32,4 +33,12 @@ class Section extends BaseModel
         return $this->belongsTo(MultiLangContent::class);
     }
 
+    /**
+    * Return the relationship to the medias
+    * @return object
+    */
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'user_section', 'section_id', 'user_id');
+    }
 }

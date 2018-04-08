@@ -88,8 +88,8 @@ class CategoryController extends BaseMultiLangContentController
         $categories = Lang::get('validation.attributes.categories');
         return [
             "same"=> Lang::get('validation.same_parent', ['resources' => $categories]),
-            "required"=> Lang::get('validation.required_in_all_locales', ['item' => Lang::get('validation.attributes.category')]),
-            "unique"=> Lang::get('validation.required_in_all_locales', ['resources' => $categories])
+            "required"=> Lang::get('validation.all_required_in_all_locales', ['item' => Lang::get('validation.attributes.category')]),
+            "unique"=> Lang::get('validation.unique_name_and_slug_in_all_locale', ['resources' => $categories])
         ];
     }
 
@@ -102,6 +102,11 @@ class CategoryController extends BaseMultiLangContentController
      */
     protected function applyFilters(Request $request, $query) {
         parent::applyFilters($request, $query);
+
+        $query = $query->with(['translations' => function ($query) use($request) {
+            $query->with('parentCategory');
+        }]);
+
         if ($request->has('locale')) {
             $query = $query->whereHas('translations', function ($query) use($request) {
                 $query->where('locale', $request->locale);

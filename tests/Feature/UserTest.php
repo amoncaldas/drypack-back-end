@@ -315,7 +315,6 @@ class UserTest extends TestCase
 
         $response->assertStatus(200);
         $responseData = $response->json();
-        $this->assertCount($firstAdmin->roles->count(), $responseData['roles']);
         $this->assertEquals('mandatory_admin_profile_auto_added', $response->headers->get('Warning'));
     }
 }

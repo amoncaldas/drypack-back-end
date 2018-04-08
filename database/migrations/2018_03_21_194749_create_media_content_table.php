@@ -21,6 +21,9 @@ class CreateMediaContentTable extends Migration {
             $table->foreign('media_id')->references('id')->on('medias')
                 ->onUpdate('cascade')->onDelete('cascade');
 
+            $table->foreign('content_id')->references('id')->on('contents')
+                ->onUpdate('cascade')->onDelete('cascade');
+
             $table->primary(['media_id', 'content_id', 'content_type']);
         });
     }

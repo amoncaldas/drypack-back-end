@@ -100,6 +100,8 @@ class User extends BaseModel implements AuthenticatableContract, CanResetPasswor
         return $this->passwordContainer;
     }
 
+    public $allowed_actions;
+
     /**
      * Set the password in the container
      *
@@ -276,8 +278,10 @@ class User extends BaseModel implements AuthenticatableContract, CanResetPasswor
      */
     public function toArray() {
         $data = parent::toArray();
-        $data['roles'] = $this->roles()->get()->toArray();
-        $data['allowed_actions'] = Authorization::userAllowedActions($this);
+        // $data['roles'] = $this->roles()->get()->toArray();
+        if($this->allowed_actions){
+          $data['allowed_actions'] = $this->allowed_actions;
+        }
         return $data;
     }
 }

@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateCAtegoryContentTable extends Migration {
+class CreateCategoryContentTable extends Migration {
 
     /**
      * Run the migrations.
@@ -19,6 +19,9 @@ class CreateCAtegoryContentTable extends Migration {
             $table->string('content_type')->unsigned();
 
             $table->foreign('category_id')->references('id')->on('categories')
+                ->onUpdate('cascade')->onDelete('cascade');
+
+            $table->foreign('content_id')->references('id')->on('contents')
                 ->onUpdate('cascade')->onDelete('cascade');
 
             $table->primary(['category_id', 'content_id', 'content_type']);

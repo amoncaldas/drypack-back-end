@@ -76,8 +76,13 @@ return [
     'unique'               => 'The :attribute has already been taken.',
     'url'                  => 'The :attribute format is invalid.',
     'same_parent'          => 'The :resources in all locale verson must have the same parent',
-    'required_in_all_locales'       => 'All the fields of the :resources , in all locales versions are mandatory',
-    'unique_in_all_locale'          => 'The :resources in all locale versions must have unique name and slug',
+    'all_required_in_all_locales'       => 'All the fields of the :resources , in all locale versions are mandatory',
+    'field_required_in_all_locales'       => 'The field :field is required in all locale versions',
+    'field_min_in_all_locales'       => 'The field :field must have at least :min characters in all locale versions',
+    'there_are_required_fields'       => 'There are required field(d) not filled in one or more locale verion(s)',
+    'unique_name_and_slug_in_all_locale'          => 'The :resources in all locale versions must have unique name and slug',
+    'unique_title_and_slug_in_all_locale'          => 'The :resources in all locale versions must have unique title and slug',
+    'at_least_one_translation_required' => 'The fields required must be informed in at least one of the available cultures',
 
     /*
     |--------------------------------------------------------------------------
@@ -128,7 +133,16 @@ return [
         'date' => 'Date',
         'image' => 'Image',
         'categories'=> 'categories',
-        'category'=> 'category'
+        'category'=> 'category',
+        'pages'=> 'pages',
+        'page'=> 'page',
+        'section'=> 'section',
+        'sections'=> 'sections',
+        'locale'=> 'locale',
+        'content' => 'content',
+        'abstract' => 'abstract',
+        'short_desc' => 'short description',
+        'featured_image_id' => 'featured image'
     ],
 
 ];

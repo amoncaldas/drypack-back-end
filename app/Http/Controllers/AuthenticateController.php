@@ -8,7 +8,9 @@ use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
+use App\Authorization\Authorization;
 use App\User;
+
 
 class AuthenticateController extends Controller
 {
@@ -48,11 +50,7 @@ class AuthenticateController extends Controller
     public function getAuthenticatedUser()
     {
         $user = \Auth::user();
-
-        // Get simple string array with only a slug
-        $user->roles = $user->roles()->get()->toArray();
-
-        // The token is valid and we have found the user via the sub claim
+        $user->allowed_actions = Authorization::userAllowedActions($user);
         return response()->json(compact('user'));
     }
 }
