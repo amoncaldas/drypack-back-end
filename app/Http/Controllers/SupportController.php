@@ -20,9 +20,11 @@ class SupportController extends Controller
     {
         $messages = array_merge(trans('auth.messages'), trans('business'), trans('mail'));
         $attributes = trans('validation.attributes');
+        $auth =  trans('auth');
         return [
             'attributes' => $attributes,
-            'messages' => $messages
+            'messages' => $messages,
+            'auth' => $auth
         ];
     }
 

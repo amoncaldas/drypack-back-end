@@ -22,7 +22,7 @@ class CreateContentsTable extends Migration
             $table->string('content_type');
             $table->string('status');
             $table->text('content')->nullable();
-            $table->string('abstract')->nullable();
+            $table->text('abstract')->nullable();
             $table->string('short_desc')->nullable();
             $table->string('password')->nullable();
             $table->integer('featured_image_id')->nullable();
@@ -32,6 +32,7 @@ class CreateContentsTable extends Migration
             $table->foreign('section_id')->references('id')->on('sections')->onDelete('set null');
             $table->timestampTz('created_at');
             $table->timestampTz('updated_at');
+            $table->dateTimeTz('published_at')->nullable();
         });
     }
 

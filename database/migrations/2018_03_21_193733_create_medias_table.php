@@ -19,7 +19,8 @@ class CreateMediasTable extends Migration
             $table->string('mimetype');
             $table->string('length')->nullable();
             $table->string('file_name')->nullable();
-            $table->string('content')->nullable();
+            $table->text('content')->nullable();
+            $table->text('thumb')->nullable();
             $table->string('url')->nullable();
             $table->string('author_name')->nullable();
 

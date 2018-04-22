@@ -23,7 +23,7 @@ return [
         ],
         'content' => [
             'path' => app_path("Content"),
-            'exclusions'=>['Content.php'],
+            'exclusions'=>['Content.php', 'ContentStatus.php'],
             'namespace'=>'App\Content'
         ]
     ],

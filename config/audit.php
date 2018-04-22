@@ -98,4 +98,9 @@ return [
     |
     */
     'strict' => true,
+
+    /**
+     * Auditable events
+     */
+    'events'=> ['created', 'updated', 'deleted', 'restored']
 ];

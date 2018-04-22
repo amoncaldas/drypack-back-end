@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Input;
 use \Auth;
 use Lang;
+use \App;
 
 
 class SectionController extends BaseMultiLangContentController
@@ -45,41 +46,62 @@ class SectionController extends BaseMultiLangContentController
     }
 
     /**
-     * Run the parent applyFilters and add the filters
+     * Apply filters to translations as conditions to get multilanguage content
      *
      * @param Request $request
-     * @param [type] $query
+     * @param Illuminate\Database\Eloquent\Builder $query
      * @return void
      */
-    protected function applyFilters(Request $request, $query) {
-        parent::applyFilters($request, $query);
-
-        $query = $query->with(['translations' => function ($query) use($request) {
-            $query->with('users');
-        }]);
-
-        // local function to add current user as a filter
-        $filterByUser = function($query) {
-            // if the current user is not the first admin,
-            // only search for section which the curretn user is linked to
-            if(!Auth::user()->isFirstAdmin()) {
-                $query = $query->whereHas('users', function ($query) {
-                    $query->where('id', Auth::user()->id);
-                });
-            }
-        };
-        // if a locale was passed, add it as a filter and also the current user
+    protected function applyWhereTranslationHasFilters($request, $query) {
         if ($request->has('locale')) {
-            $query = $query->whereHas('translations', function ($query) use($request, $filterByUser) {
-                $query->where('locale', $request->locale);
-                $filterByUser($query);
-            });
+            $query = $query->where('locale', $request->locale);
         }
-        // if not, add only the current user as a filter
-        else {
-            $query = $query->whereHas('translations', function ($query) use($filterByUser) {
-                $query = $filterByUser($query);
-            });
+
+        $user = $this->getUser();
+        $query = $query->whereHas('users', function ($q) use ($user) {
+            $q->where('id', $user->id);
+        });
+    }
+
+    /**
+     * Apply with/join rules and filters to translations as conditions to get multilanguage content
+     *
+     * @param Request $request
+     * @param Illuminate\Database\Eloquent\Builder $query
+     * @return void
+     */
+    protected function applyWithTranslationRules($request, $query) {
+        $query = $query->with('users');
+
+        // if it is not the admin environment, we only get the current language translation
+        // to avoid the overhead
+        if(!$this->isAdmin()) {
+            $query->where('locale', App::getLocale());
+        }
+    }
+
+    /**
+     * Before save, validate unique fields
+     *
+     * @param Request $request
+     * @param Model $content
+     * @return void
+     */
+    protected function beforeSave(Request $request, Model $content) {
+        parent::beforeSave($request, $content);
+
+        foreach ($request->input('translations') as $key => $value) {
+            $exists = Section::where('locale', $value['locale'])
+                ->where('multi_lang_content_id', '<>', $request->id)
+                ->where('url', $value['url'])->exists();
+
+            if($exists) {
+                $this->validator->errors()->add('unique',
+                    Lang::get('validation.unique_name_and_slug_in_all_locales',
+                    ['resources' => Lang::get('validation.attributes.sections')])
+                );
+                $this->throwValidationException($request, $this->validator);
+            }
         }
     }
 
@@ -90,7 +112,7 @@ class SectionController extends BaseMultiLangContentController
      * @return void
      */
     protected function afterSaveTranslation(Request $request, Model $translation, $trans_arr) {
-        if(isset($trans_arr['users']) && count($trans_arr['users']) > 0) {
+        if(isset($trans_arr['users'])) {
             $translation->users()->detach();
             $ids = array_pluck($trans_arr['users'], 'id');
             $translation->users()->attach($ids);
@@ -106,22 +128,12 @@ class SectionController extends BaseMultiLangContentController
      */
     protected function getValidationRules(Request $request, Model $obj)
     {
-        //TODO: add custom messages to each validation
         $validations = [
             'translations' => 'required|array|min:1',
             'translations.*.locale'=>'required',
             'translations.*.title'=>'required',
             'translations.*.url'=>'required'
         ];
-
-        if($request->has('translations')) {
-            foreach ($request->input('translations') as $key => $value) {
-                // Append the id in the unique validation to avoid failing in the update validation
-                $uniqueFilterAppend = isset($value["id"])?  ','.$value["id"] : '';
-                $validations["translations.$key.title"] = "unique:sections,title".$uniqueFilterAppend;
-                $validations["translations.$key.url"] = "unique:sections,url".$uniqueFilterAppend;
-            }
-        }
 
         return $validations;
     }
@@ -134,7 +146,7 @@ class SectionController extends BaseMultiLangContentController
     protected function messages() {
         return [
             "required"=> Lang::get('validation.all_required_in_all_locales', ['item' => Lang::get('validation.attributes.section')]),
-            "unique"=> Lang::get('validation.unique_name_and_slug_in_all_locale', ['resources' => Lang::get('validation.attributes.sections')])
+            "unique"=> Lang::get('validation.unique_name_and_slug_in_all_locales', ['resources' => Lang::get('validation.attributes.sections')])
         ];
     }
 }

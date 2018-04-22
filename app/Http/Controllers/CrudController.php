@@ -14,6 +14,8 @@ use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\Callbacks;
 use App\Http\Traits\Actions;
+use JWTAuth;
+use App\Util\DryPack;
 
 abstract class CrudController extends Controller
 {
@@ -33,4 +35,47 @@ abstract class CrudController extends Controller
      * @return void
      */
     abstract protected function getValidationRules(Request $request, Model $obj);
+
+    /**
+     * Check whenever there is a authenticated user
+     *
+     * @return boolean
+     */
+    protected function isAuthenticated() {
+        $user = $this->getUser();
+        return isset($user);
+    }
+
+    /**
+     * Get the current logged user
+     *
+     * @return void
+     */
+    protected function getUser() {
+        $user = JWTAuth::parseToken()->authenticate();
+        return $user;
+    }
+
+    /**
+     * Verifies if the request was made from the admin url
+     *
+     * @return boolean
+     */
+    protected function isAdmin() {
+        $origin = request()->header("referer");
+        $root = request()->root();
+        $result = $origin === "$root/admin" && !$this->isExternalRequest();
+        return $result;
+    }
+
+    /**
+     * Verifies if the request was made from the admin url
+     *
+     * @return boolean
+     */
+    protected function isExternalRequest() {
+        $origin = request()->header("referer");
+        $result = DryPack::startsWith($origin, env('APP_URL'));
+        return $result;
+    }
 }

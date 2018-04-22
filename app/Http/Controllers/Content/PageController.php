@@ -43,4 +43,27 @@ class PageController extends ContentController
     {
         return Page::class;
     }
+
+    /**
+     * Return the content validation rules
+     *
+     * @param Request $request
+     * @param Model $content
+     * @return array $validations rules
+     */
+    protected function getValidationRules(Request $request, Model $content)
+    {
+        // Get the parent full validation list
+        $validations = parent::getValidationRules($request, $content);
+
+        // check if there are translations on the request
+        if($request->has('translations')) {
+            foreach ($request->translations as $key => $value) {
+                // remove the abstract request, as it is not necessary in pages
+                unset($validations["translations.*.abstract"]);
+            }
+        }
+
+        return $validations;
+    }
 }

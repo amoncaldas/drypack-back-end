@@ -69,6 +69,28 @@ class Authorization
     }
 
     /**
+     * Get the actions of a resource;
+     *
+     * @param string $slug
+     * @return array|null
+     */
+    public static function getResourceActions($slug) {
+        $resource = self::getResource($slug);
+
+        $actions = [];
+
+        foreach ($resource['actions'] as $key => $value) {
+            if(is_array($value)) {
+                $actions[] = $value["slug"];
+            } else {
+               $actions[] = $value;
+            }
+        }
+
+        return $actions;
+     }
+
+    /**
      * Get the action types that will be treated in the Dynamic Authorization.
      *
      * @return array
@@ -185,6 +207,27 @@ class Authorization
         return $verifiable_controller;
     }
 
+    /**
+     * Verifies whenever a resource should be verified or not
+     *
+     * @param string $controller
+     * @param string $action_desired
+     * @return false|Action
+     */
+    public static function verifiableResource($resource_slug){
+        // Retrive the resource array in config/authorization.php by the controller name
+        $verifiable_resource = Authorization::getResource($resource_slug);
+
+        // If the resource does not exist and not listed in config/authorization.php we allow or not
+        // based in the config value of allow_not_listed_controllers
+        if(!isset($verifiable_resource)) {
+           return false;
+        }
+
+        $verifiable_resource["slug"] = $resource_slug;
+        return $verifiable_resource;
+    }
+
 
     /**
      * Verifies whenever an action should be verified or not
@@ -213,8 +256,12 @@ class Authorization
      * @param string $action_desired
      * @return boolean|Action
      */
-    public static function actionOrResult($controller, $action_desired){
-        $verifiable_resource = self::verifiableController($controller);
+    public static function actionOrResult($controller_or_slug, $action_desired, bool $byResourceSlug = null){
+        if($byResourceSlug === true) {
+            $verifiable_resource = self::verifiableResource($controller_or_slug);
+        } else {
+            $verifiable_resource = self::verifiableController($controller_or_slug);
+        }
         if ($verifiable_resource === false) {
             return Config::get('authorization.allow_not_listed_controllers') === true;
         }
@@ -236,6 +283,33 @@ class Authorization
      */
     public static function hasPermission($controller, $action_desired, $user = null) {
         $action_or_result = self::actionOrResult($controller, $action_desired);
+        if (is_bool($action_or_result)) {
+            return $action_or_result;
+        }
+
+        // If a user is not passed, we get the current logged one
+        $user = $user? $user: \Auth::user();
+
+        // Get all user's role IDs
+        $user_roles_ids = $user->roles()->get()->pluck('id')->all();
+
+        // If we can find the resource and the action, we check in the DB if at least a role attached to the
+        // user has the permission to run this action
+        $count = \DB::table('role_actions')->whereIn('role_id', $user_roles_ids)->where('action_id',$action_or_result->id)->count();
+
+        // return true or false based in the count
+        return $count > 0;
+    }
+
+    /**
+     * Checks if a given user has the permission to run a given action (method) in a given resource (controller)
+     * @param  string  $controller - full controller name, including namespace
+     * @param  string  $action - action slug (method)
+     * @param  \App\User|null  $user - instance of User. If not passed, we get the current logged user.
+     * @return boolean - if the user has or not the permission to run the action
+     */
+    public static function hasResourcePermission($resource_slug, $action_desired, $user = null) {
+        $action_or_result = self::actionOrResult($resource_slug, $action_desired, true);
         if (is_bool($action_or_result)) {
             return $action_or_result;
         }

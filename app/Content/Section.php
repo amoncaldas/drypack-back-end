@@ -34,7 +34,7 @@ class Section extends BaseModel
     }
 
     /**
-    * Return the relationship to the medias
+    * Return the relationship to the users
     * @return object
     */
     public function users()

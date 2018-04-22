@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
 use App\Exceptions\BusinessException;
+use App\Authorization\Authorization;
 
 class UsersController extends CrudController
 {
@@ -205,7 +206,7 @@ class UsersController extends CrudController
             'password' => 'confirmed|min:6',
         ]);
 
-        $user->fill(Input::only('name', 'email', 'bio'));
+        $user->fill(Input::only('name', 'email', 'bio', 'image'));
 
         // The locale is saved for the case when scheduled services
         // are ran to send e-mails to users. In this case, it is needed
@@ -228,6 +229,7 @@ class UsersController extends CrudController
 
         //get the roles to return do view
         $user->roles = $user->roles()->get()->toArray();
+        $user->allowed_actions = Authorization::userAllowedActions($user);
 
         return $user;
     }

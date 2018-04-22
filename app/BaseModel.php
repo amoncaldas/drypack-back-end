@@ -48,6 +48,12 @@ class BaseModel extends Model implements AuditableContract
         return $this->hideAttributesInDynamicQuery;
     }
 
+    /**
+     * Allow to add more casts dynamically
+     *
+     * @param array $more_attributes
+     * @return void
+     */
     protected function addCast($more_attributes = [])
     {
         $this->casts = array_merge($this->casts, $more_attributes);

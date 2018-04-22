@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Http\Request;
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -48,7 +47,23 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'i18n']], function () {
         Route::post('password/email', 'PasswordController@postEmail');
         Route::post('password/reset', 'PasswordController@postReset');
         Route::resource('sections', 'Content\SectionController');
+
+        Route::get('/{contentType}/{contentId}/revisions', function(Request $request, $contentType, $contentId) {
+            $klass = "\App\Http\Controllers\Content\\".ucfirst(trim($contentType, "s"))."Controller";
+            $controller = new $klass();
+            return $controller->revisions($request, $contentId);
+        })->where(['content', '(pages|posts)']);
+
+        Route::get('/{contentType}/{contentId}/revisions/{revisionId}', function(Request $request, $contentType, $contentId, $revisionId) {
+            $klass = "\App\Http\Controllers\Content\\".ucfirst(trim($contentType, "s"))."Controller";
+            $controller = new $klass();
+            return $controller->revision($request, $contentId, $revisionId);
+        })->where(['content', '(pages|posts)']);
+
         Route::resource('pages', 'Content\PageController');
+        Route::resource('posts', 'Content\PostController');
+
+
         Route::resource('categories', 'Content\CategoryController');
 
         // This route maps the request to /domain-data/{domainName} using generic service

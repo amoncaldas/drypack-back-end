@@ -51,7 +51,10 @@ class UsersAndRolesSeeder extends Seeder
 
         // We can use resource:action to set an specific action in a resource
         // and set CRUD permissions to the resources "authentication", "project", "task" and "user:updateProfile" to it
-        $actions_filter = ["authentication", "password", "project", "task", "user:updateProfile", "section", "page", "category", "domain-data"];
+        $actions_filter = [
+            "authentication", "password", "project",
+            "task", "user:updateProfile", "section", "page",
+            "category", "domain-data", "post"];
         AuthorizationSetup::setResourcesActionsForRole($actions_filter,$basicRole);
 
         // Create the NORMAL user (if it not exists) and attach the role NORMAL to it
@@ -66,6 +69,10 @@ class UsersAndRolesSeeder extends Seeder
             "project:show",
             "task:index",
             "task:show",
+            "page:index",
+            "page:show",
+            "post:index",
+            "post:show",
             "password",
             "authentication:authenticate",
             "user:registerNewsLetterSubscriberUser"

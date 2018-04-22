@@ -312,6 +312,27 @@ trait GenericService
         return $all_filters;
     }
 
+    /**
+     * Get the value of a filter key, if available
+     *
+     * @param Request $request
+     * @param string $filterKey
+     * @return string|null
+     */
+    public function gsGetfilterValue(Request $request, $filterKey) {
+        $filters = $this->getAttributeFilters($request);
+
+        foreach ($filters as $key => $value) {
+            if ($key === $filterKey) {
+                return $value;
+            }
+            if (is_object($value)) {
+                if(isset($value->$filterKey)) {
+                    return $value->$filterKey;
+                }
+            }
+        }
+    }
 
 
     /**

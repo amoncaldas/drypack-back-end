@@ -38,7 +38,7 @@ class MultiLangContent extends BaseModel
     /**
     * Return the relationship with the parent project
     */
-    public function author()
+    public function owner()
     {
         return $this->belongsTo(User::class, 'owner_id', 'id');
     }
@@ -63,8 +63,26 @@ class MultiLangContent extends BaseModel
         $data = parent::toArray();
         if(isset($data["translations"])){
             $data["locales"] = array_pluck($data["translations"], "locale");
-            $data["urls"] = array_pluck($data["translations"], "url", "locale");
         }
+        return $data;
+    }
+
+    /**
+     * Format/adjust the relations serialized data, transforming translations index array to locale key array
+     *
+     * @return array
+     */
+    public function relationsToArray() {
+        $data = parent::relationsToArray();
+
+        if(isset($data["translations"])) {
+            $translations = $data["translations"];
+            $data["translations"] = [];
+            foreach ($translations as $translation) {
+                $data["translations"][$translation["locale"]] = $translation;
+            }
+        }
+
         return $data;
     }
 

@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Input;
 use App\Util\DryPack;
 use App\Http\Controllers\Content\BaseMultiLangContentController;
 use Lang;
+use \App;
 
 
 class CategoryController extends BaseMultiLangContentController
@@ -89,42 +90,65 @@ class CategoryController extends BaseMultiLangContentController
         return [
             "same"=> Lang::get('validation.same_parent', ['resources' => $categories]),
             "required"=> Lang::get('validation.all_required_in_all_locales', ['item' => Lang::get('validation.attributes.category')]),
-            "unique"=> Lang::get('validation.unique_name_and_slug_in_all_locale', ['resources' => $categories])
+            "unique"=> Lang::get('validation.unique_name_and_slug_in_all_locales', ['resources' => $categories])
         ];
     }
 
     /**
-     * Run the parent applyFilters and add the filters
+     * Apply filters to translations as conditions to get multilanguage content
      *
      * @param Request $request
-     * @param [type] $query
+     * @param Illuminate\Database\Eloquent\Builder $query
      * @return void
      */
-    protected function applyFilters(Request $request, $query) {
-        parent::applyFilters($request, $query);
+    protected function applyWhereTranslationHasFilters($request, $query) {
+        $query = $query->where('locale', $request->locale);
 
-        $query = $query->with(['translations' => function ($query) use($request) {
-            $query->with('parentCategory');
-        }]);
-
-        if ($request->has('locale')) {
-            $query = $query->whereHas('translations', function ($query) use($request) {
-                $query->where('locale', $request->locale);
-            });
-        }
         if($request->has('label')) {
             $query = $query->where('label', 'ilike', '%'.$request->label.'%');
         }
+
         if($request->has('notIn')) {
             $notIn = is_array($request->notIn)? $request->notIn : [$request->notIn];
             $query = $query->whereNotIn('id', $notIn);
         }
     }
 
+    /**
+     * Apply with/join rules and filters to translations as conditions to get multilanguage content
+     *
+     * @param Request $request
+     * @param Illuminate\Database\Eloquent\Builder $query
+     * @return void
+     */
+    protected function applyWithTranslationRules($request, $query) {
+        $query = $query->with('parentCategory');
+
+        // if it is not the admin environment, we only get the current language translation
+        // to avoid the overhead
+        if(!$this->isAdmin()) {
+            $query = $query->where('locale', App::getLocale());
+        }
+    }
+
+    /**
+     * Define the category parent id based on the parent category multilanguage id
+     *
+     * @param Request $request
+     * @param Model $category
+     * @param array $trans_arr
+     * @return void
+     */
     protected function beforeSaveTranslation(Request $request, Model $category, $trans_arr) {
         if(!isset($category->slug)) {
             $category->slug = DryPack::getSlug($category->label);
         }
+
+        // The parent multilanguage content id is sent, instead of the parent category id
+        // because it can be used during validation time to determine if the multiple locale
+        // versions of a category has as parent the "same" category even if they are
+        // different locale versions of the same category
+        // we get the target parent category based on the category parent multilanguage content id
         if (isset($trans_arr["parent_multi_lang_content_id"])) {
             $category->parent_category_id = Category::where("multi_lang_content_id", $trans_arr["parent_multi_lang_content_id"])
                 ->where("locale", $trans_arr["locale"])->first()->id;

@@ -217,11 +217,14 @@ class AuthorizationSetup
                 $permissions[] = ['role_id'=>$role->id, 'action_id'=>$action->id, 'created_at'=>$now, 'updated_at'=>$now];
             }
         }
-        // It is a full refresh, so we remove all the existing actions, and then set the passed actions
-        \DB::table('role_actions')->where("role_id", $role->id)->delete();
 
-        // The allowed actions are inserted in the DB
-        \DB::table('role_actions')->insert($permissions);
+        \DB::transaction(function () use ($role, $permissions) {
+            // It is a full refresh, so we remove all the existing actions, and then set the passed actions
+            \DB::table('role_actions')->where("role_id", $role->id)->delete();
+
+            // The allowed actions are inserted in the DB
+            \DB::table('role_actions')->insert($permissions);
+        });
     }
 
     /**

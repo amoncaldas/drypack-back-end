@@ -80,9 +80,11 @@ return [
     'field_required_in_all_locales'       => 'The field :field is required in all locale versions',
     'field_min_in_all_locales'       => 'The field :field must have at least :min characters in all locale versions',
     'there_are_required_fields'       => 'There are required field(d) not filled in one or more locale verion(s)',
-    'unique_name_and_slug_in_all_locale'          => 'The :resources in all locale versions must have unique name and slug',
-    'unique_title_and_slug_in_all_locale'          => 'The :resources in all locale versions must have unique title and slug',
+    'unique_name_and_slug_in_all_locales'          => 'The :resources in all locale versions must have unique name and slug',
+    'unique_title_and_slug_in_all_locales'          => 'The :resources in all locale versions must have unique title and slug',
     'at_least_one_translation_required' => 'The fields required must be informed in at least one of the available cultures',
+    'field_in'=> 'The field :field must have one of the folowing values: :in',
+    'password_required'=> 'The password field is required when the selected status is password protected',
 
     /*
     |--------------------------------------------------------------------------
@@ -142,7 +144,8 @@ return [
         'content' => 'content',
         'abstract' => 'abstract',
         'short_desc' => 'short description',
-        'featured_image_id' => 'featured image'
+        'featured_image_id' => 'featured image',
+        'contents'=> 'contents'
     ],
 
 ];

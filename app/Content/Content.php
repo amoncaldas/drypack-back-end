@@ -8,6 +8,8 @@ use App\Content\Category;
 use App\Content\MultiLangContent;
 use App\Content\Media;
 use App\Content\Section;
+use App\Content\ContentStatus;
+use \DB;
 
 abstract class Content extends BaseModel
 {
@@ -37,6 +39,7 @@ abstract class Content extends BaseModel
         'password',
         'featured_image_id',
         'multi_lang_content_id',
+        'published_at'
     ];
 
     /**
@@ -114,22 +117,34 @@ abstract class Content extends BaseModel
         return $this->belongsToMany(Category::class, 'category_content', 'content_id', 'category_id');
     }
 
+     /**
+    * Return the relationship to the categories to which the content belongs
+    * @return object
+    */
+    public function related()
+    {
+        return $this->belongsToMany($this->getTranslationRelationTarget(), 'content_related_content', 'content_id', 'related_content_id')
+        ->withPivot('related_content_type');
+    }
+
     /**
      * Get the content url
      *
      * @return string
      */
     public function url(): string {
-        // initially, the section url is the one stored in the database
-        $section_url = $this->section->url;
+        // the root url has a special tretment, to avoid having double slashes
+        $section_url = $this->section->url === "/"? "" : $this->section->url;
 
         // if the section in question is not the default, the locale is prepended to the section url
         if ($this->section->locale !== env("DEFAULT_LOCALE")) {
             $section_url = "/".strtolower($this->section->locale).$section_url;
         }
 
+        $contentTypeTranslated = trans('content-type.'.$this->content_type, [], $this->section->locale);
+
         // build the content url
-        return "$section_url/$this->content_type/$this->slug/$this->id";
+        return "$section_url/$contentTypeTranslated/$this->slug/$this->id";
     }
 
     /**
@@ -140,16 +155,29 @@ abstract class Content extends BaseModel
      */
     public function urls(): array {
         $urls = [];
-        // load the parent multi langue content entity model
-        $mlc = $this->multiLangContent;
 
-        // set the translation relation model
-        $mlc->setTranslationRelationTarget($this->getTranslationRelationTarget());
+        // get raw data from db to avoid the overrad of loading the entire model with all relations
+        $rawContents = DB::table($this->getTable())
+            ->join('sections', 'sections.id', '=', 'contents.section_id')
+            ->where('contents.multi_lang_content_id', $this->multi_lang_content_id)
+            ->get();
 
-        // iterate and populate the url with the urls using the locale as key
-        foreach ($mlc->translations as $translation) {
-            $urls[$translation->locale] = $translation->url();
+        // for each content, build the url
+        foreach ($rawContents as $rawContent) {
+
+            // translate the content type to be used in the url
+            $contentTypeTranslated = trans('content-type.'.$rawContent->content_type, [], $rawContent->locale);
+
+            // the root url has a special tretment, to avoid having double slashes
+            $section_url = $rawContent->url === "/"? "" : $rawContent->url;
+
+            // if the section in question is not the default, the locale is prepended to the section url
+            if ($rawContent->locale !== env("DEFAULT_LOCALE")) {
+                $section_url = "/".strtolower($rawContent->locale).$section_url;
+            }
+            $urls[$rawContent->locale] = "$section_url/$contentTypeTranslated/$rawContent->slug/$rawContent->id";
         }
+
         return $urls;
     }
 
@@ -171,11 +199,16 @@ abstract class Content extends BaseModel
     public function toArray() {
         $data = parent::toArray();
         $data["url_segments"] = [
+            "sectionTitle" => $data["section"]["title"],
             "slug" => $data["slug"],
             "section_id" => $data["section_id"],
             "content_id" => $data["id"]
         ];
-        $data["url"] = $this->url();
+
+        $data["urls"] = $this->urls();
+        $data["url"] = $data["urls"][$data["locale"]];
+
+        $data["statusLabel"] = ContentStatus::translation($data["status"]);
         return $data;
     }
 }

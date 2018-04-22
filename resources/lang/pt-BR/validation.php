@@ -76,11 +76,13 @@ return [
     'same_parent'          => ':resources em todas as versões de cultura devem ter o mesmo ascendente',
     'all_required_in_all_locales'       => 'Todos os campos das :resources ,  em todas as versões de cultura são obrigatórios',
     'field_required_in_all_locales'       => 'O campo :field é obrigatório em todas as versões de cultura',
-    'field_min_in_all_locales'       => 'O campo field :field deve ter no mínimo :min caracteres em todas as culturas',
+    'field_min_in_all_locales'       => 'O campo :field deve ter no mínimo :min caracteres em todas as culturas',
     'there_are_required_fields'       => 'Há campo(s) obrigatórios não preenchido(s) em uma ou mais versão de cultura',
-    'unique_name_and_slug_in_all_locale'          => 'A(o) :resources em todas as versões de cultura deve ter um nome e slug únicos',
-    'unique_title_and_slug_in_all_locale'          => 'A(o) :resources em todas as versões de cultura deve ter título e slug únicos',
+    'unique_name_and_slug_in_all_locales'          => 'A(o) :resources em todas as versões de cultura deve ter um nome e slug únicos',
+    'unique_title_and_slug_in_all_locales'          => 'A(o) :resources em todas as versões de cultura deve ter título e slug únicos',
     'at_least_one_translation_required' => 'Devem ser informado o(s) campo(s) obrigatórios em pelo menos uma das culturas disponíveis',
+    'field_in'=> 'O campo :field deve ser igual a uma das opções :in',
+    'password_required'=> 'O campo senha é obrigatório quando o status selecionado é protegido por senha',
 
     /*
     |--------------------------------------------------------------------------
@@ -140,7 +142,8 @@ return [
         'content' => 'conteúdo',
         'abstract' => 'resumo',
         'short_desc' => 'descrição curta',
-        'featured_image_id' => 'image destaque'
+        'featured_image_id' => 'image destaque',
+        'contents'=> 'contents'
     ],
 
 ];

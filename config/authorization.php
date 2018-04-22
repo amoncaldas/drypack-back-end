@@ -77,7 +77,20 @@ return [
         'postEmail',
         'postReset',
         'toggleDone',
-        'registerNewsLetterSubscriberUser'
+        'registerNewsLetterSubscriberUser',
+
+        /* used by content stuff */
+        'draft',
+        'destroy_others',
+        'index_others',
+        'publish',
+        'password_protect',
+        'send_to_review',
+        'update_others',
+        'update_owner',
+        'revisions',
+        'revision'
+
         /* Custom actions */
 
         /* Your custom actions come here */
@@ -177,7 +190,7 @@ return [
         ],
 
         // Authentication - as we need the user identification to check the permmission
-        // first we log the user in an then we check if s/he has the permission
+        // first we log the user in an then we check if s/he has the permission to authenticate
         'authentication'=>['controller_class'=>'AuthenticateController','restricted_to_logged_users'=>true,
             'actions'=>
             [
@@ -230,7 +243,53 @@ return [
                 ],
                 'destroy',
                 'index',
-                'show'
+                'show',
+                'destroy_others',
+                'index_others',
+                'update_others',
+                'update_owner',
+
+                /* actions that are also used as content status */
+                'draft',
+                'publish',
+                'password_protect',
+                'send_to_review',
+                'revisions',
+                'revision'
+            ]
+        ],
+
+        // Post
+        'post'=>['controller_class'=>'PostController', 'namespace'=>'App\Http\Controllers\Content',
+            'actions'=>[
+                'all',
+                [
+                    'slug'=>'store',
+                    'dependencies'=>[
+                        ['resource_slug'=>'section','action_type_slug'=>'index']
+                    ]
+                ],
+                [
+                    'slug'=>'update',
+                    'dependencies'=>[
+                        ['resource_slug'=>'section','action_type_slug'=>'index']
+                    ]
+                ],
+                'destroy',
+                'index',
+                'show',
+                'destroy_others',
+                'index_others',
+                'update_others',
+                'update_owner',
+
+                /* actions that are also used as content status */
+                'draft',
+                'publish',
+                'password_protect',
+                'send_to_review',
+                'revisions',
+                'revision'
             ]
         ],
 

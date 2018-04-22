@@ -8,7 +8,9 @@ use App\Http\Requests;
 use App\Http\Controllers\CrudController;
 use Illuminate\Database\Eloquent\Model;
 use \Auth;
-
+use \App\Exceptions\BusinessException;
+use App\Authorization\Authorization;
+use \App;
 
 abstract class BaseMultiLangContentController extends CrudController
 {
@@ -56,9 +58,27 @@ abstract class BaseMultiLangContentController extends CrudController
         $model = $query->getModel();
         $model->setTranslationRelationTarget($this->getTranslationRelationTarget());
         $query->setModel($model);
-        $query = $query->with("author")->with("translations")->whereHas('translations', function ($query) use($request) {
+        $query = $query->with("owner");
+
+        $query->whereHas('translations', function ($query) use($request) {
             $query->where('type', $this->getContentType());
+
+            if (method_exists($this, "applyWhereTranslationHasFilters" )) {
+                $this->applyWhereTranslationHasFilters($request, $query);
+            }
         });
+
+        $query = $query->with(['translations' => function ($query) use($request) {
+            if (method_exists($this, "applyWithTranslationRules" )) {
+                $this->applyWithTranslationRules($request, $query);
+            }
+        }]);
+
+        $user = $this->getUser();
+        $resourceActions = Authorization::getResourceActions($this->getContentType());
+        if(isset($resourceActions["index_others"]) && $user->hasResourcePermission($this->getContentType(), "index_others")) {
+            $query->where('owner_id', Auth::user()->id);
+        }
     }
 
 
@@ -119,8 +139,35 @@ abstract class BaseMultiLangContentController extends CrudController
      * @return void
      */
     protected function beforeUpdate(Request $request, Model $content) {
+        $user = $this->getUser();
+        $resourceActions = Authorization::getResourceActions($this->getContentType());
+
+        if($content->owner_id !== $user->id &&
+            isset($resourceActions["update_others"]) &&
+            !$user->hasResourcePermission($this->getContentType(), "update_others")) {
+                throw new BusinessException("you_dont_have_permission_to_update_this_content");
+        }
         $content->setTranslationRelationTarget($this->getTranslationRelationTarget());
     }
+
+    /**
+     * Check if the curent user can destroy/delete the content. In not, raise an BusinessException
+     *
+     * @param Request $request
+     * @param Model $content
+     * @return void
+     */
+    protected function beforeDestroy(Request $request, Model $content) {
+        $user = $this->getUser();
+        $resourceActions = Authorization::getResourceActions($this->getContentType());
+
+        if($content->owner_id !== $user->id &&
+            isset($resourceActions["destroy_others"]) &&
+            !$user->hasResourcePermission($this->getContentType(), "destroy_others")) {
+                throw new BusinessException("you_dont_have_permission_to_destroy_this_content");
+        }
+    }
+
 
     /**
      * When a multi lang content is freshed it is needed to set the target translation relation
@@ -144,6 +191,15 @@ abstract class BaseMultiLangContentController extends CrudController
      */
     protected function beforeSave(Request $request, Model $content) {
         $content->type = $this->getContentType();
-        $content->owner_id = Auth::user()->id;
+        $user = $this->getUser();
+        $content->owner_id = $user->id;
+        $resourceActions = Authorization::getResourceActions($this->getContentType());
+
+        if($request->has('owner_id')) {
+            // if the update owner is not monitored or is monitored and the current user has this permission, update it
+            if (!isset($resourceActions["update_owner"]) || $user->hasResourcePermission($this->getContentType(), "update_owner")) {
+                $content->owner_id = $request->owner_id;
+            }
+        }
     }
 }

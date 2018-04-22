@@ -44,10 +44,10 @@ class Category extends BaseModel
 
     // override the toArray function (called by toJson)
     public function toArray() {
-        // get the original array to be displayed
+        // Get the original array to be displayed
         $data = parent::toArray();
 
-        // add relation data
+        // Add relation data
         $data['relations_count'] = \DB::table('category_content')->where('category_id', '=', $this->id)->count();
         if (isset($data["parent_category_id"])) {
             // TODO: add explanation!

@@ -40,7 +40,10 @@ return [
         'project'=>'Project',
         'task'=>'Task',
         'section'=> 'Section',
-        'page'=> 'Page'
+        'page'=> 'Page',
+        'post'=> 'Post',
+        'domain-data' => 'Domain data',
+        'category' => 'Category'
     ],
     'actions'=> [
         'all'=>'All',
@@ -60,7 +63,18 @@ return [
         'postEmail'=>'Request password reset',
         'postReset'=>'Save reseted password',
         'toggleDone'=> 'Alternate state',
-        'registerNewsLetterSubscriberUser'=> 'Register newsletter subscriber'
+        'registerNewsLetterSubscriberUser'=> 'Register newsletter subscriber',
+
+        'draft' => 'Draft',
+        'destroy_others' => "Delete others' item",
+        'index_others' => "List other's item",
+        'publish' => "Publish",
+        'password_protect' => "Save as password protected",
+        'update_others' => "Update others' item",
+        'send_to_review' => 'Send to review',
+        'update_owner' => 'Update owner',
+        'revisions' => 'List revisions',
+        'revision' => 'Get revision'
     ],
     /*
     |--------------------------------------------------------------------------

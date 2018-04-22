@@ -25,6 +25,7 @@ use App\Authorization\Authorization;
 use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 use OwenIt\Auditing\Contracts\UserResolver;
 use Illuminate\Support\Arr;
+use App\Content\Section;
 
 /**
  * App\User
@@ -223,14 +224,28 @@ class User extends BaseModel implements AuthenticatableContract, CanResetPasswor
         return $this->belongsToMany(Role::class);
     }
 
-    /**
-     * Verifies if the current user has the permission to run an action in a controller
-     *
-     * @return boolean
-     */
+   /**
+    * Verifies if the current user has the permission to run an action in a controller
+    *
+    * @param string $controller
+    * @param string $action
+    * @return boolean
+    */
     public function hasPermission($controller, $action)
     {
         return Authorization::hasPermission($controller, $action, $this);
+    }
+
+    /**
+    * Verifies if the current user has the permission to run an action in a controller
+    *
+    * @param string $resource_slug
+    * @param string $action
+    * @return boolean
+    */
+    public function hasResourcePermission($resource_slug, $action)
+    {
+        return Authorization::hasResourcePermission($resource_slug, $action, $this);
     }
 
     /**
@@ -283,5 +298,14 @@ class User extends BaseModel implements AuthenticatableContract, CanResetPasswor
           $data['allowed_actions'] = $this->allowed_actions;
         }
         return $data;
+    }
+
+    /**
+    * Return the relationship to sections
+    * @return object
+    */
+    public function sections()
+    {
+        return $this->belongsToMany(Section::class, 'user_section', 'user_id', 'section_id');
     }
 }

@@ -40,7 +40,10 @@ return [
         'project'=>'Projeto',
         'task'=>'Tarefa',
         'section'=> 'Seção',
-        'page'=> 'Página'
+        'page'=> 'Página',
+        'post'=> 'Post',
+        'domain-data' => 'Dados de domínio',
+        'category' => 'Categoria'
     ],
     'actions'=> [
         'all'=>'Todas',
@@ -60,7 +63,18 @@ return [
         'postEmail'=>'Solicitar redefinição de senha',
         'postReset'=>'Salvar redefinição de senha',
         'toggleDone'=> 'Alternar estado',
-        'registerNewsLetterSubscriberUser'=> 'Registrar assinante de newsletter'
+        'registerNewsLetterSubscriberUser'=> 'Registrar assinante de newsletter',
+
+        'draft' => 'Rascunho',
+        'destroy_others' => "Excluir item de outros",
+        'index_others' => "Listar items de outros",
+        'publish' => "Publicar",
+        'password_protect' => "Salvar protegido com senha",
+        'update_others' => "Atualizar item de outros",
+        'send_to_review' => 'Enviar para revisão',
+        'update_owner' => 'Alterar proprietário',
+        'revisions' => 'Listar versões',
+        'revision' => 'Recuperar versão'
     ],
     /*
     |--------------------------------------------------------------------------
