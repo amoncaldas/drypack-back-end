@@ -80,11 +80,12 @@ class BaseModel extends Model implements AuditableContract
      *
      * @return array of attribute names
      */
-    public function getAllAttributes(){
-        $fillable = $this->getFillable();
-        $hidden = $this->getHidden();
+    public static function getAllAttributes(){
+        $klass = new static();
+        $fillable = $klass->getFillable();
+        $hidden = $klass->getHidden();
         $attributes = array_merge($fillable, $hidden);
-        if ($this->timestamps !== false) {
+        if ($klass->timestamps !== false) {
             $attributes[] = "created_at";
             $attributes[] = "updated_at";
         }

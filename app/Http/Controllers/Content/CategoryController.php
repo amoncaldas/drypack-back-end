@@ -102,7 +102,11 @@ class CategoryController extends BaseMultiLangContentController
      * @return void
      */
     protected function applyWhereTranslationHasFilters($request, $query) {
-        $query = $query->where('locale', $request->locale);
+        // $query = $query->where('locale', $request->locale);
+
+        if(!$this->isAdmin()) {
+            $query = $query->where('locale', App::getLocale());
+        }
 
         if($request->has('label')) {
             $query = $query->where('label', 'ilike', '%'.$request->label.'%');

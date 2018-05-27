@@ -59,6 +59,10 @@ return [
             'driver' => 'local',
             'root' => base_path('package'),
         ],
+        'upload' => [
+            'driver' => 'local',
+            'root' => storage_path('upload'),
+        ],
         'scripts' => [
             'driver' => 'local',
             'root' => base_path('scripts'),

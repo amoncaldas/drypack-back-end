@@ -54,7 +54,7 @@ class UsersAndRolesSeeder extends Seeder
         $actions_filter = [
             "authentication", "password", "project",
             "task", "user:updateProfile", "section", "page",
-            "category", "domain-data", "post"];
+            "category", "domain-data", "post", "media"];
         AuthorizationSetup::setResourcesActionsForRole($actions_filter,$basicRole);
 
         // Create the NORMAL user (if it not exists) and attach the role NORMAL to it

@@ -64,7 +64,8 @@ abstract class CrudController extends Controller
     protected function isAdmin() {
         $origin = request()->header("referer");
         $root = request()->root();
-        $result = $origin === "$root/admin" && !$this->isExternalRequest();
+        $isFromAdminUrl = ($origin === "$root/admin");
+        $result = $isFromAdminUrl && !$this->isExternalRequest();
         return $result;
     }
 
@@ -75,7 +76,7 @@ abstract class CrudController extends Controller
      */
     protected function isExternalRequest() {
         $origin = request()->header("referer");
-        $result = DryPack::startsWith($origin, env('APP_URL'));
-        return $result;
+        $startsWith = DryPack::startsWith($origin, env('APP_URL'));
+        return !$startsWith;
     }
 }

@@ -43,7 +43,8 @@ return [
         'page'=> 'Página',
         'post'=> 'Post',
         'domain-data' => 'Dados de domínio',
-        'category' => 'Categoria'
+        'category' => 'Categoria',
+        'media-upload' => 'Upload de mídia'
     ],
     'actions'=> [
         'all'=>'Todas',
@@ -74,7 +75,8 @@ return [
         'send_to_review' => 'Enviar para revisão',
         'update_owner' => 'Alterar proprietário',
         'revisions' => 'Listar versões',
-        'revision' => 'Recuperar versão'
+        'revision' => 'Recuperar versão',
+        'upload' => 'Enviar arquivo'
     ],
     /*
     |--------------------------------------------------------------------------

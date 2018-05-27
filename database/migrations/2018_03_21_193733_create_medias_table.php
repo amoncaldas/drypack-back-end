@@ -24,6 +24,16 @@ class CreateMediasTable extends Migration
             $table->string('url')->nullable();
             $table->string('author_name')->nullable();
 
+            $table->string('unique_name')->nullable();
+            $table->string('ext')->nullable();
+            $table->integer('width')->nullable();
+            $table->integer('height')->nullable();
+            $table->string('width_unit')->nullable();
+            $table->string('height_unit')->nullable();
+            $table->string('preview_image')->nullable();
+            $table->string('dimension_type')->nullable(); // responsive, sized
+            $table->string('storage_policy'); // 'filesystem' or 'indb'
+
             $table->integer('owner_id');
             $table->foreign('owner_id')->references('id')->on('users');
 

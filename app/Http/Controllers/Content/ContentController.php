@@ -2,25 +2,40 @@
 
 namespace App\Http\Controllers\Content;
 
-use App\Content\MultiLangContent;
-use App\Content\Page;
-use Illuminate\Http\Request;
-use App\Http\Requests;
-use App\Http\Controllers\Content\BaseMultiLangContentController;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Input;
-use App\User;
-use App\Content\Category;
-use App\Content\Content;
 use Lang;
-use App\Content\ContentStatus;
 use \Auth;
 use \App;
+use App\User;
+use App\Content\Page;
+use App\Http\Requests;
+use App\Content\Media;
+use App\Content\Content;
+use App\Content\Category;
+use Illuminate\Http\Request;
+use App\Content\ContentStatus;
+use App\Content\MultiLangContent;
 use OwenIt\Auditing\Models\Audit;
-
+use Illuminate\Support\Facades\Input;
+use Illuminate\Database\Eloquent\Model;
+use App\Http\Controllers\Content\BaseMultiLangContentController;
 
 abstract class ContentController extends BaseMultiLangContentController
 {
+    /**
+     * Must have attributes to be added in the selected in the index action
+     *
+     * @var array
+     */
+    protected $requiredSelectdAttrs = array("id", "section_id", "featured_image_id", "status", "multi_lang_content_id", "locale", "slug");
+
+
+    /**
+     * Get additional attributes to be added in the selected in the index action
+     *
+     * @return array
+     */
+    abstract protected function getListAttrs();
+
     /**
      * Apply filters to translations as conditions to get multilanguage content
      *
@@ -47,6 +62,22 @@ abstract class ContentController extends BaseMultiLangContentController
                 $sectionQuery->whereIn('id', $user_sections_id);
             });
         }
+
+        if ($request->has('authors')) {
+            $query = $query->whereHas('authors', function ($authorQuery) use ($request) {
+                $authorQuery->whereIn('id', explode(',', $request->authors));
+            });
+        }
+
+        if ($request->has('categories')) {
+            $query = $query->whereHas('categories', function ($categoryQuery) use ($request) {
+                $categoryQuery->whereIn('id', explode(',', $request->categories));
+            });
+        }
+
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
+        }
     }
 
     /**
@@ -54,10 +85,33 @@ abstract class ContentController extends BaseMultiLangContentController
      *
      * @param Request $request
      * @param Illuminate\Database\Eloquent\Builder $query
+     * @param boolean $allFields
      * @return void
      */
-    protected function applyWithTranslationRules($request, $query) {
-        $query = $query->with('categories')->with('authors')->with('section');
+    protected function applyWithTranslationRules($request, $query, $allFields = null) {
+
+        // If allFields is not true (probably we are in the query mode), return only
+        // the attributes returned by the method getListAttrs, defined
+        // in the child controller.
+        // Like this we avoid returning unecessary attributes to list the contents
+        // that may be very big, like content text with base64 images
+        // we will return the full content only in the `show` method, equivalent to HTTP GET verb
+        if(!$allFields) {
+            $selecFields = array_merge($this->getListAttrs(), $this->requiredSelectdAttrs);
+            $query = $query->select($selecFields);
+        }
+
+        // if allFields is true, we just don't define the attributes to be selected
+        // what means select all
+        $query = $query->with('categories')->with('authors')->with('section')->with('medias')->with('related')
+
+        // we also retrieve the feature image, but we dont need to get all fields,
+        // specially the content, that can be large and not necessary in the list mode
+        ->with(['featuredImage' => function($query) {
+            $filtered_attr = array_diff(Media::getAllAttributes(), ["content", "storage_policy", "unique_name"]);
+            $filtered_attr[] = "id"; // the id isnecessary to the join relation be stablished
+            $query->select($filtered_attr);
+        }]);
 
         // if it is not the admin environment, we only get the current language translation
         // to avoid the overhead
@@ -106,7 +160,7 @@ abstract class ContentController extends BaseMultiLangContentController
      */
     protected function getValidationRules(Request $request, Model $content)
     {
-        $user_sections_id = Auth::user()->sections()->get()->pluck('id')->all();
+        $user_sections_id = $this->getUser()->sections()->get()->pluck('id')->all();
 
         $validations = [
             'translations' => 'required|array|min:1',
@@ -183,10 +237,14 @@ abstract class ContentController extends BaseMultiLangContentController
      * @return void
      */
     protected function afterSaveTranslation(Request $request, Model $translation, $trans_arr) {
-        if(isset($trans_arr['authors'])) {
+        if(isset($trans_arr['authors']) && count($trans_arr['authors']) > 0) {
             $translation->authors()->detach();
             $ids = array_pluck($trans_arr['authors'], 'id');
             $translation->authors()->attach($ids, ['content_type'=>$this->getContentType()]);
+        } else {
+            // set current user as author
+            $translation->authors()->detach();
+            $translation->authors()->attach($this->getUser()->id, ['content_type'=>$this->getContentType()]);
         }
         if(isset($trans_arr['categories'])) {
             $translation->categories()->detach();
@@ -203,6 +261,11 @@ abstract class ContentController extends BaseMultiLangContentController
                     $translation->related()->attach($related["id"], ['related_content_type'=>$relatedModel->content_type]);
                 }
             }
+        }
+        if(isset($trans_arr['medias'])) {
+            $translation->medias()->detach();
+            $ids = array_pluck($trans_arr['medias'], 'id');
+            $translation->medias()->attach($ids, ['content_type'=>$this->getContentType()]);
         }
     }
 
@@ -233,7 +296,8 @@ abstract class ContentController extends BaseMultiLangContentController
         // and wants to keep the same friendly url, including the same id
         if( isset($content_arr["url_segments"]["content_id"])) {
             $id = $content_arr["url_segments"]["content_id"];
-            $existingContentWithSameId = Page::find($id);
+            $klass = $this->getTranslationModel();
+            $existingContentWithSameId = $klass::find($id);
             // this is allowed only if a content with the specified id does not already exist
             if ($existingContentWithSameId === null) {
                 $content->id =  $id;
@@ -300,8 +364,33 @@ abstract class ContentController extends BaseMultiLangContentController
      * @return void
      */
     public function revision(Request $request, $contentId, $revisionId) {
-        $revision = Audit::find($revisionId);
-        return $revision;
+
+        // Get the revision from the audit,
+        // including the user id and name that made the change
+        $revisionData = Audit::with(['user' => function($query) {
+            $query->select('id','name');
+        }])->find($revisionId);
+
+        // get the attributes changed
+        $revisionNew = $revisionData->new_values;
+
+        // get the current version
+        // we need to to give a response with an object containig a full object
+        // and the Audit/revision has only the changed values
+        $klass = $this->getTranslationModel();
+        $content = $klass::find($contentId);
+
+        // add the missing attributes in the Audit/revision using the current version
+        foreach ($content->getAllAttributes() as $key) {
+            if (!isset($revisionNew[$key])) {
+                $revisionNew[$key] = $content->$key;
+            }
+        }
+
+        // add the revision id in the object
+        $revisionNew["revision_id"] = $revisionId;
+
+        return $revisionNew;
     }
 
 

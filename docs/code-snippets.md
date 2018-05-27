@@ -90,6 +90,31 @@ var withHtml = '<p>a</p>';
 var withoutHtml = withHtml ? String(withHtml).replace(/<[^>]+>/gm, '') : '';
 ```
 
+## Get JS File from base64 ##
+
+```js
+function getJSFileInstance(file) {
+  var byteString = file.thumb;
+
+  // write the bytes of the string to a typed array
+  var ia = new Uint8Array(byteString.length);
+
+  for (var i = 0; i < byteString.length; i++) {
+    ia[i] = byteString.charCodeAt(i);
+  }
+
+  var theFile = new File(
+    [ia],
+    file.file_name,
+    {
+      type: file.mimetype
+    }
+  );
+
+  return theFile;
+}
+```
+
 
           
 

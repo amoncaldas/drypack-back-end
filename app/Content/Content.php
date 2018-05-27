@@ -72,7 +72,7 @@ abstract class Content extends BaseModel
     */
     public function featuredImage()
     {
-        return $this->hasOne(Media::class, 'featured_image_id', 'id');
+        return $this->hasOne(Media::class, 'id', 'featured_image_id');
     }
 
     /**

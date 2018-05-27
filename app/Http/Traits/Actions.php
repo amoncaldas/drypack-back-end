@@ -93,7 +93,11 @@ trait Actions
 
         $klass = $this->getModel();
 
-        $obj = $klass::findOrFail($id);
+        $baseQuery = $klass::query();
+
+        $this->callback('beforeShow', $request, $baseQuery, $id);
+
+        $obj = $baseQuery->findOrFail($id);
 
         $this->callback('afterShow', $request, $obj);
 

@@ -43,7 +43,8 @@ return [
         'page'=> 'Page',
         'post'=> 'Post',
         'domain-data' => 'Domain data',
-        'category' => 'Category'
+        'category' => 'Category',
+        'media-upload' => 'Media upload'
     ],
     'actions'=> [
         'all'=>'All',
@@ -74,7 +75,8 @@ return [
         'send_to_review' => 'Send to review',
         'update_owner' => 'Update owner',
         'revisions' => 'List revisions',
-        'revision' => 'Get revision'
+        'revision' => 'Get revision',
+        'upload' => 'Upload file'
     ],
     /*
     |--------------------------------------------------------------------------

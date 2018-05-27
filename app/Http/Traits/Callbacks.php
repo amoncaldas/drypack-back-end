@@ -38,6 +38,7 @@ trait Callbacks
         'afterUpdate' => [ 'afterUpdate' ],
         'afterSave' => [ 'afterSave' ],
         'afterShow' => [ 'afterShow' ],
+        'beforeShow' => [ 'beforeShow' ],
         'afterDestroy' => [ 'afterDestroy' ],
         'applyFilters' => ['applyFilters'],
         'beforeValidation'=> ['beforeValidation']
@@ -63,6 +64,7 @@ trait Callbacks
     protected function afterUpdate(Request $request, Model $model) { } // NOSONAR
     protected function afterSave(Request $request, Model $model) { } // NOSONAR
     protected function afterShow(Request $request, Model $model) { } // NOSONAR
+    protected function beforeShow(Request $request, $query, $id) { } // NOSONAR
     protected function afterDestroy(Request $request, Model $model) { } // NOSONAR
     protected function applyFilters(Request $request, $query) { } // NOSONAR
     protected function beforeValidation(Request $request, Model $model) { } // NOSONAR

@@ -21,6 +21,8 @@ class DatabaseSeeder extends Seeder
         // The ActionsSeeder internally calls the UsersAndRolesSeeder
         $this->call(ActionsSeeder::class);
 
+        $this->call(ContentSeeder::class);
+
         // Adding here references to other seeders
 
         Model::reguard();

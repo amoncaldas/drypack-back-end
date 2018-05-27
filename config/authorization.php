@@ -89,7 +89,8 @@ return [
         'update_others',
         'update_owner',
         'revisions',
-        'revision'
+        'revision',
+        'upload'
 
         /* Custom actions */
 
@@ -291,6 +292,16 @@ return [
                 'revisions',
                 'revision'
             ]
+        ],
+
+        // Section
+        'media'=>['controller_class'=>'MediaController', 'namespace'=>'App\Http\Controllers\Content', 'actions'=>[
+            'all',
+            'destroy',
+            'index',
+            'show',
+            'store',
+            'upload']
         ],
 
         // Domain data

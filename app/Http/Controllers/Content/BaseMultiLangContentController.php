@@ -19,21 +19,21 @@ abstract class BaseMultiLangContentController extends CrudController
      *
      * @return string
      */
-    abstract public function getTranslationRelationTarget();
+    abstract protected function getTranslationRelationTarget();
 
     /**
      * Get the translation model class.
      *
      * @return Illuminate\Database\Eloquent\Model
      */
-    abstract public function getTranslationModel();
+    abstract protected function getTranslationModel();
 
     /**
      * Get the content type of the translation class
      *
      * @return string
      */
-    abstract public function getContentType();
+    abstract protected function getContentType();
 
 
     /**
@@ -55,12 +55,9 @@ abstract class BaseMultiLangContentController extends CrudController
      * @return void
      */
     protected function applyFilters(Request $request, $query) {
-        $model = $query->getModel();
-        $model->setTranslationRelationTarget($this->getTranslationRelationTarget());
-        $query->setModel($model);
-        $query = $query->with("owner");
+        $this->setTranslations($request, $query);
 
-        $query->whereHas('translations', function ($query) use($request) {
+        $query->whereHas('translations', function ($query) use ($request) {
             $query->where('type', $this->getContentType());
 
             if (method_exists($this, "applyWhereTranslationHasFilters" )) {
@@ -68,17 +65,50 @@ abstract class BaseMultiLangContentController extends CrudController
             }
         });
 
-        $query = $query->with(['translations' => function ($query) use($request) {
-            if (method_exists($this, "applyWithTranslationRules" )) {
-                $this->applyWithTranslationRules($request, $query);
-            }
-        }]);
-
+        // if the user has not the permission to index other users' content
+        // and the content has this type of action as an assignable permission
+        // limit the contents to the ones that belongs to the current user
         $user = $this->getUser();
         $resourceActions = Authorization::getResourceActions($this->getContentType());
         if(isset($resourceActions["index_others"]) && $user->hasResourcePermission($this->getContentType(), "index_others")) {
             $query->where('owner_id', Auth::user()->id);
         }
+    }
+
+    /**
+     * Set the translations relations and rules to be used to get a single instance
+     *
+     * @param Request $request
+     * @param Illuminate\Database\Eloquent\Builder $query
+     * @param integer $id
+     * @return void
+     */
+    protected function beforeShow(Request $request, $query, $id) {
+        $this->setTranslations($request, $query, true);
+    }
+
+    /**
+     * Set the translations relations and rules to be used
+     *
+     * @param Request $request
+     * @param Illuminate\Database\Eloquent\Builder $query
+     * @param boolean $allFields
+     * @return void
+     */
+    protected function setTranslations(Request $request, $query, $allFields = null) {
+        // Initialize the optional $allFields parameter
+        $allFields = $allFields ? $allFields : false;
+
+        $model = $query->getModel();
+        $model->setTranslationRelationTarget($this->getTranslationRelationTarget());
+        $query->setModel($model);
+        $query = $query->with("owner");
+
+        $query = $query->with(['translations' => function ($query) use ($request, $allFields) {
+            if (method_exists($this, "applyWithTranslationRules" )) {
+                $this->applyWithTranslationRules($request, $query, $allFields);
+            }
+        }]);
     }
 
 
@@ -106,7 +136,7 @@ abstract class BaseMultiLangContentController extends CrudController
      * @param array $trans_arr
      * @return void
      */
-    function saveTranslation(Request $request, array $trans_arr) {
+    protected function saveTranslation(Request $request, array $trans_arr) {
         $klass = $this->getTranslationModel();
 
         if(isset($trans_arr["id"])) { // it is an update

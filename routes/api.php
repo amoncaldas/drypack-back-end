@@ -94,6 +94,12 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'i18n']], function () {
         });
 
         /**
+         * Media controller and upload
+         */
+        Route::resource('media', 'Content\MediaController', ['except' => ['upload']]);
+        Route::post('media/upload', 'Content\MediaController@upload');
+
+        /**
          * This dummy route is intended to be used to test the case
          * when an resource (represented by a controller) exist but is not declared on the
          * config/authorization.php. If you remove this, the AuthorizationTest will have one fail

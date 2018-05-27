@@ -16,11 +16,20 @@ use App\Content\Category;
 class PageController extends ContentController
 {
     /**
+     * Get additional fields to be added in the selected in the index action
+     *
+     * @return array
+     */
+    protected function getListAttrs() {
+        return ['title'];
+    }
+
+    /**
      * Get the content type of the translation class
      *
      * @return Illuminate\Database\Eloquent\Model
      */
-    public function getContentType(){
+    protected function getContentType(){
         return "page";
     }
 
@@ -29,7 +38,7 @@ class PageController extends ContentController
      *
      * @return string
      */
-    public function getTranslationRelationTarget()
+    protected function getTranslationRelationTarget()
     {
         return "App\Content\Page";
     }
@@ -39,7 +48,7 @@ class PageController extends ContentController
      *
      * @return Illuminate\Database\Eloquent\Model
      */
-    public function getTranslationModel()
+    protected function getTranslationModel()
     {
         return Page::class;
     }
