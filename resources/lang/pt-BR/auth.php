@@ -44,7 +44,7 @@ return [
         'post'=> 'Post',
         'domain-data' => 'Dados de domínio',
         'category' => 'Categoria',
-        'media-upload' => 'Upload de mídia'
+        'media' => 'Mídia'
     ],
     'actions'=> [
         'all'=>'Todas',
@@ -76,7 +76,12 @@ return [
         'update_owner' => 'Alterar proprietário',
         'revisions' => 'Listar versões',
         'revision' => 'Recuperar versão',
-        'upload' => 'Enviar arquivo'
+        'upload' => 'Enviar arquivo',
+        'showContent' => 'Exibir o conteúdo de uma mídia',
+        'upload_video' => 'Upload video file',
+        'upload_audio' => 'Upload audio file',
+        'upload_image' => 'Upload image file',
+        'upload_document' => 'Upload document file',
     ],
     /*
     |--------------------------------------------------------------------------

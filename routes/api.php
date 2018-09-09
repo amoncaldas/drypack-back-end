@@ -96,8 +96,15 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'i18n']], function () {
         /**
          * Media controller and upload
          */
-        Route::resource('media', 'Content\MediaController', ['except' => ['upload']]);
+        Route::resource('medias', 'Content\MediaController', ['except' => ['upload', 'showContent']]);
         Route::post('media/upload', 'Content\MediaController@upload');
+        Route::get('medias/{id}/content', 'Content\MediaController@showContent');
+
+        // Route::get('media/content/{id}', function(Request $request, $id) {
+        //     $klass = "\App\Http\Controllers\Content\"MediaController";
+        //     $controller = new $klass();
+        //     return $controller->showContent($request, $id);
+        // });
 
         /**
          * This dummy route is intended to be used to test the case

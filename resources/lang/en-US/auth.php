@@ -44,7 +44,7 @@ return [
         'post'=> 'Post',
         'domain-data' => 'Domain data',
         'category' => 'Category',
-        'media-upload' => 'Media upload'
+        'media' => 'Media'
     ],
     'actions'=> [
         'all'=>'All',
@@ -76,7 +76,12 @@ return [
         'update_owner' => 'Update owner',
         'revisions' => 'List revisions',
         'revision' => 'Get revision',
-        'upload' => 'Upload file'
+        'upload' => 'Upload file',
+        'showContent' => 'Show a media raw content',
+        'upload_video' => 'Upload video file',
+        'upload_audio' => 'Upload audio file',
+        'upload_image' => 'Upload image file',
+        'upload_document' => 'Upload document file',
     ],
     /*
     |--------------------------------------------------------------------------

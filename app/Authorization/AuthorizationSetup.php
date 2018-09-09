@@ -213,9 +213,15 @@ class AuthorizationSetup
 
         // For each action, an array with the role x action relation data (user id, action id and current timestamp) is created
         foreach ($allowed_actions as $action) {
-            if($action->action_type_slug != 'all' && $action->resource_slug !== 'all') {
-                $permissions[] = ['role_id'=>$role->id, 'action_id'=>$action->id, 'created_at'=>$now, 'updated_at'=>$now];
+            try {
+                if($action->action_type_slug != 'all' && $action->resource_slug !== 'all') {
+                    $permissions[] = ['role_id'=>$role->id, 'action_id'=>$action->id, 'created_at'=>$now, 'updated_at'=>$now];
+                }
+            } catch(\Exception $ex){
+                $test = $ex;
+                $a = $action;
             }
+
         }
 
         \DB::transaction(function () use ($role, $permissions) {

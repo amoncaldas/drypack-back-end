@@ -94,9 +94,9 @@ class DryPack
     /**
      * Check if a string ends with a substring
      *
-     * @param [type] $haystack
-     * @param [type] $needle
-     * @return void
+     * @param string $haystack
+     * @param string $needle
+     * @return boolean
      */
     public static function endsWith($haystack, $needle) {
         // search forward starting from end minus needle length characters
@@ -106,12 +106,24 @@ class DryPack
     /**
      * Check if a string starts with a substring
      *
-     * @param [type] $haystack
-     * @param [type] $needle
-     * @return void
+     * @param string $haystack
+     * @param string $needle
+     * @return boolean
      */
     public static  function startsWith($haystack, $needle) {
         // search backwards starting from haystack length characters from the end
         return $needle === "" || strrpos($haystack, $needle, -strlen($haystack)) !== false;
+    }
+
+    /**
+     * Check if a string contains a substring
+     *
+     * @param string $haystack
+     * @param string $needle
+     * @return boolean
+     */
+    public static  function contains($haystack, $needle) {
+        // search backwards starting from haystack length characters from the end
+        return $needle === "" || strrpos($haystack, $needle) !== false;
     }
 }

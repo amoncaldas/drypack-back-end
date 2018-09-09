@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\UploadedFile;
+use App\Content\MediaText;
+use App\User;
 
 class Media extends BaseModel
 {
@@ -22,8 +24,10 @@ class Media extends BaseModel
     public const DIMENSION_TYPE_SIZED = "sized";
     public const THUMB_FORMAT = "jpg";
     public const VIDEO_TYPE = "video";
+    public const EXTERNAL_VIDEO_TYPE = "external_video";
     public const IMAGE_TYPE = "image";
     public const AUDIO_TYPE = "audio";
+    public const DOCUMENT_TYPE = "document";
     public const HTTP_PROTOCOL_START = "http:";
     public const THUMB_SUFFIX = "_thumb_";
     public const THUMB_PATH = "thumb_path";
@@ -31,6 +35,7 @@ class Media extends BaseModel
     public const UPLOAD_PATH = "upload_path";
     public const PIXEL_UNIT = "px";
     public const BASE64_IMAGE_PREFIX = "data:image/jpg;base64,";
+    public const YOUTUBE_PREVIEW_PATTERN = "http://i3.ytimg.com/vi/<ID>/maxresdefault.jpg";
 
 
     /**
@@ -46,7 +51,7 @@ class Media extends BaseModel
      * @var array
      */
     protected $fillable = ['file_name','unique_name','type',
-        'status','author_name','author_id', 'mimetype','ext',
+        'status','author_name','owner_id', 'mimetype','ext',
         'length', 'content', 'thumb', 'url', 'owner_id', 'storage_policy'
     ];
 
@@ -84,14 +89,42 @@ class Media extends BaseModel
     }
 
     /**
+    * Return the relationship with the parent project
+    */
+    public function owner()
+    {
+        return $this->belongsTo(User::class, 'owner_id', 'id');
+    }
+
+    /**
+    * Return the relationship with the parent project
+    */
+    public function mediaTexts()
+    {
+        return $this->hasMany(MediaText::class);
+    }
+
+    /**
      * Resolve media file location
      *
      * @return void
      */
     public function resolveFileLocation() {
-        $savePath = $this->getSavePath(self::UPLOAD_PATH);
-        $filePath = $savePath."/".$this->unique_name;
-        return $filePath;
+        // get youtube image based in video url
+        if ($this->type === self::EXTERNAL_VIDEO_TYPE) {
+            $queryString = parse_url($this->url, PHP_URL_QUERY);
+            parse_str($queryString, $params);
+            $v = $params['v'];
+            if(strlen($v)>0){
+                $this->preview_image = str_replace("<ID>", $v, self::YOUTUBE_PREVIEW_PATTERN);
+                return $this->preview_image;
+            }
+
+        } else {
+            $savePath = $this->getSavePath(self::UPLOAD_PATH);
+            $filePath = $savePath."/".$this->unique_name;
+            return $filePath;
+        }
     }
 
     /**
@@ -102,9 +135,14 @@ class Media extends BaseModel
      */
     public function save(array $options = []) {
         $this->prepareSave();
-        if ($this->type !== self::AUDIO_TYPE && Config::get('media-uploader.auto_thumb') === true) {
+        if (($this->type === self::IMAGE_TYPE || self::EXTERNAL_VIDEO_TYPE) && Config::get('media-uploader.auto_thumb') === true) {
             $this->createAutoThumb();
         }
+        if (isset($this->media_texts) && is_array($this->media_texts)) {
+            $media_texts = $this->media_texts;
+            unset($this->media_texts);
+        }
+
         parent::save($options);
     }
 
@@ -169,7 +207,7 @@ class Media extends BaseModel
                 $base64 = base64_encode($blobContent);
                 return $includePrefix? self::BASE64_IMAGE_PREFIX.$base64 : $base64;
             }
-        } else if ($this->type === self::VIDEO_TYPE) {
+        } elseif ($this->type === self::VIDEO_TYPE) {
             if($this->preview_image !== null) {
                 if(DryPack::startsWith($this->preview_image, self::HTTP_PROTOCOL_START)) {
                     $blobContent = file_get_contents($this->preview_image);
@@ -178,6 +216,13 @@ class Media extends BaseModel
                 } else {
                     return $includePrefix? self::BASE64_IMAGE_PREFIX.$this->preview_image : $this->preview_image;
                 }
+            }
+        } elseif ($this->type === self::EXTERNAL_VIDEO_TYPE) {
+            $imageUrl = $this->resolveFileLocation();
+            if($imageUrl) {
+                $blobContent = file_get_contents($imageUrl);
+                $base64 = base64_encode($blobContent);
+                return $includePrefix? self::BASE64_IMAGE_PREFIX.$base64 : $base64;
             }
         }
         return null;
@@ -235,7 +280,7 @@ class Media extends BaseModel
      * @return void
      */
     protected function createAutoThumb() {
-        if ($this->type !== self::AUDIO_TYPE) {
+        if ($this->type === self::IMAGE_TYPE || $this->type === self::EXTERNAL_VIDEO_TYPE) {
             $thumbWidth = Config::get('media-uploader.auto_thumb_width');
             $thumbHeight = Config::get('media-uploader.auto_thumb_height');
             $thumbProportional = Config::get('media-uploader.auto_thumb_proportional');
@@ -254,7 +299,7 @@ class Media extends BaseModel
      * @return Imagick
      */
     protected function createThumb($width, $height, $proportional = false) {
-        if ($this->type !== self::AUDIO_TYPE) {
+        if ($this->type === self::IMAGE_TYPE || $this->type === self::EXTERNAL_VIDEO_TYPE) {
             $imagick  = $this->getOriginaImageImagick();
             if ($proportional === true) {
                 $imagick->thumbnailImage($width, $height,true, true);
@@ -319,7 +364,7 @@ class Media extends BaseModel
             $this->height = $d['height'];
             $this->width_unit = self::PIXEL_UNIT;
             $this->height_unit = self::PIXEL_UNIT;
-            $this->preview_image = null; // ad,for example,youtube preview image here
+            $this->preview_image = null; // add,for example,youtube preview image here
         } else {
             $this->dimension_type = self::DIMENSION_TYPE_RESPONSIVE;
         }
@@ -353,5 +398,44 @@ class Media extends BaseModel
 
         $thumbFileName = str_replace(".".$this->ext, self::THUMB_SUFFIX."$dimensions.".$this->ext, $this->unique_name);
         return $thumbFileName;
+    }
+
+    /**
+     * Format/adjust the relations serialized data, transforming translations index array to locale key array
+     *
+     * @return array
+     */
+    public function relationsToArray() {
+        $data = parent::relationsToArray();
+
+        if(!isset($data["media_texts"])) {
+            $data["media_texts"] = $this->mediaTexts;
+        }
+        if(isset($data["media_texts"])) {
+            $mediaTexts = $data["media_texts"];
+            $data["media_texts"] = [];
+            $data["locales"] = [];
+            foreach ($mediaTexts as $mediaText) {
+                $data["media_texts"][$mediaText["locale"]] = $mediaText;
+                $data["locales"][] = $mediaText["locale"];
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * Format/adjust the relations serialized data, transforming translations index array to locale key array
+     *
+     * @return array
+     */
+    public function toArray() {
+        $data = parent::toArray();
+        $id = $data["id"];
+        if (!isset($data["url"]) || $data["url"] === "") {
+            $data["url"] = "/".request()->route()->getPrefix(). "/medias/$id/content";
+        }
+
+        return $data;
     }
 }

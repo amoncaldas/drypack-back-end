@@ -105,7 +105,7 @@ abstract class ContentController extends BaseMultiLangContentController
         // what means select all
         $query = $query->with('categories')->with('authors')->with('section')->with('medias')->with('related')
 
-        // we also retrieve the feature image, but we dont need to get all fields,
+        // we also retrieve the featured image, but we dont need to get all fields,
         // specially the content, that can be large and not necessary in the list mode
         ->with(['featuredImage' => function($query) {
             $filtered_attr = array_diff(Media::getAllAttributes(), ["content", "storage_policy", "unique_name"]);

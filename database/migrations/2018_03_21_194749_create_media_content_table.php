@@ -25,6 +25,7 @@ class CreateMediaContentTable extends Migration {
                 ->onUpdate('cascade')->onDelete('cascade');
 
             $table->primary(['media_id', 'content_id', 'content_type']);
+
         });
     }
 

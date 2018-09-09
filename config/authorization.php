@@ -90,7 +90,12 @@ return [
         'update_owner',
         'revisions',
         'revision',
-        'upload'
+        'showContent',
+        'upload',
+        'upload_video',
+        'upload_audio',
+        'upload_image',
+        'upload_document'
 
         /* Custom actions */
 
@@ -301,7 +306,14 @@ return [
             'index',
             'show',
             'store',
-            'upload']
+            'update',
+            'showContent',
+            'upload',
+                ['slug' =>'upload_video', 'dependencies'=>[['resource_slug'=>'media','action_type_slug'=>'upload']]],
+                ['slug' =>'upload_audio', 'dependencies'=>[['resource_slug'=>'media','action_type_slug'=>'upload']]],
+                ['slug' =>'upload_image', 'dependencies'=>[['resource_slug'=>'media','action_type_slug'=>'upload']]],
+                ['slug' =>'upload_document', 'dependencies'=>[['resource_slug'=>'media','action_type_slug'=>'upload']]]
+            ]
         ],
 
         // Domain data

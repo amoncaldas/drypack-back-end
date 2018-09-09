@@ -76,7 +76,17 @@ abstract class CrudController extends Controller
      */
     protected function isExternalRequest() {
         $origin = request()->header("referer");
-        $startsWith = DryPack::startsWith($origin, env('APP_URL'));
+        $appUrl = env('APP_URL');
+
+        // in the case we arerunning the app locally, we need to treat the special case of localhost/0.0.0.0
+        if (DryPack::contains($appUrl, "localhost") && DryPack::contains($origin, "0.0.0.0")) {
+            $appUrl = str_replace("localhost", "0.0.0.0", $appUrl);
+        }
+        if (DryPack::contains($appUrl, "0.0.0.0") && DryPack::contains($origin, "localhost")) {
+            $appUrl = str_replace("0.0.0.0", "localhost", $appUrl);
+        }
+        $startsWith = DryPack::startsWith($origin, $appUrl);
+
         return !$startsWith;
     }
 }

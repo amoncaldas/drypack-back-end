@@ -74,6 +74,7 @@ class UsersAndRolesSeeder extends Seeder
             "post:index",
             "post:show",
             "password",
+            "media:showContent",
             "authentication:authenticate",
             "user:registerNewsLetterSubscriberUser"
         ];

@@ -152,7 +152,7 @@ class Handler extends ExceptionHandler
         }
         // When an business exception is raised by the application
         if ($e instanceof BusinessException) {
-            $response = response()->json([$this->errorKey => $e->getMessage()], 400, $this->headers);
+            $response = response()->json([$this->errorKey => $e->getMessage(), "error_value"=> $e->errorValue], 400, $this->headers);
         }
 
         return $response;

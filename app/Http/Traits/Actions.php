@@ -165,6 +165,7 @@ trait Actions
 
         $response = response($freshed);
 
+        // if defined add warning header that describes a non critical fail during the save process
         if($request->warning != null) {
             $response->header("Warning", $request->warning);
         }
