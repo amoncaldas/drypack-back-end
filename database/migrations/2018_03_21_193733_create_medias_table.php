@@ -41,6 +41,13 @@ class CreateMediasTable extends Migration
             $table->foreign('author_id')->references('id')->on('users');
             $table->timestampTz('created_at');
             $table->timestampTz('updated_at');
+
+            $table->dateTimeTz('captured_at')->nullable();
+            $table->string('capture_device')->nullable();
+            $table->json('exif_info')->nullable();
+            $table->string('from')->nullable(); // used to store the origin of an external content
+            $table->string('external_content_id')->nullable(); // used to store the id of external content in the origin
+            $table->string('tags')->nullable();
         });
     }
 

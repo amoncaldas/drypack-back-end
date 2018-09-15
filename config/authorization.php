@@ -95,7 +95,9 @@ return [
         'upload_video',
         'upload_audio',
         'upload_image',
-        'upload_document'
+        'upload_document',
+        'save_html_media',
+        'save_external_video'
 
         /* Custom actions */
 
@@ -299,14 +301,19 @@ return [
             ]
         ],
 
-        // Section
+        // Media
         'media'=>['controller_class'=>'MediaController', 'namespace'=>'App\Http\Controllers\Content', 'actions'=>[
             'all',
             'destroy',
             'index',
             'show',
             'store',
+                ['slug' =>'save_html_media', 'dependencies'=>[['resource_slug'=>'media','action_type_slug'=>'store']]],
+                ['slug' =>'save_external_video', 'dependencies'=>[['resource_slug'=>'media','action_type_slug'=>'store']]],
             'update',
+            'destroy_others',
+            'update_others',
+            'update_owner',
             'showContent',
             'upload',
                 ['slug' =>'upload_video', 'dependencies'=>[['resource_slug'=>'media','action_type_slug'=>'upload']]],

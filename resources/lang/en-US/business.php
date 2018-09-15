@@ -10,5 +10,6 @@ return [
     'extension_not_allowed'=> "File having :ext extension is not allowed to be uploaded",
     'you_dont_have_permission_to_upload_this_kind_of_content'=> "You don't have permission to upload :type(s)",
     'no_file_provided'=> 'No file was provided to be uploaded',
-    'invalid_upload'=> 'Invalid file provided to be uploaded'
+    'invalid_upload'=> 'Invalid file provided to be uploaded',
+    'you_dont_have_permission_to_change_the_owner_of_this_content' => 'You do not have permission to change the owner of this item'
 ];

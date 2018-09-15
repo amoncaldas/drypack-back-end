@@ -324,6 +324,7 @@ abstract class ContentController extends BaseMultiLangContentController
             if (Auth::user()->hasResourcePermission($this->getContentType(), $action)) {
                 $content->status = $content_arr['status'];
             } else {
+                // set the warning message on the request because it is gonna be read and add in the reponse
                 $request->merge(["warning"=>'the_status_was_set_as_draft_because_of_lack_of_permission']);
             }
         }

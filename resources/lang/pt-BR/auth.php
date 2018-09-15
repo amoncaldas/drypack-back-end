@@ -78,10 +78,12 @@ return [
         'revision' => 'Recuperar versão',
         'upload' => 'Enviar arquivo',
         'showContent' => 'Exibir o conteúdo de uma mídia',
-        'upload_video' => 'Upload video file',
-        'upload_audio' => 'Upload audio file',
-        'upload_image' => 'Upload image file',
-        'upload_document' => 'Upload document file',
+        'upload_video' => 'Upload de vídeo',
+        'upload_audio' => 'Upload de audio',
+        'upload_image' => 'Upload de imagem',
+        'upload_document' => 'Upload de documento',
+        'save_html_media' => 'Salvar mídia html',
+        'save_external_video' => 'Salvar vídeo externo'
     ],
     /*
     |--------------------------------------------------------------------------

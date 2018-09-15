@@ -2,14 +2,14 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-use OwenIt\Auditing\Auditable;
-use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Config;
+use OwenIt\Auditing\Auditable;
 use OwenIt\Auditing\Models\Audit;
 use Illuminate\Support\Facades\Auth;
 use App\Exceptions\BusinessException;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 
 class BaseModel extends Model implements AuditableContract
 {

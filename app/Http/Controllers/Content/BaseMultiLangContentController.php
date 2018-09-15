@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers\Content;
 
-use App\Content\MultiLangContent;
-use Illuminate\Http\Request;
-use App\Http\Requests;
-use App\Http\Controllers\CrudController;
-use Illuminate\Database\Eloquent\Model;
-use \Auth;
-use \App\Exceptions\BusinessException;
-use App\Authorization\Authorization;
+
 use \App;
+use App\Http\Requests;
+use Illuminate\Http\Request;
+use App\Content\MultiLangContent;
+use App\Authorization\Authorization;
+use \App\Exceptions\BusinessException;
+use Illuminate\Database\Eloquent\Model;
+use App\Http\Controllers\CrudController;
 
 abstract class BaseMultiLangContentController extends CrudController
 {
@@ -65,14 +65,7 @@ abstract class BaseMultiLangContentController extends CrudController
             }
         });
 
-        // if the user has not the permission to index other users' content
-        // and the content has this type of action as an assignable permission
-        // limit the contents to the ones that belongs to the current user
-        $user = $this->getUser();
-        $resourceActions = Authorization::getResourceActions($this->getContentType());
-        if(isset($resourceActions["index_others"]) && $user->hasResourcePermission($this->getContentType(), "index_others")) {
-            $query->where('owner_id', Auth::user()->id);
-        }
+        $this->applyIndexOthersPermissionFilter($query);
     }
 
     /**
@@ -169,38 +162,24 @@ abstract class BaseMultiLangContentController extends CrudController
      * @return void
      */
     protected function beforeUpdate(Request $request, Model $content) {
-        $user = $this->getUser();
-        $resourceActions = Authorization::getResourceActions($this->getContentType());
-
-        if($content->owner_id !== $user->id &&
-            isset($resourceActions["update_others"]) &&
-            !$user->hasResourcePermission($this->getContentType(), "update_others")) {
-                throw new BusinessException("you_dont_have_permission_to_update_this_content");
-        }
+        $this->checkUpdateOthersPermission($content, $this->getContentType());
         $content->setTranslationRelationTarget($this->getTranslationRelationTarget());
     }
 
     /**
-     * Check if the curent user can destroy/delete the content. In not, raise an BusinessException
+     * Check if the curent user can destroy/delete the content. If not, raise an BusinessException
      *
      * @param Request $request
      * @param Model $content
      * @return void
      */
     protected function beforeDestroy(Request $request, Model $content) {
-        $user = $this->getUser();
-        $resourceActions = Authorization::getResourceActions($this->getContentType());
-
-        if($content->owner_id !== $user->id &&
-            isset($resourceActions["destroy_others"]) &&
-            !$user->hasResourcePermission($this->getContentType(), "destroy_others")) {
-                throw new BusinessException("you_dont_have_permission_to_destroy_this_content");
-        }
+        $this->checkDestroyOthersPermission($content, $this->getContentType());
     }
 
 
     /**
-     * When a multi lang content is freshed it is needed to set the target translation relation
+     * When a multi lang content is freshed (reloaded) it is needed to reset the target translation relation
      * define din the parent controller
      *
      * @param Request $request
@@ -220,16 +199,8 @@ abstract class BaseMultiLangContentController extends CrudController
      * @return void
      */
     protected function beforeSave(Request $request, Model $content) {
+        $this->checkUpdateOwnerPermission($request, $this->getContentType());
         $content->type = $this->getContentType();
-        $user = $this->getUser();
         $content->owner_id = $user->id;
-        $resourceActions = Authorization::getResourceActions($this->getContentType());
-
-        if($request->has('owner_id')) {
-            // if the update owner is not monitored or is monitored and the current user has this permission, update it
-            if (!isset($resourceActions["update_owner"]) || $user->hasResourcePermission($this->getContentType(), "update_owner")) {
-                $content->owner_id = $request->owner_id;
-            }
-        }
     }
 }

@@ -2,16 +2,16 @@
 
 namespace App\Content;
 
+use App\User;
 use \Imagick;
 use App\BaseModel;
 use App\Util\DryPack;
 use App\Content\Content;
+use App\Content\MediaText;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Http\UploadedFile;
-use App\Content\MediaText;
-use App\User;
 
 class Media extends BaseModel
 {
@@ -35,7 +35,6 @@ class Media extends BaseModel
     public const UPLOAD_PATH = "upload_path";
     public const PIXEL_UNIT = "px";
     public const BASE64_IMAGE_PREFIX = "data:image/jpg;base64,";
-    public const YOUTUBE_PREVIEW_PATTERN = "http://i3.ytimg.com/vi/<ID>/maxresdefault.jpg";
 
 
     /**
@@ -52,7 +51,9 @@ class Media extends BaseModel
      */
     protected $fillable = ['file_name','unique_name','type',
         'status','author_name','owner_id', 'mimetype','ext',
-        'length', 'content', 'thumb', 'url', 'owner_id', 'storage_policy'
+        'length', 'content', 'thumb', 'url', 'owner_id',
+        'storage_policy', 'captured_at', 'capture_device', 'exif_info',
+        'from', 'external_content_id', 'tags'
     ];
 
     /**
@@ -61,6 +62,17 @@ class Media extends BaseModel
      * @var Imagick
      */
     protected $imagickOriginaImage = null;
+
+    /**
+     * Overwrite the based model to add the cast
+     *
+     * @param array $attributes
+     */
+    public function __construct(array $attributes = array())
+    {
+       parent::__construct($attributes);
+       $this->addCast(["exif_info"=> 'array']);
+    }
 
     /**
      * Get the the imgick representation of the original image
@@ -104,6 +116,7 @@ class Media extends BaseModel
         return $this->hasMany(MediaText::class);
     }
 
+
     /**
      * Resolve media file location
      *
@@ -112,14 +125,7 @@ class Media extends BaseModel
     public function resolveFileLocation() {
         // get youtube image based in video url
         if ($this->type === self::EXTERNAL_VIDEO_TYPE) {
-            $queryString = parse_url($this->url, PHP_URL_QUERY);
-            parse_str($queryString, $params);
-            $v = $params['v'];
-            if(strlen($v)>0){
-                $this->preview_image = str_replace("<ID>", $v, self::YOUTUBE_PREVIEW_PATTERN);
-                return $this->preview_image;
-            }
-
+            return $this->preview_image;
         } else {
             $savePath = $this->getSavePath(self::UPLOAD_PATH);
             $filePath = $savePath."/".$this->unique_name;
@@ -364,7 +370,28 @@ class Media extends BaseModel
             $this->height = $d['height'];
             $this->width_unit = self::PIXEL_UNIT;
             $this->height_unit = self::PIXEL_UNIT;
-            $this->preview_image = null; // add,for example,youtube preview image here
+            $this->preview_image = null; // when is IMAGE_TYPE, has no preview
+
+            // parse captured_at data, if defined
+            if($this->captured_at) {
+                $this->captured_at = \DryPack::parseDate($this->captured_at);
+            }
+
+            /* Get the EXIF information */
+            $exifArray = $imagick->getImageProperties("exif:*");
+            $this->exif_info = json_encode($exifArray);
+
+            /* Loop trough the EXIF properties */
+            foreach ($exifArray as $exifName => $exifValue)
+            {
+                if ( strtolower($exifName) === "exif:datetimeoriginal" && !isset($this->captured_at)) {
+                    $this->captured_at = \DryPack::parseDate($exifValue);
+                }
+                if ( strtolower($exifName) === "exif:make" && !isset($this->capture_device)) {
+                    $this->capture_device = $exifValue;
+                }
+            }
+
         } else {
             $this->dimension_type = self::DIMENSION_TYPE_RESPONSIVE;
         }
@@ -434,6 +461,9 @@ class Media extends BaseModel
         $id = $data["id"];
         if (!isset($data["url"]) || $data["url"] === "") {
             $data["url"] = "/".request()->route()->getPrefix(). "/medias/$id/content";
+        }
+        if (!isset($data["tags"])) {
+            // $data["tags"] = [];
         }
 
         return $data;
