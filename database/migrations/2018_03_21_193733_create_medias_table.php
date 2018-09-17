@@ -21,6 +21,7 @@ class CreateMediasTable extends Migration
             $table->string('file_name')->nullable();
             $table->text('content')->nullable();
             $table->text('thumb')->nullable();
+            $table->text('thumb_medium')->nullable();
             $table->string('url')->nullable();
             $table->string('author_name')->nullable();
 
@@ -44,10 +45,10 @@ class CreateMediasTable extends Migration
 
             $table->dateTimeTz('captured_at')->nullable();
             $table->string('capture_device')->nullable();
-            $table->json('exif_info')->nullable();
+            $table->json('exif_data')->nullable();
             $table->string('from')->nullable(); // used to store the origin of an external content
             $table->string('external_content_id')->nullable(); // used to store the id of external content in the origin
-            $table->string('tags')->nullable();
+            $table->string('slug')->nullable();
         });
     }
 

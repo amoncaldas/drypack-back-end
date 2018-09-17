@@ -35,9 +35,11 @@ abstract class Content extends BaseModel
         'content',
         'abstract',
         'short_desc',
+        'tags',
         'status',
         'password',
         'featured_image_id',
+        'featured_video_id',
         'multi_lang_content_id',
         'published_at'
     ];

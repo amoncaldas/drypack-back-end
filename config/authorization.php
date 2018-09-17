@@ -97,7 +97,8 @@ return [
         'upload_image',
         'upload_document',
         'save_html_media',
-        'save_external_video'
+        'save_external_video',
+        'getExternalVideoData'
 
         /* Custom actions */
 
@@ -307,9 +308,13 @@ return [
             'destroy',
             'index',
             'show',
+            'getExternalVideoData',
             'store',
                 ['slug' =>'save_html_media', 'dependencies'=>[['resource_slug'=>'media','action_type_slug'=>'store']]],
-                ['slug' =>'save_external_video', 'dependencies'=>[['resource_slug'=>'media','action_type_slug'=>'store']]],
+                ['slug' =>'save_external_video', 'dependencies'=>[
+                    ['resource_slug'=>'media','action_type_slug'=>'store'],
+                    ['resource_slug'=>'media','action_type_slug'=>'getExternalVideoData']]
+                ],
             'update',
             'destroy_others',
             'update_others',

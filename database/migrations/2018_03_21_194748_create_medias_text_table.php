@@ -17,6 +17,7 @@ class CreateMediasTextTable extends Migration
             $table->string('title');
             $table->string('desc');
             $table->string('locale');
+            $table->string('tags')->nullable();
             $table->integer('media_id')->nullable();
             $table->foreign('media_id')->references('id')->on('medias')->onUpdate('cascade')->onDelete('cascade');
             $table->timestampTz('created_at');

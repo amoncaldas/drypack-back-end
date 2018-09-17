@@ -221,6 +221,7 @@ abstract class ContentController extends BaseMultiLangContentController
                 $messages["translations.$key.short_desc.required"] = Lang::get('validation.field_required_in_all_locales', ['field' => Lang::get('validation.attributes.short_desc')]);
                 $messages["translations.$key.short_desc.min"] = Lang::get('validation.field_min_in_all_locales', ['field' => Lang::get('validation.attributes.short_desc'), 'min'=>100]);
                 // $messages['translations.*.featured_image_id.required'] = Lang::get('validation.field_required_in_all_locales', ['field' => Lang::get('validation.attributes.featured_image_id')]);
+                // $messages['translations.*.featured_video_id.required'] = Lang::get('validation.field_required_in_all_locales', ['field' => Lang::get('validation.attributes.featured_video_id')]);
             }
             if($value["status"] === ContentStatus::$passwordProtected["slug"]) {
                 $messages["translations.$key.password.required"] = Lang::get('validation.password_required');

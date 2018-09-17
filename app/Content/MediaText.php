@@ -19,7 +19,7 @@ class MediaText extends BaseModel
      *
      * @var array
      */
-    protected $fillable = ['title','desc','locale','media_id'];
+    protected $fillable = ['title','desc','locale','tags', 'media_id'];
 
 
     /**

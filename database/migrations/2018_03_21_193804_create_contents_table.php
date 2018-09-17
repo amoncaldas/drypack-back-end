@@ -24,9 +24,15 @@ class CreateContentsTable extends Migration
             $table->text('content')->nullable();
             $table->text('abstract')->nullable();
             $table->string('short_desc')->nullable();
+            $table->string('tags')->nullable();
             $table->string('password')->nullable();
+
             $table->integer('featured_image_id')->nullable();
             $table->foreign('featured_image_id')->references('id')->on('medias');
+
+            $table->integer('featured_video_id')->nullable();
+            $table->foreign('featured_video_id')->references('id')->on('medias');
+
             $table->integer('multi_lang_content_id')->nullable();
             $table->foreign('multi_lang_content_id')->references('id')->on('multi_lang_contents')->onUpdate('cascade')->onDelete('cascade');
             $table->foreign('section_id')->references('id')->on('sections')->onDelete('set null');

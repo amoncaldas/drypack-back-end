@@ -17,7 +17,8 @@ class CreateCategoriesTable extends Migration
             $table->string('label');
             $table->string('slug');
             $table->text('locale');
-            $table->integer('multi_lang_content_id');
+            $table->integer('multi_lang_content_id')->unsigned();
+
             $table->foreign('multi_lang_content_id')->references('id')->on('multi_lang_contents')->onUpdate('cascade')->onDelete('cascade');
             $table->integer('parent_category_id')->unsigned()->nullable();;
             $table->foreign('parent_category_id')->references('id')->on('categories')

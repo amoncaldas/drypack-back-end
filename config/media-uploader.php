@@ -23,4 +23,6 @@ return [
     'auto_thumb' => true,
     'auto_thumb_width' => 240,
     'auto_thumb_height' => 240,
+    'auto_medium_thumb_width' => 1024,
+    'auto_medium_thumb_height' => 600,
 ];

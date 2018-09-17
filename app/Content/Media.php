@@ -7,6 +7,7 @@ use \Imagick;
 use App\BaseModel;
 use App\Util\DryPack;
 use App\Content\Content;
+use App\Content\Category;
 use App\Content\MediaText;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
@@ -49,11 +50,28 @@ class Media extends BaseModel
      *
      * @var array
      */
-    protected $fillable = ['file_name','unique_name','type',
-        'status','author_name','owner_id', 'mimetype','ext',
-        'length', 'content', 'thumb', 'url', 'owner_id',
-        'storage_policy', 'captured_at', 'capture_device', 'exif_info',
-        'from', 'external_content_id', 'tags'
+    protected $fillable = [
+        'file_name',
+        'unique_name',
+        'type',
+        'status',
+        'author_name',
+        'owner_id',
+        'mimetype',
+        'ext',
+        'length',
+        'content',
+        'thumb',
+        'thumb_medium',
+        'url',
+        'owner_id',
+        'storage_policy',
+        'captured_at',
+        'capture_device',
+        'exif_data',
+        'from',
+        'external_content_id',
+        'slug'
     ];
 
     /**
@@ -71,7 +89,7 @@ class Media extends BaseModel
     public function __construct(array $attributes = array())
     {
        parent::__construct($attributes);
-       $this->addCast(["exif_info"=> 'array']);
+       $this->addCast(["exif_data"=> 'array']);
     }
 
     /**
@@ -114,6 +132,15 @@ class Media extends BaseModel
     public function mediaTexts()
     {
         return $this->hasMany(MediaText::class);
+    }
+
+    /**
+    * Return the relationship to the categories to which the content belongs
+    * @return object
+    */
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class, 'category_media', 'media_id', 'category_id');
     }
 
 
@@ -164,7 +191,7 @@ class Media extends BaseModel
         $thumbBase64 = $this->getAutotThumb($options);
 
         // if not, get a custom thumb already generated or generate a new one
-        if ($thumbBase64 ===false) {
+        if ($thumbBase64 === false) {
             $thumbUri = $this->resolveThumbFileLocation($options["width"], $options["height"]);
             if (File::exists($thumbUri)) {
                 $blobContent = file_get_contents($thumbUri);
@@ -287,12 +314,21 @@ class Media extends BaseModel
      */
     protected function createAutoThumb() {
         if ($this->type === self::IMAGE_TYPE || $this->type === self::EXTERNAL_VIDEO_TYPE) {
+            // small thumb
             $thumbWidth = Config::get('media-uploader.auto_thumb_width');
             $thumbHeight = Config::get('media-uploader.auto_thumb_height');
             $thumbProportional = Config::get('media-uploader.auto_thumb_proportional');
 
             $imagickThumb = $this->createThumb($thumbWidth, $thumbHeight, $thumbProportional);
             $this->thumb = base64_encode($imagickThumb->getImageBlob());
+
+            // medium thumb
+            $mediumThumbWidth = Config::get('media-uploader.auto_medium_thumb_width');
+            $mediumThumbHeight = Config::get('media-uploader.auto_medium_thumb_height');
+            $thumbProportional = Config::get('media-uploader.auto_thumb_proportional');
+
+            $imagickThumb = $this->createThumb($mediumThumbWidth, $mediumThumbHeight, $thumbProportional);
+            $this->thumb_medium = base64_encode($imagickThumb->getImageBlob());
         }
     }
 
@@ -379,7 +415,7 @@ class Media extends BaseModel
 
             /* Get the EXIF information */
             $exifArray = $imagick->getImageProperties("exif:*");
-            $this->exif_info = json_encode($exifArray);
+            $this->exif_data = json_encode($exifArray);
 
             /* Loop trough the EXIF properties */
             foreach ($exifArray as $exifName => $exifValue)
@@ -459,11 +495,10 @@ class Media extends BaseModel
     public function toArray() {
         $data = parent::toArray();
         $id = $data["id"];
+        $slug = $data["slug"];
         if (!isset($data["url"]) || $data["url"] === "") {
             $data["url"] = "/".request()->route()->getPrefix(). "/medias/$id/content";
-        }
-        if (!isset($data["tags"])) {
-            // $data["tags"] = [];
+            $data["url_medium"] = "/".request()->route()->getPrefix(). "/medias/$id/content/$slug/thumb/medium";
         }
 
         return $data;

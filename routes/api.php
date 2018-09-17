@@ -34,7 +34,8 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'i18n']], function () {
         Route::get('locales', 'SupportController@locales');
     });
 
-    // First we log the user an then, in the AuthenticateController the 'dyn.permission' is executed
+    // First we log in the user an then, in the AuthenticateController the 'dyn.permission' is executed
+    // that is why the authenticate action is not wrapped by the dyn.permission middleware
     Route::post('authenticate', 'AuthenticateController@authenticate');
 
     /*
@@ -96,15 +97,14 @@ Route::group(['prefix' => 'v1', 'middleware' => ['cors', 'i18n']], function () {
         /**
          * Media controller and upload
          */
-        Route::resource('medias', 'Content\MediaController', ['except' => ['upload', 'showContent']]);
+        Route::get('medias/video/external-data', 'Content\MediaController@getExternalVideoData');
+        Route::resource('medias', 'Content\MediaController', ['except' => ['upload', 'showContent', 'getExternalVideoData']]);
         Route::post('media/upload', 'Content\MediaController@upload');
-        Route::get('medias/{id}/content', 'Content\MediaController@showContent');
 
-        // Route::get('media/content/{id}', function(Request $request, $id) {
-        //     $klass = "\App\Http\Controllers\Content\"MediaController";
-        //     $controller = new $klass();
-        //     return $controller->showContent($request, $id);
-        // });
+        Route::get('medias/{id}/content', 'Content\MediaController@showContent');
+        Route::get('medias/{id}/content/{slug}', 'Content\MediaController@showContent');
+        Route::get('medias/{id}/content/{slug}/thumb/{sizeName}', 'Content\MediaController@showContent');
+
 
         /**
          * This dummy route is intended to be used to test the case

@@ -142,8 +142,15 @@ return [
         'content' => 'conteúdo',
         'abstract' => 'resumo',
         'short_desc' => 'descrição curta',
-        'featured_image_id' => 'image destaque',
-        'contents'=> 'contents'
+        'featured_image_id' => 'imagem destaque',
+        'featured_video_id' => 'video destaque',
+        'contents'=> 'contents',
+
     ],
+
+    'types' => [
+        'html'=> 'HTML',
+        'external_video'=> 'vídeo externo'
+    ]
 
 ];

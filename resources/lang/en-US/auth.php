@@ -83,7 +83,8 @@ return [
         'upload_image' => 'Upload image file',
         'upload_document' => 'Upload document file',
         'save_html_media' => 'Save html media',
-        'save_external_video' => 'Save external video'
+        'save_external_video' => 'Save external video',
+        'getExternalVideoData'=> 'Retrieve external video data'
     ],
     /*
     |--------------------------------------------------------------------------

@@ -17,21 +17,15 @@ use \App\Exceptions\BusinessException;
 use Illuminate\Database\Eloquent\Model;
 use App\Http\Controllers\CrudController;
 use Illuminate\Database\Eloquent\Builder as EloquentQueryBuilder;
+use App\Http\Controllers\Content\MediaExternalVideoAdapters\VideoAdapterBuilder;
 
 
 class MediaController extends CrudController
 {
     // youtube constants
-    protected const YOUTUBE_FROM =  "http://youtube.com";
-    protected const YOUTUBE_URL_PATTERN =  "http://youtube.com/embed/<VIDEO_ID>";
-    protected const YOUTUBE_VIDEO_INFO_PATTERN = "https://www.googleapis.com/youtube/v3/videos?part=id%2C+snippet&id=<VIDEO_ID>&key=<API_KEY>";
-    protected const YOUTUBE_PREVIEW_PATTERN = "http://i3.ytimg.com/vi/<VIDEO_ID>/maxresdefault.jpg";
     protected const YOUTUBE_HOSTS = ["youtube.com","youtu.be", "www.youtube.com"];
 
     // vimeo constants
-    protected const VIMEO_FROM =  "http://vimeo.com";
-    protected const VIMEO_URL_PATTERN =  "https://player.vimeo.com/video/<VIDEO_ID>";
-    protected const VIMEO_VIDEO_INFO_PATTERN = "http://vimeo.com/api/v2/video/<VIDEO_ID>.json";
     protected const VIMEO_HOSTS = ["vimeo.com","www.vimeo.com"];
 
 
@@ -55,8 +49,15 @@ class MediaController extends CrudController
         // mode. The 'url' attribute of each model have the endpoint that
         // can be used to retrive the media content
         $attrs = $query->getModel()->getAllAttributes();
+
+        // in listing mode do not get the content field
         $content_key = array_search("content",$attrs);
         unset($attrs[$content_key]);
+
+        // in listing mode do not get the thumb_medium field
+        $thumb_medium_key = array_search("thumb_medium",$attrs);
+        unset($attrs[$thumb_medium_key]);
+
         $attrs[] = "id";
         $query = $query->select($attrs);
         $query = $query->with('mediaTexts')->with('author')->with('owner')->orderBy('created_at', 'desc');
@@ -78,6 +79,12 @@ class MediaController extends CrudController
             $query = $query->where('author_name', 'ilike', '%'.$request->author_name.'%');
         }
 
+        if ($request->has('categories')) {
+            $query = $query->whereHas('categories', function ($categoryQuery) use ($request) {
+                $categoryQuery->whereIn('id', explode(',', $request->categories));
+            });
+        }
+
         $this->applyIndexOthersPermissionFilter($query);
     }
 
@@ -92,6 +99,20 @@ class MediaController extends CrudController
     protected function beforeSave(Request $request, Model $media)
     {
         $this->checkUpdateOwnerPermission($request, "media");
+
+        $user = $this->getUser();
+        $resourceActions = Authorization::getResourceActions("media");
+
+        if($media->type === "html" && isset($resourceActions["save_html_media"]) && !$user->hasResourcePermission("media", "save_html_media")) {
+            $msg = \Lang::get('business.you_dont_have_permission_to_save', ['type' => Lang::get('validation.types.html')]);
+            throw new BusinessException($msg);
+        }
+        if($media->type === "external_video" && isset($resourceActions["save_external_video"]) && !$user->hasResourcePermission("media", "save_external_video")) {
+            $msg = \Lang::get('business.you_dont_have_permission_to_save', ['type' => Lang::get('validation.types.external_video')]);
+            throw new BusinessException($msg);
+        }
+
+
         $this->setAuthorAndOwner($request, $media);
 
         if ($request->type === "external_video") {
@@ -118,103 +139,10 @@ class MediaController extends CrudController
      * @return void
      */
     private function setExternalContentData(Request $request, Model $media) {
+
         if ($media->type === Media::EXTERNAL_VIDEO_TYPE) {
-            $host = parse_url($media->url, PHP_URL_HOST);
-
-            // only youtube and videmo supported at this moment
-            if( in_array($host, self::YOUTUBE_HOSTS)) {
-                $this->setYoutubeData($request, $media);
-            } elseif (in_array($host, self::VIMEO_HOSTS)) {
-                $this->setVimeoData($request, $media);
-            }
-        }
-    }
-
-    /**
-     * Set the media info of a external Vimeo video using the vimeo api
-     *
-     * @param Request $request
-     * @param Model $media
-     * @return void
-     */
-    private function setVimeoData(Request $request, Model $media) {
-        preg_match("/(?:www\.|player\.)?vimeo.com\/(?:channels\/(?:\w+\/)?|groups\/(?:[^\/]*)\/videos\/|album\/(?:\d+)\/video\/|video\/|)(\d+)(?:[a-zA-Z0-9_\-]+)?/i", $media->url, $matches);
-        $videoId = $matches[1];
-
-        $media->external_content_id = $videoId;
-        $media->status = "saved";
-        $media->mimetype = "video/vimeo";
-        $media->storage_policy = "indb";
-        $media->dimension_type = "responsive";
-        $media->url = str_replace("<VIDEO_ID>", $videoId, self::VIMEO_URL_PATTERN);
-        $media->from = self::VIMEO_FROM;
-
-        $videoInfoUrl = str_replace("<VIDEO_ID>", $videoId, self::VIMEO_VIDEO_INFO_PATTERN);
-        $response = file_get_contents($videoInfoUrl);
-        if ($response) {
-            $video_attributes = json_decode($response, true);
-            if (isset($video_attributes[0])) {
-                $video_attributes = $video_attributes[0];
-                $media->preview_image = isset($video_attributes["thumbnail_large"]) ? $video_attributes["thumbnail_large"] : null;
-                $media->length = isset($video_attributes["duration"]) ? $video_attributes["duration"] : null;
-                $media->author_name = isset($video_attributes["user_name"]) ? $video_attributes["user_name"] : null;
-                $media->width = isset($video_attributes["width"]) ? $video_attributes["width"] : null;
-                $media->height = isset($video_attributes["height"]) ? $video_attributes["height"] : null;
-                $media->tags = isset($video_attributes["tags"]) ? $video_attributes["tags"] : null ;
-
-                // Set the warning title  and the desc on the request
-                // because it is gonna be read by the getMediaTexts in the afterSave event
-                if (isset($video_attributes["title"])) {
-                    $request->merge(["title"=>$video_attributes["title"]]);
-                }
-                if (isset($video_attributes["description"])) {
-                    $request->merge(["desc"=>$video_attributes["description"] ]);
-                }
-            }
-        }
-    }
-
-
-    /**
-     * Set the media info of a external youtube video using the youtube data api
-     *
-     * @param Request $request
-     * @param Model $media
-     * @return void
-     */
-    private function setYoutubeData(Request $request, Model $media) {
-        preg_match("#(?<=v=)[a-zA-Z0-9-]+(?=&)|(?<=v\/)[^&\n]+(?=\?)|(?<=embed/)[^&\n]+|(?<=v=)[^&\n]+|(?<=youtu.be/)[^&\n]+#", $media->url, $matches);
-        $videoId = $matches[0];
-
-        $media->preview_image = str_replace("<VIDEO_ID>", $videoId, self::YOUTUBE_PREVIEW_PATTERN);
-        $media->external_content_id = $videoId;
-        $media->status = "saved";
-        $media->mimetype = "video/youtube";
-        $media->storage_policy = "indb";
-        $media->dimension_type = "responsive";
-        $media->url = str_replace("<VIDEO_ID>", $videoId, self::YOUTUBE_URL_PATTERN);
-        $media->from = self::YOUTUBE_FROM;
-
-        $youtubeApiKey = env("YOUTUBE_DATA_API_KEY");
-        $videoInfoUrl = str_replace("<API_KEY>", $youtubeApiKey, str_replace("<VIDEO_ID>", $videoId, self::YOUTUBE_VIDEO_INFO_PATTERN));
-        $response = file_get_contents($videoInfoUrl);
-        if ($response) {
-            $video_attributes = json_decode($response, true);
-            if (isset($video_attributes["items"]) && isset($video_attributes["items"][0]) && isset($video_attributes["items"][0]["snippet"])) {
-                $video_attributes = $video_attributes["items"][0]["snippet"];
-                $media->length = isset($video_attributes["duration"]) ? $video_attributes["duration"] : null;
-                $media->captured_at = isset($video_attributes["publishedAt"]) ? \DryPack::parseDate($video_attributes["publishedAt"]) : null;
-                $media->tags = isset($video_attributes["tags"]) ? implode(",", $video_attributes["tags"] ) : null ;
-
-                // Set the warning title  and the desc on the request
-                // because it is gonna be read by the getMediaTexts in the afterSave event
-                if (isset($video_attributes["title"])) {
-                    $request->merge(["title"=>$video_attributes["title"]]);
-                }
-                if (isset($video_attributes["desc"])) {
-                    $request->merge(["desc"=>$video_attributes["description"] ]);
-                }
-            }
+            $videoAdapter = VideoAdapterBuilder::build($media->url);
+            $videoAdapter->addVideoData($media);
         }
     }
 
@@ -255,9 +183,17 @@ class MediaController extends CrudController
 
             foreach ($media_texts as $key => $value) {
                 $locale = isset($value['locale']) ? $value['locale'] : $key;
-                $mediaText = new MediaText(['title'=>$value['title'], 'desc'=>$value['desc'], 'locale'=>$locale]);
+                $tags = isset($value['tags']) ? $value['tags'] : null;
+                $mediaText = new MediaText(['title'=>$value['title'], 'desc'=>$value['desc'], 'locale'=>$locale, 'tags'=>$tags]);
                 $media->mediaTexts()->save($mediaText);
             }
+        }
+
+        // remove all categories and (re)save them
+        if(isset($request->categories)) {
+            $media->categories()->detach();
+            $ids = array_pluck($request->categories, 'id');
+            $media->categories()->attach($ids);
         }
     }
 
@@ -282,6 +218,7 @@ class MediaController extends CrudController
                         "locale"=>$value["locale"]
                     ];
                     $media_text["desc"] = isset($value["desc"])? $value["desc"] : $value["title"];
+                    $media_text["tags"] = isset($value["tags"])? $value["tags"] : null;
                     $media_texts[] = $media_text;
                 }
             }
@@ -357,16 +294,23 @@ class MediaController extends CrudController
      * Process a file upload submitted
      *
      * @param Request $request
-     * @return array - with created media id
+     * @param Integer $id
+     * @param String $slug - media name name free of special characters and camel cased
+     * @param String $sizeName - 'original'|'medium'
+     * @return \Illuminate\Http\Response
      */
-    public function showContent(Request $request, $id) {
+    public function showContent(Request $request, $id, $slug, $sizeName = null) {
         $media = Media::find($id);
         if ($media){
             if($media->storage_policy === "filesystem" || $media->type === Media::VIDEO_TYPE) {
                 $fileContents = File::get($media->resolveFileLocation());
 
             } else { // storage_policy === "indb", so the data is stored in the content attribute
-                $fileContents = base64_decode($media->content);
+                if (!isset($sizeName) || $sizeName === "origial") {
+                    $fileContents = base64_decode($media->content);
+                } elseif ($sizeName === "medium") {
+                    $fileContents = base64_decode($media->thumb_medium);
+                }
             }
 
             $mediaType = $media->type === "document" ? "application" : $media->type;
@@ -375,6 +319,22 @@ class MediaController extends CrudController
             return response("Media not found.", 404);
         }
     }
+
+    /**
+     * Get the data of an external video based in itsurl
+     *
+     * @param Request $request
+     * @param String $videoUrl
+     * @return App\Http\Controllers\Content\MediaExternalVideoAdapters\VideoData
+     */
+    public function getExternalVideoData(Request $request) {
+        // $videoUrl = base64_decode($videoUrl);
+        $videoUrl = $request->url;
+        $videoAdapter = VideoAdapterBuilder::build($videoUrl);
+        $parsed = (array) $videoAdapter->getVideoData();
+        return [$parsed];
+    }
+
 
     /**
      * Check if the loggeduser can upload the type of content (video/audio/image/document) that is being sent

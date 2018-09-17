@@ -145,7 +145,12 @@ return [
         'abstract' => 'abstract',
         'short_desc' => 'short description',
         'featured_image_id' => 'featured image',
+        'featured_video_id' => 'featured video',
         'contents'=> 'contents'
     ],
+    'types' => [
+        'html'=> 'HTML',
+        'external_video'=> 'external_video'
+    ]
 
 ];

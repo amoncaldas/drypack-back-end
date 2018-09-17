@@ -115,6 +115,15 @@ function getJSFileInstance(file) {
 }
 ```
 
+# Route api closure #
+```php
+Route::get('my-content/endpoint/{id}', function(Request $request, $id) {
+  $klass = "\App\Http\Controllers\Content\"DesiredController";
+  $controller = new $klass();
+  return $controller->showContent($request, $id);
+});
+```
+
 
           
 
