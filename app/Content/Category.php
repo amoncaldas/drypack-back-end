@@ -25,7 +25,7 @@ class Category extends BaseModel
 
 
     /**
-    * Return the relationship to the project to which the the task belongs to
+    * Return the relationship to the multilanguage to which the category belongs to
     * @return object
     */
     public function multiLangContent()

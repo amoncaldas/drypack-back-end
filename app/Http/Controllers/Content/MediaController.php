@@ -60,26 +60,29 @@ class MediaController extends CrudController
 
         $attrs[] = "id";
         $query = $query->select($attrs);
-        $query = $query->with('mediaTexts')->with('author')->with('owner')->orderBy('created_at', 'desc');
+        $query = $query->with('mediaTexts')->with('author')->with('owner')->with('categories')->orderBy('created_at', 'desc');
 
         $query = $query->whereHas('mediaTexts', function ($textQuery) use ($request) {
-            if ($request->has('title')) {
+            if ($request->has('title')  && $request->title != null) {
                 $textQuery = $textQuery->where('title', 'like', '%'.$request->title.'%');
             }
-            if ($request->has('locale')) {
+            if ($request->has('locale') && $request->locale != null) {
                 $textQuery = $textQuery->where('locale', $request->locale);
+            }
+            if ($request->has('tags') && $request->tags != null) {
+                $textQuery = $textQuery->where('tags', 'ilike', '%'.$request->tags.'%');
             }
         });
 
-        if ($request->has('type')) {
+        if ($request->has('type') && $request->type != null ) {
             $query = $query->where('type', $request->type);
         }
 
-        if ($request->has('author_name')) {
+        if ($request->has('author_name') && $request->author_name != null ) {
             $query = $query->where('author_name', 'ilike', '%'.$request->author_name.'%');
         }
 
-        if ($request->has('categories')) {
+        if ($request->has('categories') && $request->categories != null && is_array($request->categories)) {
             $query = $query->whereHas('categories', function ($categoryQuery) use ($request) {
                 $categoryQuery->whereIn('id', explode(',', $request->categories));
             });
@@ -112,7 +115,6 @@ class MediaController extends CrudController
             throw new BusinessException($msg);
         }
 
-
         $this->setAuthorAndOwner($request, $media);
 
         if ($request->type === "external_video") {
@@ -139,7 +141,6 @@ class MediaController extends CrudController
      * @return void
      */
     private function setExternalContentData(Request $request, Model $media) {
-
         if ($media->type === Media::EXTERNAL_VIDEO_TYPE) {
             $videoAdapter = VideoAdapterBuilder::build($media->url);
             $videoAdapter->addVideoData($media);
@@ -263,7 +264,7 @@ class MediaController extends CrudController
         ini_set('memory_limit', '512M');
 
         // Get the file. If invalid, it will throw a BusinessException
-        $file = $this->getFileAndValidate($request);
+        $file = $this->getAndValidateUploadFile($request);
 
         // transform the data from the request into a populated Media instance
         $media = $this->buildMediaObj($request, $file);
@@ -300,20 +301,26 @@ class MediaController extends CrudController
      * @return \Illuminate\Http\Response
      */
     public function showContent(Request $request, $id, $slug, $sizeName = null) {
+        // if hotlink is disabled (serve image to external servers)
+        if (env('DENY_HOTLINK') === true && $this->isExternalRequest()) {
+            return response("Access refused.", 403);
+        }
         $media = Media::find($id);
         if ($media){
-            if($media->storage_policy === "filesystem" || $media->type === Media::VIDEO_TYPE) {
+            // videos are always stored in the file system, even if the configuration is 'indb'
+            // because they can be very big
+            if($media->storage_policy === Media::STORAGE_POLICY_FILESYSTEM || $media->type === Media::VIDEO_TYPE) {
                 $fileContents = File::get($media->resolveFileLocation());
-
-            } else { // storage_policy === "indb", so the data is stored in the content attribute
-                if (!isset($sizeName) || $sizeName === "origial") {
+            }
+            else { // storage_policy === "indb", so the data is stored in the content/thumb_medium attribute
+                if (!isset($sizeName) || $sizeName === Media::ORIGINAL_SIZE_NAME) {
                     $fileContents = base64_decode($media->content);
-                } elseif ($sizeName === "medium") {
+                } elseif ($sizeName === Media::MEDIUM_SIZE_NAME) {
                     $fileContents = base64_decode($media->thumb_medium);
                 }
             }
 
-            $mediaType = $media->type === "document" ? "application" : $media->type;
+            $mediaType = $media->type === Media::DOCUMENT_TYPE ? "application" : $media->type;
             return response($fileContents, 200)->header('Content-Type', $mediaType."/".$media->ext);
         } else {
             return response("Media not found.", 404);
@@ -430,7 +437,7 @@ class MediaController extends CrudController
      * @return File
      * @throws BusinessException
      */
-    protected function getFileAndValidate(Request $request) {
+    protected function getAndValidateUploadFile(Request $request) {
         $file = Input::file('media_upload');
         if (!$file) {
             throw new BusinessException("messages.no_file_provided", $request->file_key);

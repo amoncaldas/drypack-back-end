@@ -69,12 +69,21 @@ abstract class Content extends BaseModel
     }
 
     /**
-    * Return the relationship to the feaured images of the content
+    * Return the relationship to the feaured image of the content
     * @return object
     */
     public function featuredImage()
     {
         return $this->hasOne(Media::class, 'id', 'featured_image_id');
+    }
+
+    /**
+    * Return the relationship to the feaured video of the content
+    * @return object
+    */
+    public function featuredVideo()
+    {
+        return $this->hasOne(Media::class, 'id', 'featured_video_id');
     }
 
     /**

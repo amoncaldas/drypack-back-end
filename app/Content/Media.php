@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Storage;
 class Media extends BaseModel
 {
     /**
-     * Constats to define values used in the class
+     * Constats that define values used in the class
      */
     public const STORAGE_POLICY_FILESYSTEM = "filesystem";
     public const STORAGE_POLICY_INDB = "indb";
@@ -26,6 +26,7 @@ class Media extends BaseModel
     public const THUMB_FORMAT = "jpg";
     public const VIDEO_TYPE = "video";
     public const EXTERNAL_VIDEO_TYPE = "external_video";
+    public const HTML_TYPE = "html";
     public const IMAGE_TYPE = "image";
     public const AUDIO_TYPE = "audio";
     public const DOCUMENT_TYPE = "document";
@@ -36,6 +37,11 @@ class Media extends BaseModel
     public const UPLOAD_PATH = "upload_path";
     public const PIXEL_UNIT = "px";
     public const BASE64_IMAGE_PREFIX = "data:image/jpg;base64,";
+    public const EXIF_PREFIX = "exif:*";
+    public const EXIF_CAPTURE_DATE_KEY = "exif:datetimeoriginal";
+    public const EXIF_CAPTURE_DEVICE_KEY = "exif:make";
+    public const MEDIUM_SIZE_NAME = "medium";
+    public const ORIGINAL_SIZE_NAME = "original";
 
 
     /**
@@ -71,7 +77,11 @@ class Media extends BaseModel
         'exif_data',
         'from',
         'external_content_id',
-        'slug'
+        'slug',
+        'width',
+        'height',
+        'width_unit',
+        'height_unit'
     ];
 
     /**
@@ -92,6 +102,40 @@ class Media extends BaseModel
        $this->addCast(["exif_data"=> 'array']);
     }
 
+
+    /**
+    * Return the relationship with the author
+    */
+    public function author()
+    {
+        return $this->belongsTo(User::class, 'author_id', 'id');
+    }
+
+    /**
+    * Return the relationship with the owner
+    */
+    public function owner()
+    {
+        return $this->belongsTo(User::class, 'owner_id', 'id');
+    }
+
+    /**
+    * Return the relationship with the media texts
+    */
+    public function mediaTexts()
+    {
+        return $this->hasMany(MediaText::class);
+    }
+
+    /**
+    * Return the categories relationship to which the media belongs
+    * @return object
+    */
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class, 'category_media', 'media_id', 'category_id');
+    }
+
     /**
      * Get the the imgick representation of the original image
      *
@@ -107,40 +151,6 @@ class Media extends BaseModel
             $this->imagickOriginaImage = $imagick;
         }
         return $this->imagickOriginaImage;
-    }
-
-
-    /**
-    * Return the relationship with the parent project
-    */
-    public function author()
-    {
-        return $this->belongsTo(User::class, 'author_id', 'id');
-    }
-
-    /**
-    * Return the relationship with the parent project
-    */
-    public function owner()
-    {
-        return $this->belongsTo(User::class, 'owner_id', 'id');
-    }
-
-    /**
-    * Return the relationship with the parent project
-    */
-    public function mediaTexts()
-    {
-        return $this->hasMany(MediaText::class);
-    }
-
-    /**
-    * Return the relationship to the categories to which the content belongs
-    * @return object
-    */
-    public function categories()
-    {
-        return $this->belongsToMany(Category::class, 'category_media', 'media_id', 'category_id');
     }
 
 
@@ -168,14 +178,6 @@ class Media extends BaseModel
      */
     public function save(array $options = []) {
         $this->prepareSave();
-        if (($this->type === self::IMAGE_TYPE || self::EXTERNAL_VIDEO_TYPE) && Config::get('media-uploader.auto_thumb') === true) {
-            $this->createAutoThumb();
-        }
-        if (isset($this->media_texts) && is_array($this->media_texts)) {
-            $media_texts = $this->media_texts;
-            unset($this->media_texts);
-        }
-
         parent::save($options);
     }
 
@@ -231,34 +233,38 @@ class Media extends BaseModel
      * @return string|null
      */
     public function getBase64ImageContent($includePrefix = false) {
-        if($this->type === self::IMAGE_TYPE) {
-            if($this->storage_policy === self::STORAGE_POLICY_INDB) {
-                return $this->content;
-            } else {
-                $imageUri = $this->resolveFileLocation();
-                $blobContent = file_get_contents($imageUri);
-                $base64 = base64_encode($blobContent);
-                return $includePrefix? self::BASE64_IMAGE_PREFIX.$base64 : $base64;
-            }
-        } elseif ($this->type === self::VIDEO_TYPE) {
-            if($this->preview_image !== null) {
-                if(DryPack::startsWith($this->preview_image, self::HTTP_PROTOCOL_START)) {
-                    $blobContent = file_get_contents($this->preview_image);
-                    $base64 = base64_encode($blobContent);
-                    return $includePrefix? self::BASE64_IMAGE_PREFIX.$base64 : $base64;
+
+        switch ($this->type) {
+            case self::IMAGE_TYPE:
+                if($this->storage_policy === self::STORAGE_POLICY_INDB) {
+                    return $this->content;
                 } else {
-                    return $includePrefix? self::BASE64_IMAGE_PREFIX.$this->preview_image : $this->preview_image;
+                    $imageUri = $this->resolveFileLocation();
+                    $blobContent = file_get_contents($imageUri);
+                    $base64Content = base64_encode($blobContent);
+                    return $includePrefix? self::BASE64_IMAGE_PREFIX.$base64Content : $base64Content;
                 }
-            }
-        } elseif ($this->type === self::EXTERNAL_VIDEO_TYPE) {
-            $imageUrl = $this->resolveFileLocation();
-            if($imageUrl) {
-                $blobContent = file_get_contents($imageUrl);
-                $base64 = base64_encode($blobContent);
-                return $includePrefix? self::BASE64_IMAGE_PREFIX.$base64 : $base64;
-            }
+                break;
+            case self::VIDEO_TYPE:
+                if($this->preview_image !== null) {
+                    if(DryPack::startsWith($this->preview_image, self::HTTP_PROTOCOL_START)) {
+                        $blobContent = file_get_contents($this->preview_image);
+                        $base64Content = base64_encode($blobContent);
+                        return $includePrefix? self::BASE64_IMAGE_PREFIX.$base64Content : $base64Content;
+                    } else {
+                        return $includePrefix? self::BASE64_IMAGE_PREFIX.$this->preview_image : $this->preview_image;
+                    }
+                }
+            case self::EXTERNAL_VIDEO_TYPE:
+                $imageUrl = $this->resolveFileLocation();
+                if($imageUrl) {
+                    $blobContent = file_get_contents($imageUrl);
+                    $base64Content = base64_encode($blobContent);
+                    return $includePrefix? self::BASE64_IMAGE_PREFIX.$base64Content : $base64Content;
+                }
+            default:
+                return null;
         }
-        return null;
     }
 
     /**
@@ -318,7 +324,6 @@ class Media extends BaseModel
             $thumbWidth = Config::get('media-uploader.auto_thumb_width');
             $thumbHeight = Config::get('media-uploader.auto_thumb_height');
             $thumbProportional = Config::get('media-uploader.auto_thumb_proportional');
-
             $imagickThumb = $this->createThumb($thumbWidth, $thumbHeight, $thumbProportional);
             $this->thumb = base64_encode($imagickThumb->getImageBlob());
 
@@ -326,7 +331,6 @@ class Media extends BaseModel
             $mediumThumbWidth = Config::get('media-uploader.auto_medium_thumb_width');
             $mediumThumbHeight = Config::get('media-uploader.auto_medium_thumb_height');
             $thumbProportional = Config::get('media-uploader.auto_thumb_proportional');
-
             $imagickThumb = $this->createThumb($mediumThumbWidth, $mediumThumbHeight, $thumbProportional);
             $this->thumb_medium = base64_encode($imagickThumb->getImageBlob());
         }
@@ -363,21 +367,24 @@ class Media extends BaseModel
     protected function getAutotThumb($options) {
         $autoWidth = Config::get('media-uploader.auto_thumb_width');
         $autoHeight = Config::get('media-uploader.auto_thumb_height');
+        $autoMediumWidth = Config::get('media-uploader.auto_medium_thumb_width');
+        $autoMediumHeight = Config::get('media-uploader.auto_medium_thumb_height');
+
+        // parse thumb options
         $width = isset($options["width"]) ? $options["width"] : false;
         $height = isset($options["height"])? $options["height"] : false;
+        $proportional = isset($options["proportional"]) ? $options["proportional"] : false;
+
 
         /**
          * If the width and height were not informed, or they are the same of the auto thumb, get the auto thumb
          */
-        if(($width === false && $height === false) || ($width === $autoWidth && $height === $autoHeight)) {
-            $thumbBase64 = $this->thumb;
-            if ($thumbBase64 === null) {
-                $proportional = isset($options["proportional"]) ? $options["proportional"] : false;
-                $imagickThumb = $this->createThumb($autoWidth, $autoHeight, $proportional);
-                $thumbBase64 = base64_encode($imagickThumb->getImageBlob());
-            }
-            if (isset($options["include_base64_prefix"])) {
-                $thumbBase64 = self::BASE64_IMAGE_PREFIX.$thumb;
+        if($width !== false && $height !== false) {
+            // get default thumbs
+            if ($width === $autoWidth && $height === $autoHeight)  {
+                $thumbBase64 = $this->thumb;
+            } elseif ($width === $autoMediumWidth && $height === $autoMediumHeight) {
+                $thumbBase64 = $this->thumb_medium;
             }
             return $thumbBase64;
         }
@@ -391,7 +398,18 @@ class Media extends BaseModel
      * @return void
      */
     protected function prepareSave() {
+
+        if (($this->type === self::IMAGE_TYPE || self::EXTERNAL_VIDEO_TYPE) && Config::get('media-uploader.auto_thumb') === true) {
+            $this->createAutoThumb();
+        }
+
+        // default storage policy
         $this->storage_policy = self::STORAGE_POLICY_INDB;
+
+        if($this->type !== self::EXTERNAL_VIDEO_TYPE && $this->type !== self::HTML_TYPE ) {
+            $fileName = str_replace(".$this->ext", "", $this->file_name);
+            $this->slug = DryPack::getSlug($fileName);
+        }
 
         if($this->type === self::IMAGE_TYPE) {
             if (Config::get('media-uploader.storage_policy') === self::STORAGE_POLICY_FILESYSTEM) {
@@ -406,26 +424,26 @@ class Media extends BaseModel
             $this->height = $d['height'];
             $this->width_unit = self::PIXEL_UNIT;
             $this->height_unit = self::PIXEL_UNIT;
-            $this->preview_image = null; // when is IMAGE_TYPE, has no preview
-
-            // parse captured_at data, if defined
-            if($this->captured_at) {
-                $this->captured_at = \DryPack::parseDate($this->captured_at);
-            }
+            $this->preview_image = null; // when it is IMAGE_TYPE, it has no preview
 
             /* Get the EXIF information */
-            $exifArray = $imagick->getImageProperties("exif:*");
+            $exifArray = $imagick->getImageProperties(self::EXIF_PREFIX);
             $this->exif_data = json_encode($exifArray);
 
-            /* Loop trough the EXIF properties */
+            // Loop through the EXIF data
             foreach ($exifArray as $exifName => $exifValue)
             {
-                if ( strtolower($exifName) === "exif:datetimeoriginal" && !isset($this->captured_at)) {
-                    $this->captured_at = \DryPack::parseDate($exifValue);
+                if ( strtolower($exifName) === self::EXIF_CAPTURE_DATE_KEY && !isset($this->captured_at)) {
+                    $this->captured_at = $exifValue;
                 }
-                if ( strtolower($exifName) === "exif:make" && !isset($this->capture_device)) {
+                if ( strtolower($exifName) === self::EXIF_CAPTURE_DEVICE_KEY && !isset($this->capture_device)) {
                     $this->capture_device = $exifValue;
                 }
+            }
+
+            // Parse captured_at date, if present
+            if($this->captured_at) {
+                $this->captured_at = DryPack::parseDate($this->captured_at);
             }
 
         } else {
@@ -474,6 +492,12 @@ class Media extends BaseModel
         if(!isset($data["media_texts"])) {
             $data["media_texts"] = $this->mediaTexts;
         }
+        if(!isset($data["categories"])) {
+            $data["categories"] = $this->categories;
+        }
+        if(!isset($data["owner"])) {
+            $data["owner"] = $this->owner;
+        }
         if(isset($data["media_texts"])) {
             $mediaTexts = $data["media_texts"];
             $data["media_texts"] = [];
@@ -495,10 +519,15 @@ class Media extends BaseModel
     public function toArray() {
         $data = parent::toArray();
         $id = $data["id"];
-        $slug = $data["slug"];
-        if (!isset($data["url"]) || $data["url"] === "") {
-            $data["url"] = "/".request()->route()->getPrefix(). "/medias/$id/content";
-            $data["url_medium"] = "/".request()->route()->getPrefix(). "/medias/$id/content/$slug/thumb/medium";
+
+        if (!isset($data["url"])) {
+            if ($data["type"] !== self::EXTERNAL_VIDEO_TYPE) {
+                $slug = $data["slug"];
+                $data["url"] = "/".request()->route()->getPrefix(). "/medias/$id/content/$slug";
+                if ($data["type"] === self::IMAGE_TYPE) {
+                    $data["url_medium"] = "/".request()->route()->getPrefix(). "/medias/$id/content/$slug/thumb/medium";
+                }
+            }
         }
 
         return $data;

@@ -22,7 +22,7 @@ class Vimeo implements IMediaExternalVideo
     }
 
     public function getVideoData() : VideoData {
-        preg_match("/(?:www\.|player\.)?vimeo.com\/(?:channels\/(?:\w+\/)?|groups\/(?:[^\/]*)\/videos\/|album\/(?:\d+)\/video\/|video\/|)(\d+)(?:[a-zA-Z0-9_\-]+)?/i", $videoUrl, $matches);
+        preg_match("/(?:www\.|player\.)?vimeo.com\/(?:channels\/(?:\w+\/)?|groups\/(?:[^\/]*)\/videos\/|album\/(?:\d+)\/video\/|video\/|)(\d+)(?:[a-zA-Z0-9_\-]+)?/i", $this->videoUrl, $matches);
         $videoId = $matches[1];
 
         $videoData = new VideoData();
@@ -40,8 +40,17 @@ class Vimeo implements IMediaExternalVideo
                 $videoData->preview_image = isset($video_attributes["thumbnail_large"]) ? $video_attributes["thumbnail_large"] : null;
                 $videoData->length = isset($video_attributes["duration"]) ? $video_attributes["duration"] : null;
                 $videoData->author_name = isset($video_attributes["user_name"]) ? $video_attributes["user_name"] : null;
-                $videoData->width = isset($video_attributes["width"]) ? $video_attributes["width"] : null;
-                $videoData->height = isset($video_attributes["height"]) ? $video_attributes["height"] : null;
+
+                if (isset($video_attributes["width"])) {
+                    $videoData->width = $video_attributes["width"];
+                    $videoData->width_unit = "px";
+                }
+
+                if (isset($video_attributes["height"])) {
+                    $videoData->height = $video_attributes["height"];
+                    $videoData->height_unit = "px";
+                }
+
                 $videoData->tags = isset($video_attributes["tags"]) ? $video_attributes["tags"] : null ;
 
                 $videoData->title = isset($video_attributes["title"]) ? $video_attributes["title"] : null ;
@@ -63,11 +72,14 @@ class Vimeo implements IMediaExternalVideo
         $media->from = $videoData->from;
 
         $media->length = $videoData->length;
-        $media->author_name = $videoData->author_name;
+        $media->author_name = isset($media->author_name) ? $media->author_name : $videoData->author_name;
         $media->width = $videoData->width;
         $media->height = $videoData->height;
-        $media->captured_at = $videoData->captured_at;
+        $media->captured_at = isset($media->captured_at) ? $media->captured_at : $videoData->captured_at;
         $media->url = $videoData->url;
+
+        $media->width_unit = $videoData->width_unit;
+        $media->height_unit = $videoData->height_unit;
     }
 
 }

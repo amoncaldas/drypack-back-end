@@ -13,7 +13,7 @@ class Youtube implements IMediaExternalVideo
     // youtube constants
     protected const YOUTUBE_FROM =  "http://youtube.com";
     protected const YOUTUBE_URL_PATTERN =  "http://youtube.com/embed/<VIDEO_ID>";
-    protected const YOUTUBE_VIDEO_INFO_PATTERN = "https://www.googleapis.com/youtube/v3/videos?part=id%2C+snippet&id=<VIDEO_ID>&key=<API_KEY>";
+    protected const YOUTUBE_VIDEO_INFO_PATTERN = "https://www.googleapis.com/youtube/v3/videos?part=id,snippet,contentDetails&id=<VIDEO_ID>&key=<API_KEY>";
     protected const YOUTUBE_PREVIEW_PATTERN = "http://i3.ytimg.com/vi/<VIDEO_ID>/maxresdefault.jpg";
 
     public function __construct($videoUrl)
@@ -41,6 +41,7 @@ class Youtube implements IMediaExternalVideo
             if (isset($video_attributes["items"]) && isset($video_attributes["items"][0]) && isset($video_attributes["items"][0]["snippet"])) {
                 $video_attributes = $video_attributes["items"][0]["snippet"];
                 $videoData->length = isset($video_attributes["duration"]) ? $video_attributes["duration"] : null;
+                $videoData->author_name = isset($video_attributes["channelTitle"]) ? $video_attributes["channelTitle"] : null;
                 $videoData->captured_at = isset($video_attributes["publishedAt"]) ? \DryPack::parseDate($video_attributes["publishedAt"]) : null;
                 $videoData->tags = isset($video_attributes["tags"]) ? implode(",", $video_attributes["tags"] ) : null ;
                 $videoData->title = isset($video_attributes["title"]) ? $video_attributes["title"] : null ;
@@ -62,10 +63,10 @@ class Youtube implements IMediaExternalVideo
         $media->from = $videoData->from;
 
         $media->length = $videoData->length;
-        $media->author_name = $videoData->author_name;
+        $media->author_name = isset($media->author_name) ? $media->author_name : $videoData->author_name;
         $media->width = $videoData->width;
         $media->height = $videoData->height;
-        $media->captured_at = $videoData->captured_at;
+        $media->captured_at = isset($media->captured_at) ? $media->captured_at : $videoData->captured_at;
         $media->url = $videoData->url;
     }
 }
