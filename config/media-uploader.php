@@ -20,7 +20,7 @@ return [
     'image_allowed_extensions' => ["jpg", "jpeg", "gif", "png", "tiff"],
     'video_allowed_extensions' => ["mp4"],
     'audio_allowed_extensions' => ["mp3"],
-    'document_allowed_extensions' => ["pdf", "docx"],
+    'document_allowed_extensions' => ["pdf", "docx", "doc"],
 
     // videos are always stored in the file system, even if the configuration is 'indb'
     'storage_policy' => "indb", // can be 'filesystem' or 'indb'

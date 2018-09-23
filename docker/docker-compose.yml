@@ -1,0 +1,59 @@
+version: '3.1'
+
+networks:
+  drypack_net:
+    driver: bridge
+services:
+  node:
+    container_name: dry_node_admin_server
+    build:
+      context: node-clients
+    user: "node"
+    environment:
+       - NODE_ENV=production
+    volumes:
+      - .:../public/
+    ports:
+      - "5000:5000"
+  php:
+    container_name: dry_php_server
+    image: custom-laravel-php:7.2
+    build:
+      context: back-end
+    networks:
+      - drypack_net
+    volumes:
+      - ./:../public
+  drypack_web:
+    image: jguyomard/laravel-nginx:1.13
+    container_name: dry_web_server
+    volumes:
+      - ./:/var/www
+    networks:
+      - drypack_net
+    ports:
+      - 8081:80
+  drypack_db:
+    image: mdillon/postgis # can be also only 'postgres'
+    container_name: dry_db_server
+    networks:
+      - drypack_net
+    environment:
+      POSTGRES_DB: drypack_db
+      POSTGRES_USER: drypackuser
+      POSTGRES_PASSWORD: drypack
+  drypack_adminer:
+    image: adminer
+    container_name: dry_adminer_server
+    networks:
+      - drypack_net
+    restart: always
+    ports:
+      - 8080:8080
+  drypack_smtp:
+    image: namshi/smtp
+    container_name: dry_smtp_server
+    networks:
+      - drypack_net
+
+

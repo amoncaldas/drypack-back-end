@@ -47,13 +47,12 @@ return [
     | Available action types that can be added for resources
     |--------------------------------------------------------------------------
     |
-    | These actions represent controller methods that can be associated with resources (controllers)
+    | These actions represent controller methods that can be associated with resources (controllers).
     | By default we add here the actions implemented by the App\Http\Controllers\CrudController, that are:
     | 'index', 'store', 'update', 'show' and 'destroy'. The wildcard action 'all' is also included.
     | Unless your application stops using the CrudController, you should not remove these actions.
-    | The second section contains other actions that are present in the DryPack Framework.
-    | Unless you are not using these actions (that are part of DryPack), you should not remove them
-    |
+    | The others sections contains other actions that are present in the DryPack Framework.
+    | Unless you are not using these actions (that are part of DryPack), you should not remove them.
     */
 
     'action_types' => [
@@ -111,7 +110,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | Each resource must have a key (the resource slug) and as value an array with:
-    | - actions => 'list of actions present in this resource' (can be an slug or an array, to describe dependencies)
+    | - actions => 'list of actions present in the resource' (can be an slug or an array, to describe dependencies)
     | - controller_class => 'The class name of the controller'
     | - namespace => 'full namespace of the controller' (optional - if not informed, the default will be used)
     | - restricted_to_logged_users => true|false (optional, default false) defines if the resource is only acessible to logged users
@@ -123,7 +122,7 @@ return [
         | Resources that are part of the DryPack functionalities
         |--------------------------------------------------------------------------
 
-        /* Abstract wildcard resource (do not remove) */
+        /* Abstract wildcard resource (DO NOT REMOVE/CHANGE UNLESS YOU KNOW WHAT YOU ARE DOING) */
         'all'=>['actions'=>['all','store','update','destroy', 'show']],
 
         // User
@@ -157,7 +156,7 @@ return [
 
         // Authorization/login
         'authorization'=>['controller_class'=>'AuthorizationController', 'restricted_to_logged_users'=>true,
-             'actions'=>['all','resources','actions', 'mapAndGet']
+            'actions'=>['all','resources','actions', 'mapAndGet']
         ],
 
         // Reset password
@@ -198,8 +197,7 @@ return [
              ]
         ],
 
-        // Authentication - as we need the user identification to check the permmission
-        // first we log the user in an then we check if s/he has the permission to authenticate
+        // Authentication - as we need the user identification to check the permmissions
         'authentication'=>['controller_class'=>'AuthenticateController','restricted_to_logged_users'=>true,
             'actions'=>
             [
@@ -214,22 +212,14 @@ return [
             ]
         ],
 
-        /*
-        |--------------------------------------------------------------------------
-        | This dummy resource is intended to be used to test the case when an resource
-        | (represented by a controller) exist and is declared in the config/authorization.php
-        | but one of its actions is not declared. If you remove this, the AuthorizationTest
-        | will have one fail but your application will continue working
-        |--------------------------------------------------------------------------
-        */
-        'dummyActionTest'=>['dummy'=>true,'namespace'=>'App\Http\Controllers\Samples','controller_class'=>'DummyActionController', 'actions'=>[]],
+
 
         // Section
         'section'=>['controller_class'=>'SectionController', 'namespace'=>'App\Http\Controllers\Content',
             'actions'=>['all','store','update','destroy','index', 'show']
         ],
 
-         // Section
+        // Category
         'category'=>['controller_class'=>'CategoryController', 'namespace'=>'App\Http\Controllers\Content',
          'actions'=>['all','store','update','destroy','index', 'show']
         ],
@@ -258,13 +248,17 @@ return [
                 'update_others',
                 'update_owner',
 
-                /* actions that are also used as content status */
+                'revisions', // if the user can list revisions of a content
+                'revision', // if the user can get the data about a revision in particular
+
+                // Actions that are also used as content status
+                // So, if the content is being saved with one of
+                // these status it will be checked if the
+                // user the permission to save like this
                 'draft',
                 'publish',
                 'password_protect',
                 'send_to_review',
-                'revisions',
-                'revision'
             ]
         ],
 
@@ -291,14 +285,17 @@ return [
                 'index_others',
                 'update_others',
                 'update_owner',
+                'revisions', // if the user can list revisions of a content
+                'revision', // if the user can get the data about a revision in particular
 
-                /* actions that are also used as content status */
+                // Actions that are also used as content status
+                // So, if the content is being saved with one of
+                // these status it will be checked if the
+                // user the permission to save like this
                 'draft',
                 'publish',
                 'password_protect',
                 'send_to_review',
-                'revisions',
-                'revision'
             ]
         ],
 
@@ -356,6 +353,16 @@ return [
                 ['slug'=>'show','dependencies'=>[['resource_slug'=>'project','action_type_slug'=>'index']]],
                 ['slug'=>'toggleDone','dependencies'=>[['resource_slug'=>'project','action_type_slug'=>'index']]]
             ]
-        ]
+            ],
+
+         /*
+        |--------------------------------------------------------------------------
+        | This dummy resource is intended to be used to test the case when an resource
+        | (represented by a controller) exist and is declared in the config/authorization.php
+        | but one of its actions is not declared. If you remove this, the AuthorizationTest
+        | will have one fail but your application will continue working
+        |--------------------------------------------------------------------------
+        */
+        'dummyActionTest'=>['dummy'=>true,'namespace'=>'App\Http\Controllers\Samples','controller_class'=>'DummyActionController', 'actions'=>[]],
     ]
 ];

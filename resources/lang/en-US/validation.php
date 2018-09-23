@@ -83,8 +83,11 @@ return [
     'unique_name_and_slug_in_all_locales'          => 'The :resources in all locale versions must have unique name and slug',
     'unique_title_and_slug_in_all_locales'          => 'The :resources in all locale versions must have unique title and slug',
     'at_least_one_translation_required' => 'The fields required must be informed in at least one of the available cultures',
+    'media_text_in_all_cultures_required' => 'The media texts must be informed in all cultures',
     'field_in'=> 'The field :field must have one of the folowing values: :in',
     'password_required'=> 'The password field is required when the selected status is password protected',
+    'only_the_followings_cultures_are_valid' => 'Only the followings cultures are valid :locales',
+    'only_the_followings_units_are_valid' => 'Only the followings units are valid :units',
 
     /*
     |--------------------------------------------------------------------------

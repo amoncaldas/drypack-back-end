@@ -145,29 +145,24 @@ abstract class Content extends BaseModel
      */
     public function url(): string {
         // the root url has a special tretment, to avoid having double slashes
-        $section_url = $this->section->url === "/"? "" : $this->section->url;
-
-        // if the section in question is not the default, the locale is prepended to the section url
-        if ($this->section->locale !== env("DEFAULT_LOCALE")) {
-            $section_url = "/".strtolower($this->section->locale).$section_url;
-        }
-
+        $locale = strtolower($this->section->locale);
+        $section_url = $this->section->url === "/" ? "" : $this->section->url;
         $contentTypeTranslated = trans('content-type.'.$this->content_type, [], $this->section->locale);
 
         // build the content url
-        return "$section_url/$contentTypeTranslated/$this->slug/$this->id";
+        return "/$locale/$section_url/$contentTypeTranslated/$this->slug/$this->id";
     }
 
     /**
-     * Get the urlof all content locale version
+     * Get the url of all content locale version
      * This method must be used with caution, because consumes a lot of resources!
      *
-     * @return array
+     * @return array of urls of the content in different locales
      */
     public function urls(): array {
         $urls = [];
 
-        // get raw data from db to avoid the overrad of loading the entire model with all relations
+        // Get raw data from db to avoid the cost of loading the entire model with all relations
         $rawContents = DB::table($this->getTable())
             ->join('sections', 'sections.id', '=', 'contents.section_id')
             ->where('contents.multi_lang_content_id', $this->multi_lang_content_id)
@@ -176,17 +171,15 @@ abstract class Content extends BaseModel
         // for each content, build the url
         foreach ($rawContents as $rawContent) {
 
+            $locale = strtolower($rawContent->locale);
+
             // translate the content type to be used in the url
             $contentTypeTranslated = trans('content-type.'.$rawContent->content_type, [], $rawContent->locale);
 
             // the root url has a special tretment, to avoid having double slashes
             $section_url = $rawContent->url === "/"? "" : $rawContent->url;
 
-            // if the section in question is not the default, the locale is prepended to the section url
-            if ($rawContent->locale !== env("DEFAULT_LOCALE")) {
-                $section_url = "/".strtolower($rawContent->locale).$section_url;
-            }
-            $urls[$rawContent->locale] = "$section_url/$contentTypeTranslated/$rawContent->slug/$rawContent->id";
+            $urls[$rawContent->locale] = "/$locale/$section_url/$contentTypeTranslated/$rawContent->slug/$rawContent->id";
         }
 
         return $urls;

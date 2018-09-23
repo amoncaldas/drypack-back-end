@@ -2,6 +2,7 @@
 
 namespace App\Content;
 
+use \DB;
 use App\User;
 use \Imagick;
 use App\BaseModel;
@@ -19,17 +20,22 @@ class Media extends BaseModel
     /**
      * Constats that define values used in the class
      */
-    public const STORAGE_POLICY_FILESYSTEM = "filesystem";
-    public const STORAGE_POLICY_INDB = "indb";
     public const DIMENSION_TYPE_RESPONSIVE = "responsive";
     public const DIMENSION_TYPE_SIZED = "sized";
     public const THUMB_FORMAT = "jpg";
+
+    // storage types
+    public const STORAGE_POLICY_FILESYSTEM = "filesystem";
+    public const STORAGE_POLICY_INDB = "indb";
+
+    // media types
     public const VIDEO_TYPE = "video";
     public const EXTERNAL_VIDEO_TYPE = "external_video";
     public const HTML_TYPE = "html";
     public const IMAGE_TYPE = "image";
     public const AUDIO_TYPE = "audio";
     public const DOCUMENT_TYPE = "document";
+
     public const HTTP_PROTOCOL_START = "http:";
     public const THUMB_SUFFIX = "_thumb_";
     public const THUMB_PATH = "thumb_path";
@@ -43,6 +49,9 @@ class Media extends BaseModel
     public const MEDIUM_SIZE_NAME = "medium";
     public const ORIGINAL_SIZE_NAME = "original";
 
+    // statuses
+    public const DRAFT_STATUS = "draft";
+    public const PUBLISHED_STATUS = "published";
 
     /**
      * The database table used by the model.
@@ -81,8 +90,37 @@ class Media extends BaseModel
         'width',
         'height',
         'width_unit',
-        'height_unit'
+        'height_unit',
+        'published_at',
+        'expired_at'
     ];
+
+    /**
+     * The attributes that should be mutated to dates.
+     *
+     * @var array
+     */
+    protected $dates = [
+        'published_at',
+        'captured_at',
+        'expired_at'
+    ];
+
+    /**
+     * Get an array with the lisf of valid html media types
+     *
+     * @return Array
+     */
+    public static function getValidTypes () {
+        return [
+            self::VIDEO_TYPE,
+            self::EXTERNAL_VIDEO_TYPE,
+            self::HTML_TYPE,
+            self::IMAGE_TYPE,
+            self::AUDIO_TYPE,
+            self::DOCUMENT_TYPE
+        ];
+    }
 
     /**
      * Transient imagick object representing the full image
@@ -391,6 +429,33 @@ class Media extends BaseModel
         return false;
     }
 
+    /**
+     * Get an array containing a list of fields/columns and expressions
+     * that must be used to list medias
+     * This strategy is used to avoid loading all media large fields in each object
+     * while in listing mode, specially the 'content' and 'thumb_medium' columns
+     * that contains long base64 strings, excet in the case of html media type
+     *
+     * @return void
+     */
+    public static function getListSelectFields () {
+        $attrs = self::getAllAttributes();
+
+        // in listing mode do not get the content field
+        $content_key = array_search("content",$attrs);
+        unset($attrs[$content_key]);
+
+        // in listing mode do not get the thumb_medium field
+        $thumb_medium_key = array_search("thumb_medium",$attrs);
+        unset($attrs[$thumb_medium_key]);
+
+        $attrs[] = "id";
+        $htmlType= self::HTML_TYPE;
+        $table = (new static)->getTable();
+        $attrs[] = DB::raw("(select case when $table.type = '$htmlType' then $table.content else null end ) as content");
+        return $attrs;
+    }
+
 
     /**
      * Prepare the media to be saved, setting meta data
@@ -481,6 +546,18 @@ class Media extends BaseModel
         return $thumbFileName;
     }
 
+    public function getUrl () {
+        $url = $this->url;
+        if (!isset($url)) {
+            if ($this->type !== self::EXTERNAL_VIDEO_TYPE) {
+                $slug = $this->slug;
+                $id = $this->id;
+                $url = "/".request()->route()->getPrefix(). "/medias/$id/content/$slug";
+            }
+        }
+        return $url;
+    }
+
     /**
      * Format/adjust the relations serialized data, transforming translations index array to locale key array
      *
@@ -518,14 +595,12 @@ class Media extends BaseModel
      */
     public function toArray() {
         $data = parent::toArray();
-        $id = $data["id"];
 
         if (!isset($data["url"])) {
             if ($data["type"] !== self::EXTERNAL_VIDEO_TYPE) {
-                $slug = $data["slug"];
-                $data["url"] = "/".request()->route()->getPrefix(). "/medias/$id/content/$slug";
+                $data["url"] = $this->getUrl();
                 if ($data["type"] === self::IMAGE_TYPE) {
-                    $data["url_medium"] = "/".request()->route()->getPrefix(). "/medias/$id/content/$slug/thumb/medium";
+                    $data["url_medium"] = $data["url"]."/thumb/medium";
                 }
             }
         }

@@ -49,6 +49,8 @@ class CreateMediasTable extends Migration
             $table->string('from')->nullable(); // used to store the origin of an external content
             $table->string('external_content_id')->nullable(); // used to store the id of external content in the origin
             $table->string('slug')->nullable();
+            $table->dateTimeTz('published_at')->nullable();
+            $table->dateTimeTz('expired_at')->nullable();
         });
     }
 

@@ -39,6 +39,7 @@ class CreateContentsTable extends Migration
             $table->timestampTz('created_at');
             $table->timestampTz('updated_at');
             $table->dateTimeTz('published_at')->nullable();
+            $table->dateTimeTz('expired_at')->nullable();
         });
     }
 

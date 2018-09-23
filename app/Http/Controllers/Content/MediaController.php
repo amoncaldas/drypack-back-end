@@ -22,12 +22,6 @@ use App\Http\Controllers\Content\MediaExternalVideoAdapters\VideoAdapterBuilder;
 
 class MediaController extends CrudController
 {
-    // youtube constants
-    protected const YOUTUBE_HOSTS = ["youtube.com","youtu.be", "www.youtube.com"];
-
-    // vimeo constants
-    protected const VIMEO_HOSTS = ["vimeo.com","www.vimeo.com"];
-
 
     protected function getModel()
     {
@@ -42,23 +36,13 @@ class MediaController extends CrudController
      * @param Illuminate\Database\Eloquent\Builder $query
      * @return void
      */
-    protected function applyFilters(Request $request, $query)
-    {
+    protected function applyFilters(Request $request, $query) {
         // We want to get all the fields, except the 'content',
         // to avoid transfering a huge amount of data while in listing
         // mode. The 'url' attribute of each model have the endpoint that
         // can be used to retrive the media content
-        $attrs = $query->getModel()->getAllAttributes();
+        $attrs = Media::getListSelectFields();
 
-        // in listing mode do not get the content field
-        $content_key = array_search("content",$attrs);
-        unset($attrs[$content_key]);
-
-        // in listing mode do not get the thumb_medium field
-        $thumb_medium_key = array_search("thumb_medium",$attrs);
-        unset($attrs[$thumb_medium_key]);
-
-        $attrs[] = "id";
         $query = $query->select($attrs);
         $query = $query->with('mediaTexts')->with('author')->with('owner')->with('categories')->orderBy('created_at', 'desc');
 
@@ -78,6 +62,10 @@ class MediaController extends CrudController
             $query = $query->where('type', $request->type);
         }
 
+        if ($request->has('status') && $request->status != null ) {
+            $query = $query->where('status', $request->status);
+        }
+
         if ($request->has('author_name') && $request->author_name != null ) {
             $query = $query->where('author_name', 'ilike', '%'.$request->author_name.'%');
         }
@@ -89,6 +77,19 @@ class MediaController extends CrudController
         }
 
         $this->applyIndexOthersPermissionFilter($query);
+        $this->applyAvailabilityTimeFilter($query);
+    }
+
+    /**
+     * Check the time availability of the media
+     *
+     * @param Request $request
+     * @param Illuminate\Database\Eloquent\Builder $query
+     * @param integer $id
+     * @return void
+     */
+    protected function beforeShow(Request $request, $query, $id) {
+        $this->applyAvailabilityTimeFilter($query);
     }
 
 
@@ -99,38 +100,42 @@ class MediaController extends CrudController
      * @param Model $media
      * @return void
      */
-    protected function beforeSave(Request $request, Model $media)
-    {
+    protected function beforeSave(Request $request, Model $media) {
         $this->checkUpdateOwnerPermission($request, "media");
 
         $user = $this->getUser();
         $resourceActions = Authorization::getResourceActions("media");
 
-        if($media->type === "html" && isset($resourceActions["save_html_media"]) && !$user->hasResourcePermission("media", "save_html_media")) {
-            $msg = \Lang::get('business.you_dont_have_permission_to_save', ['type' => Lang::get('validation.types.html')]);
+        if($media->type === Media::HTML_TYPE && isset($resourceActions["save_html_media"]) && !$user->hasResourcePermission("media", "save_html_media")) {
+            $msg = Lang::get('business.you_dont_have_permission_to_save', ['type' => Lang::get('validation.types.html')]);
             throw new BusinessException($msg);
         }
-        if($media->type === "external_video" && isset($resourceActions["save_external_video"]) && !$user->hasResourcePermission("media", "save_external_video")) {
-            $msg = \Lang::get('business.you_dont_have_permission_to_save', ['type' => Lang::get('validation.types.external_video')]);
+        if($media->type === Media::EXTERNAL_VIDEO_TYPE && isset($resourceActions["save_external_video"]) && !$user->hasResourcePermission("media", "save_external_video")) {
+            $msg = Lang::get('business.you_dont_have_permission_to_save', ['type' => Lang::get('validation.types.external_video')]);
             throw new BusinessException($msg);
+        }
+
+        if ($request->published_at) {
+            $request->published_at = DryPack::parseDate($request->published_at);
+        }
+        if ($request->expired_at) {
+            $request->expired_at = DryPack::parseDate($request->expired_at);
+        }
+
+        if ($request->has("status")) {
+            $media->status = $request->status;
         }
 
         $this->setAuthorAndOwner($request, $media);
 
-        if ($request->type === "external_video") {
+        if ($request->type === Media::EXTERNAL_VIDEO_TYPE) {
             $this->setExternalContentData($request, $media);
         }
-        elseif ($request->type === "html") {
-            $media->status = "saved";
+        elseif ($request->type === Media::HTML_TYPE) {
             $media->mimetype = "text/html";
             $media->storage_policy = "indb";
-            $media->preview_image = "";
-            $media->dimension_type = "responsive"; // sized?
-
-            // $media->width = "responsive";
-            // $media->height = "responsive";
-            // $media->width_unit = "responsive";
-            // $media->height_unit = "responsive";
+            $media->preview_image = null;
+            $media->dimension_type = $media->width_unit === "%" &&  $media->height_unit === "%" ? Media::DIMENSION_TYPE_RESPONSIVE : Media::DIMENSION_TYPE_SIZED;
         }
     }
 
@@ -144,6 +149,22 @@ class MediaController extends CrudController
         if ($media->type === Media::EXTERNAL_VIDEO_TYPE) {
             $videoAdapter = VideoAdapterBuilder::build($media->url);
             $videoAdapter->addVideoData($media);
+        }
+    }
+
+    /**
+     * Checks if the request is not trying to store an only uploadable content type
+     *
+     * @param Request $request
+     * @param Model $task
+     * @return void
+     */
+    public function beforeStore(Request $request, Model $task)
+    {
+        $onlyCreatableViaUploadTypes = [Media::IMAGE_TYPE, Media::AUDIO_TYPE, Media::DOCUMENT_TYPE, Media::VIDEO_TYPE];
+        if (in_array($request->type, $onlyCreatableViaUploadTypes)) {
+            $msg = Lang::get('business.only_storable_via_upload', ['type' => $request->type]);
+            throw new BusinessException($msg);
         }
     }
 
@@ -247,9 +268,92 @@ class MediaController extends CrudController
     }
 
 
-    protected function getValidationRules(Request $request, Model $obj)
-    {
-        return [];
+    /**
+     * Return the content validation rules
+     *
+     * @param Request $request
+     * @param Model $obj
+     * @return array $validations rules
+     */
+    protected function getValidationRules(Request $request, Model $media) {
+        $isUpdate = false;
+
+        $types = implode(',', Media::getValidTypes());
+        $locales = implode(',', array_keys(Config::get('i18n.locales')));
+        $statuses = implode(',', [Media::PUBLISHED_STATUS, Media::DRAFT_STATUS]);
+        $validations = [
+            'type' => 'required|in:'.$types,
+            'status' => 'required|in:'.$statuses,
+            'author_name'=>'required|min:2',
+            'media_texts'=>'required|array|min:1',
+            'media_texts.*.title'=>'required|min:3',
+            'media_texts.*.locale'=>'required|min:2|in:'.$locales
+        ];
+
+        // is update
+        if (isset($media->id)) {
+            $isUpdate = true;
+            $validations["owner_id"] = 'exists:users,id';
+        }
+
+        switch ($request->type) {
+            case Media::IMAGE_TYPE:
+                $validations["file_name"] = "required";
+                break;
+            case Media::AUDIO_TYPE:
+                $validations["file_name"] = "required";
+                break;
+            case Media::AUDIO_TYPE:
+                $validations["file_name"] = "required";
+                break;
+            case Media::DOCUMENT_TYPE:
+                $validations["file_name"] = "required";
+                break;
+            case Media::EXTERNAL_VIDEO_TYPE:
+                if (!$isUpdate) {
+                    $validations["url"] = "required";
+                }
+                break;
+            case Media::HTML_TYPE:
+                $validations["content"] = "required";
+                $validations["width"] = "required|integer";
+                $validations["height"] = "required|integer";
+                $validations["width_unit"] = "required|in:'px', '%', 'em', 'vw'";
+                $validations["height_unit"] = "required|in:'px', '%', 'em', 'vw'";
+                break;
+        }
+
+        // In case the media status is as 'publised', the publish date is required
+        if ($request->status === Media::PUBLISHED_STATUS) {
+            $validations["published_at"] = 'required|date';
+        }
+
+        // return $validations;
+        return $validations;
+    }
+
+    /**
+     * Specify custom messages for the validation
+     *
+     * @return void
+     */
+    protected function messages($request) {
+        $messages = [
+           "media_texts.required" => Lang::get('validation.media_text_in_all_cultures_required'),
+           "media_texts.array" => Lang::get('validation.media_text_in_all_cultures_required'),
+           "media_texts.min" => Lang::get('validation.media_text_in_all_cultures_required'),
+           "height_unit" =>  Lang::get('validation.only_the_followings_units_are_valid', ['units' => "px, %, em, vw"]),
+           "width_unit" =>  Lang::get('validation.only_the_followings_units_are_valid', ['units' => "px, %, em, vw"])
+        ];
+
+        $locales = implode(',', array_keys(Config::get('i18n.locales')));
+        foreach ($request->media_texts as $key => $value) {
+            $messages["media_texts.$key.title.required"] = Lang::get('validation.media_text_in_all_cultures_required');
+            $messages["media_texts.$key.locale.required"] = Lang::get('validation.media_text_in_all_cultures_required');
+            $messages["media_texts.$key.locale.in"] =  Lang::get('validation.only_the_followings_cultures_are_valid',  ['locales' => $locales]);
+        }
+
+        return $messages;
     }
 
     /**
@@ -305,8 +409,17 @@ class MediaController extends CrudController
         if (env('DENY_HOTLINK') === true && $this->isExternalRequest()) {
             return response("Access refused.", 403);
         }
-        $media = Media::find($id);
+        $media = Media::findOrFail($id);
         if ($media){
+            if ($this->checkAvailabilityTimeFilter($media) === false) {
+                return response("Media not found.", 404);
+            }
+            if (!$this->isAdmin() && $media->status === Media::DRAFT_STATUS) {
+                return response("Media not found.", 404);
+            }
+            if ($media->slug !== $slug) {
+                return redirect($media->getUrl(), 301);
+            }
             // videos are always stored in the file system, even if the configuration is 'indb'
             // because they can be very big
             if($media->storage_policy === Media::STORAGE_POLICY_FILESYSTEM || $media->type === Media::VIDEO_TYPE) {
@@ -397,14 +510,19 @@ class MediaController extends CrudController
      */
     protected function buildMediaObj(Request $request, $file) {
         $media = new Media();
-        $media->status = "saved";
+        // uploaded media has as default the 'draft' status
+        // when the media is saved attached/linked to a content
+        // the status of each media wil be auto updated to 'published'
+        // this is done to avoid auto listing medias that are related to
+        // non public contents
+        $media->status = Media::DRAFT_STATUS;
         $media->file_name = $file->getClientOriginalName();
         $media->mimetype = $file->getMimeType();
         $media->ext = $file->getClientOriginalExtension();
 
         $media->type = \explode("/", $media->mimetype)[0];
         if (in_array($media->ext, Config::get('media-uploader.document_allowed_extensions'))) {
-            $media->type = "document";
+            $media->type = Media::DOCUMENT_TYPE;
         }
 
         $this->setAuthorAndOwner($request, $media);

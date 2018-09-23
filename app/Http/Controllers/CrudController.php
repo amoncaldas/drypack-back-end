@@ -10,6 +10,7 @@ namespace App\Http\Controllers;
 
 use JWTAuth;
 use App\BaseModel;
+use Carbon\Carbon;
 use App\Util\DryPack;
 use App\Http\Requests;
 use Illuminate\Http\Request;
@@ -110,6 +111,35 @@ abstract class CrudController extends Controller
         $resourceActions = Authorization::getResourceActions("media");
         if(isset($resourceActions["index_others"]) && $user->hasResourcePermission("media", "index_others")) {
             $query->where($ownerIdField, $this->getUser()->id);
+        }
+    }
+
+    /**
+     * Apply availability time interval filter ('publisehd_at' and 'expired_at')
+     *
+     * @param EloquentQueryBuilder $query
+     * @return void
+     */
+    protected function applyAvailabilityTimeFilter (EloquentQueryBuilder $query) {
+        if (!$this->isAdmin()) {
+            $now = Carbon::now();
+            $query->where("published_at", ">=", $now);
+            $query->where("expired_at", "<=", $now);
+        }
+    }
+
+    /**
+     * Check availability time interval ('publisehd_at' and 'expired_at')
+     *
+     * @param EloquentQueryBuilder $query
+     * @return void
+     */
+    protected function checkAvailabilityTimeFilter (Model $model) {
+        if (!$this->isAdmin()) {
+            $now = Carbon::now();
+            if (isset($model->published_at) && $model->published_at < $now ||  (isset($model->expired_at) && $now > $model->expired_at)) {
+                return false;
+            }
         }
     }
 

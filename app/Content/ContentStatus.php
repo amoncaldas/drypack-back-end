@@ -5,7 +5,7 @@ use \Lang;
 
 class ContentStatus
 {
-    // these status represent also actions in config/authorization.php
+    // These status represent also actions in config/authorization.php
     public static $draft = ["slug"=>"draft", "action_slug"=>"draft"];
     public static $published = ["slug"=>"published", "action_slug"=>"publish"];
     public static $passwordProtected = ["slug"=>"password_protected", "action_slug"=>"password_protect"];

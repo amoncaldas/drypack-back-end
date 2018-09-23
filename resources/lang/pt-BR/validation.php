@@ -81,8 +81,11 @@ return [
     'unique_name_and_slug_in_all_locales'          => 'A(o) :resources em todas as versões de cultura deve ter um nome e slug únicos',
     'unique_title_and_slug_in_all_locales'          => 'A(o) :resources em todas as versões de cultura deve ter título e slug únicos',
     'at_least_one_translation_required' => 'Devem ser informado o(s) campo(s) obrigatórios em pelo menos uma das culturas disponíveis',
+    'media_text_in_all_cultures_required' => 'Os textos da media devem ser informados para todas as culturas disponíveis',
     'field_in'=> 'O campo :field deve ser igual a uma das opções :in',
     'password_required'=> 'O campo senha é obrigatório quando o status selecionado é protegido por senha',
+    'only_the_followings_cultures_are_valid' => 'Somente as seguintes culturas são válidas :locales',
+    'only_the_followings_units_are_valid' => 'Somente as seguintes uidades são válidas :units',
 
     /*
     |--------------------------------------------------------------------------

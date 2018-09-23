@@ -7,11 +7,11 @@
 
 namespace App\Authorization;
 
-use Illuminate\Support\Facades\Config;
-use App\Authorization\Action;
-use Illuminate\Support\Collection;
 use App\Role;
 use Carbon\Carbon;
+use App\Authorization\Action;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Config;
 use App\Authorization\AuthorizationSetup;
 
 

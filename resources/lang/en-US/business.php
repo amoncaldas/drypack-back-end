@@ -12,5 +12,6 @@ return [
     'you_dont_have_permission_to_upload_this_kind_of_content'=> "You don't have permission to upload :type(s)",
     'no_file_provided'=> 'No file was provided to be uploaded',
     'invalid_upload'=> 'Invalid file provided to be uploaded',
-    'you_dont_have_permission_to_change_the_owner_of_this_content' => 'You do not have permission to change the owner of this item'
+    'you_dont_have_permission_to_change_the_owner_of_this_content' => 'You do not have permission to change the owner of this item',
+    'only_storable_via_upload' => ':type is only storable via upload method'
 ];

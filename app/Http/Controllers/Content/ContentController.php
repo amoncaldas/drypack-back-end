@@ -16,6 +16,7 @@ use App\Content\ContentStatus;
 use App\Content\MultiLangContent;
 use OwenIt\Auditing\Models\Audit;
 use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Database\Eloquent\Model;
 use App\Http\Controllers\Content\BaseMultiLangContentController;
 
@@ -118,7 +119,24 @@ abstract class ContentController extends BaseMultiLangContentController
         if(!$this->isAdmin()) {
             $query = $query->where('locale', App::getLocale());
         }
+        $this->applyAvailabilityTimeFilter($query);
     }
+
+    /**
+     * Check the time availability of the media
+     *
+     * @param Request $request
+     * @param Illuminate\Database\Eloquent\Builder $query
+     * @param integer $id
+     * @return void
+     */
+    protected function afterShow(Request $request, Model $content) {
+        if ($this->checkAvailabilityTimeFilter($content) === false) {
+            return response("Content not found.", 404);
+        }
+    }
+
+
 
     /**
      * Before save, validate unique fields
@@ -158,33 +176,38 @@ abstract class ContentController extends BaseMultiLangContentController
      * @param Model $obj
      * @return array $validations rules
      */
-    protected function getValidationRules(Request $request, Model $content)
-    {
-        $user_sections_id = $this->getUser()->sections()->get()->pluck('id')->all();
+    protected function getValidationRules(Request $request, Model $content) {
+        $userSectionsId = implode(',',$this->getUser()->sections()->get()->pluck('id')->all());
+        $locales = implode(',', array_keys(Config::get('i18n.locales')));
+        $statuses = implode(',', ContentStatus::allKeys());
 
         $validations = [
             'translations' => 'required|array|min:1',
-            'translations.*.locale'=>'required',
+            'translations.*.locale'=>'required|min:2|in:'.$locales,
             'translations.*.title'=>'required|min:3',
             'translations.*.url_segments' => 'required|array|min:2',
             'translations.*.url_segments.slug'=>'required|min:3',
             'translations.*.url_segments.section_id'=>'required|integer',
-            'translations.*.url_segments.section_id'=>'required|integer|in:'.implode(',', $user_sections_id),
-            'translations.*.status'=>'required|in:'.implode(',', ContentStatus::allKeys())
+            'translations.*.url_segments.section_id'=>'required|integer|in:'.$userSectionsId,
+            'translations.*.status'=>'required|in:'.$statuses
         ];
 
         if($request->has('translations')) {
             foreach ($request->translations as $key => $value) {
                 if($value["status"] === ContentStatus::$passwordProtected["slug"]) {
                     $validations['translations.*.password'] = 'required';
+                    $validations['translations.*.published_at'] = 'required|date';
                 }
                 elseif($value["status"] === ContentStatus::$published["slug"]) {
                     $validations['translations.*.content'] = 'required|min:100';
                     $validations['translations.*.abstract'] = 'required|min:100';
                     $validations['translations.*.short_desc'] = 'required|min:100';
+                    $validations['translations.*.published_at'] = 'required|date';
                 }
             }
         }
+
+
 
         return $validations;
     }
@@ -264,6 +287,11 @@ abstract class ContentController extends BaseMultiLangContentController
             }
         }
         if(isset($trans_arr['medias'])) {
+            // Make sure that each media has the pubilshed status
+            if ($trans_arr["status"] === ContentStatus::$published["slug"] || $trans_arr["status"] === ContentStatus::$passwordProtected["slug"]) {
+                Media::whereIn('id', $ids)->update(['status' => Media::PUBLISHED_STATUS]);
+            }
+            // Update the relation table
             $translation->medias()->detach();
             $ids = array_pluck($trans_arr['medias'], 'id');
             $translation->medias()->attach($ids, ['content_type'=>$this->getContentType()]);

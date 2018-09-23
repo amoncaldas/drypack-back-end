@@ -12,5 +12,6 @@ return [
     'you_dont_have_permission_to_upload_this_kind_of_content'=> "Você não tem permissão para enviar :type(s)",
     'no_file_provided'=> 'Não foi fornecido nenhum arquivo para ser enviado',
     'invalid_upload'=> 'Arquivo fornecido para envio inválido',
-    'you_dont_have_permission_to_change_the_owner_of_this_item' => 'Você não tem permissão para alterar o proprietário deste item'
+    'you_dont_have_permission_to_change_the_owner_of_this_item' => 'Você não tem permissão para alterar o proprietário deste item',
+    'only_storable_via_upload' => ':type só é criável via método de upload'
 ];
