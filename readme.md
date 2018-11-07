@@ -313,7 +313,7 @@ en-US, but you can also change it.
 - *In the back-end*:
   - add the desired locale in the *config/i18n.php*
   - create a folder in *resources/lang/* with the identification of your locale (eg.:de-DE)
-  - copy the all the files from 8resources/lang/en-US8* to your new locale folder
+  - copy the all the files from *resources/lang/en-US* to your new locale folder
   - open each file copied in your new folder and translate the contents
 
 - *In the front-end admin*:
