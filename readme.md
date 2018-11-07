@@ -14,8 +14,6 @@ This project is based in Laravel, a collection of community and custom component
 - [Components and Frameworks used](#components-and-frameworks-used)
 - [Getting, configuring and running](#getting-configuring-and-running)
 - [Repository workflow practices recommendation](#repository-workflow-practices-recommendation)
-- [Installation](#installation)
-- [Configuring the project](#configuring-the-project)
 - [Running the project](#running-the-project)
 - [Code verification](#code-verification)
 - [Automated tests](#automated-tests)
