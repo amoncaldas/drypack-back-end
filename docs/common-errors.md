@@ -10,6 +10,12 @@ This docs list some common errors and the solutions for the the DryPack solution
 npm rebuild node-sass
 ```
 
+## Max watch limite reached ##
+
+```sh
+echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+```
+
 ## Class not found ##
 
 ```sh
