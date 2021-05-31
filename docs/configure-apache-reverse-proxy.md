@@ -6,7 +6,7 @@ The code below has the steps about how to install/configure Apache as a reverse 
 apt-get install -y aptitude
 aptitude -y upgrade
 aptitude install -y build-essential
-aptitude install -y apache2 libapache2-mod-proxy-html libxml2-dev
+aptitude install -y apache2 libxml2-dev
 a2enmod proxy proxy_ajp proxy_http rewrite deflate headers proxy_balancer proxy_connect proxy_html
 service apache2 restart
 ```
