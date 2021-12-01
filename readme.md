@@ -24,7 +24,7 @@ This project is based on Laravel, a collection of community and custom component
   - [Internationalization](#internationalization)
   - [Editor](#editor)
   - [Debugging back-end with XDebug](#debugging-back-end-with-xdebug)
-  - [Code generators](#code-generators)
+  - [Code generator](#code-generator)
   - [Dynamic Permissions](#dynamic-permissions)
   - [How to use GenericService](#how-to-use-genericservice)
   - [Easy CRUD](#easy-crud)
