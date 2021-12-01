@@ -1,6 +1,6 @@
 <?php
 /**
- * GenericService is a shared base service trait that provides out of the functionalities to get data based in the request
+ * GenericService is a shared base service trait that provides functionalities to get data based on the request
  *
  * @author Amon Caldas <amoncaldas@gmail.com>
  * @license http://opensource.org/licenses/MIT
