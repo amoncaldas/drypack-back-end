@@ -1,11 +1,10 @@
 # DryPack Framework #
 
-This is the DryPack, a web Framework and it is intended to be used as a base for web applications, avoiding the need of creating already common features and automatons that are part of most of modern web applications. The idea is that developer just write the code related to the business needs and in a simple and clean way. The Framework name is inspired in the Don't Repeat Yourself principle.
-We are trying to make our best, but of course you are very welcomed to make suggestions and contributions.
+This is the DryPack, a web Framework and it is intended to be used as a base for web applications, avoiding the need of creating already common features and automations that are part of most modern web applications. The idea is that the developer just writes the code related to the business needs and in a simple and clean way. The Framework name is inspired by the Don't Repeat Yourself principle.
 
 ## About ##
 
-This project is based in Laravel, a collection of community and custom components and customs front-end for admin and client with AngularJS. It tries to encompass the right components in harmony to get an out-the-box, decoupled, easy to use/develop, RESTful architectural style and fully functional web framework.
+This project is based on Laravel, a collection of community and custom components and custom front-end for admin and client with AngularJS. It encompasses the right components in harmony to get an out-the-box, decoupled, easy to use/develop, RESTful architectural style and fully functional web framework.
 
 ## Sections ##
 
